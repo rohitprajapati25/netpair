@@ -1,13 +1,13 @@
 import React from "react";
 import { useFormik } from "formik";
 import { Link } from "react-router-dom";
-import { signUpSchema } from "../schemas";
+import { signUpSchema } from "../../schemas";
 
 const initialValues = {
   email: "",
 };
 
-const Forgot = () => {
+const Fform = () => {
   const {
     values,
     errors,
@@ -26,10 +26,10 @@ const Forgot = () => {
   });
 
   return (
-    <div>
+    <div className="flex items-center justify-center pt-25.5 pb-35">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-xl w-full max-w-sm space-y-4"
+        className="bg-white p-2 rounded-xl w-full max-w-sm space-y-4"
       >
         <a href="/forgot"><h2 className="text-xl font-semibold text-center">
           Forgot Password
@@ -39,10 +39,12 @@ const Forgot = () => {
           <label className="block mb-1">Email</label>
           <input
             type="text"
-            name="email"
+            name="email" 
             value={values.email}
             onChange={handleChange}
             onBlur={handleBlur}
+            placeholder="Enter Your Email"
+
             className="w-full border rounded px-3 py-2"
           />
 
@@ -68,4 +70,4 @@ const Forgot = () => {
   );
 };
 
-export default Forgot;
+export default Fform;

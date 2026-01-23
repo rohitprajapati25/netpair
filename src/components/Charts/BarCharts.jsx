@@ -18,10 +18,10 @@ const data = [
 
 const BarCharts = () => {
   return (
-    <div style={{ width: "30%", height: 300 }} className="border-2 rounded-xl border-gray-400">
+      <div style={{ width: "30%", height: 400}} className="border-2 rounded-xl border-gray-400 bg-white"> 
       <ResponsiveContainer>
         <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid strokeDasharray="3 3"/>
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />

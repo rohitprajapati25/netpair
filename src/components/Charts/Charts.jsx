@@ -10,8 +10,7 @@ const Charts = () => {
 
   return (
     
-    
-        <div style={{ width: "30%", height: 300 }}>
+    <div style={{ width: "30%", height: 300 }}>
       <ResponsiveContainer>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />

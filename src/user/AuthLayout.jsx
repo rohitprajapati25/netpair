@@ -7,7 +7,7 @@ const AuthLayout = ({ children }) => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="flex w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden">
       
-        <div className="w-full md:w-1/2 flex flex-col items-center justify-center px-10 py-16 relative">
+        <div className="w-full md:w-1/2 flex flex-col items-center justify-center px-10 py-16 ">
           
      
           <img
@@ -17,7 +17,7 @@ const AuthLayout = ({ children }) => {
           />
 
          
-          <div className="w-full">
+          <div className="w-full overflow-y-auto max-h-[448px] pr-2">
             {children}
           </div>
         </div>

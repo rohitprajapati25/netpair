@@ -21,7 +21,7 @@ const COLORS = ["#22c55e", "#facc15", "#ef4444"];
   { name: "Rejected", value: props.av },
 ];
   return (
-    <div style={{ width: "30%", height: 300 }}>
+    <div style={{ width: "30%", height: 400 }}  className="border-2 rounded-xl border-gray-400 bg-white">
       <ResponsiveContainer>
         <PieChart>
           <Pie

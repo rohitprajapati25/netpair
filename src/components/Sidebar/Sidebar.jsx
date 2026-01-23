@@ -1,14 +1,38 @@
 import React, { useState } from "react";
-import Header from "./Header";
+import Header from "../Header";
 import "remixicon/fonts/remixicon.css";
 import { NavLink } from "react-router-dom";
+import Sidedata from "./Sidedata";
+import Dashboard from "../../user/Dash/Dashboard";
 
-const Sidebar = () => {
+const Sidebar = (props) => {
   const [collapsed, setCollapsed] = useState(false);
 
+  const sidebarArray = [
+    {
+      navipath:"dashboard",
+      icon : "ri-dashboard-line",
+      data : "Dashboard",
+      coll : collapsed
+    },
+     {
+      navipath:"attendance",
+      icon : "ri-calendar-check-line",
+      data : "Attendance",
+      coll : collapsed
+    },
+     {
+      navipath:"leave",
+      icon : "ri-survey-line",
+      data : "Leave",
+      coll : collapsed
+    }
+  ];
+  console.log(sidebarArray);
+  
   return (
     <div className="flex">
-      <div
+      <div 
         className={`h-screen bg-white border-r border-gray-300
         transition-all duration-300
         ${collapsed ? "w-20" : "w-75"}`}
@@ -30,7 +54,7 @@ const Sidebar = () => {
               transition-opacity duration-200
               ${
                 collapsed
-                  ? "opacity-0 group-hover:opacity-100 px-4 text-2xl"
+                  ? "opacity-0 hover:opacity-100 px-4 text-2xl"
                   : "opacity-100 px-4"
               }
             `}
@@ -38,26 +62,13 @@ const Sidebar = () => {
         </div>
 
         <div className="p-2">
-          <NavLink to="/dashboard">
-            <div
-            className={`h-12 flex items-center p-2 mt-2 rounded
-            hover:bg-gray-100 
-            ${collapsed ? "justify-center" : "gap-3"}`}
-          >
-            <i className="ri-dashboard-line text-2xl"></i>
-            {!collapsed && <p className="text-lg">Dashboard</p>}
-          </div>
-          </NavLink>
-
-          <div
-            className={`h-12 flex items-center p-2 mt-2 rounded
-            hover:bg-gray-100
-            ${collapsed ? "justify-center" : "gap-3"}`}
-          >
-           <i className="ri-calendar-check-line text-2xl"></i>
-            {!collapsed && <p className="text-lg">Attendance</p>}
-          </div>
-        </div>
+             {sidebarArray.map(function(elems,ind){
+              return <div key={ind}>
+                  <Sidedata navipath={elems.navipath} icon={elems.icon} data={elems.data} coll={elems.coll}/>
+             
+                </div>
+              })}
+        </div> 
       </div>
       
 

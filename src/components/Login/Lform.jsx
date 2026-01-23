@@ -84,7 +84,7 @@ const Lform = () => {
   });
 
   return (
-    <div className="">
+    <div>
       <form
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-lg w-full max-w-md"

@@ -9,16 +9,29 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const data = [
+
+
+const AreaChartSimple = (props) => {
+  const data = [
   { month: "Jan", leaves: 4 },
   { month: "Feb", leaves: 2 },
   { month: "Mar", leaves: 6 },
   { month: "Apr", leaves: 3 },
-];
+  { month: "May", leaves: 2 },
+  { month: "Jun", leaves: 3 },
+  { month: "Jul", leaves: 5 },
+  { month: "Aug", leaves: 4 },
+  { month: "Sep", leaves: 4 },
+  { month: "Oct", leaves: 8 },
+  { month: "nov", leaves: 4 },
+  { month: "Dec", leaves: 4 },
 
-const AreaChartSimple = () => {
+
+
+  
+];
   return (
-    <div style={{ width: "30%", height: 300 }}>
+    <div style={{ width: "30%", height: 400 }}  className="border-2 rounded-xl border-gray-400 bg-white">
       <ResponsiveContainer>
         <AreaChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />

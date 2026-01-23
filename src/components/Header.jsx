@@ -4,6 +4,8 @@ import { Outlet } from 'react-router-dom'
 import Dashboard from '../user/Dash/Dashboard'
 
 const Header = () => {
+  const date = new Date();
+  
   return (
    
      
@@ -11,7 +13,7 @@ const Header = () => {
           <div className='w-full h-15 flex items-center  justify-between p-5 bg-white border-b-2 border-gray-300'>
           <div>
              <p className='text-2xl font-bold'>Welcome Elonmusk!</p>
-             <p className='text-xs font-semibold'>Today is Wednesday, 21 Jan 2026</p>
+             <p className='text-xs font-semibold'>Today is {date.toDateString()}</p>
 
           </div>
           <div className='border-2 border-gray-500 flex h-12 w-40 m-1  rounded-2xl justify-center items-center'>

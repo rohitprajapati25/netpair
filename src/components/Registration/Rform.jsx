@@ -33,7 +33,7 @@ const Rform = () => {
   });
 
   return (
-    <form onSubmit={handleSubmit} className="w-full space-y-4">
+    <form onSubmit={handleSubmit} className="w-full space-y-4 p-8">
 
       <div>
         <h2 className="text-3xl font-bold text-gray-800">
