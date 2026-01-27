@@ -1,56 +1,3 @@
-// import React from 'react'
-// import {Formik,useFormik} from "formik";
-// import { loginSchema } from '../../schemas';
-// import { useNavigate } from 'react-router-dom';
-
-// const initialValues ={
-//   email : "",
-//   password : ""
-
-// }
-
-// const Lform = () => {
-//   const usenavigate = useNavigate();
-//     const {values, errors, touched, handleBlur , handleChange , handleSubmit  } = useFormik({
-//     initialValues : initialValues,
-//     validationSchema : loginSchema,
-//     onSubmit : (values,action)=>{
-//       console.log(values);
-//       alert("Login Done...");
-//       usenavigate("/home");
-//       action.resetForm();
-//     }
-//   });  
-  
-  
-//   return (
-//     <div className=''>
-//       <form onSubmit={handleSubmit}>
-//         <p className="text-black text-3xl font-bold">Login to your account</p>
-//         <p className="text-black font-normal tracking-wider">Enter Your Account Details</p><br />
-
-//         <label htmlFor="email" className="font-medium text-xl">Email :  </label><br />
-//         <input className="w-75 h-10 font-bold border-2 rounded border-gray-300 pl-3"  type="text" name="email" value={values.email} onChange={handleChange} onBlur={handleBlur} placeholder="Enter Your Email Id" /><br />
-//         {errors.email && touched.email ? <p className="text-red-600 ">{errors.email}</p>:null}
-        
-//         <label htmlFor="password" className="font-medium text-xl">Password :  </label><br />
-//         <input className="w-75 h-10 font-bold border-2 rounded border-gray-300 pl-3"  type="password" name="password" value={values.password} onChange={handleChange} onBlur={handleBlur} placeholder="Enter Your Password" /><br />
-//         {errors.password && touched.password ? <p className="text-red-600">{errors.password}</p>:null} 
-//         <br />
-       
-//           <input type="checkbox" name="checkbox" className="text-xs" />Remember login &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-//           <a className="font-extrabold underline text-blue-900 text-xs w-auto" href="/forgot" >Forget Password?</a><br />
-//         <br/>
-//         <button type="submit" className="bg-blue-900 py-2 px-8 rounded text-white hover:cursor-pointer hover:bg-blue-600" >Submit</button><br /><br />
-//         <h4>Does't have an account? <a className='text-blue-800 font-bold underline' href="/registration">Sign Up</a></h4>
-
-//       </form>
-//     </div>
-//   )
-// }
-
-// export default Lform
-
 
 import React from "react";
 import { useFormik } from "formik";
@@ -82,6 +29,7 @@ const Lform = () => {
       action.resetForm();
     },
   });
+
 
   return (
     <div>

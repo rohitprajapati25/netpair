@@ -7,6 +7,10 @@ import PieChartSimple from '../../components/Charts/PieChartSimple'
 // import Sidebar from '../../components/Sidebar'
 
 const Dashboard = () => {
+  
+  
+
+
   return (
     <div className='relative h-[100%] w-full bg-gray-100 flex flex-col items-center justify-strat gap-3'>
       <div className='flex gap-3 items-center justify-center h-auto p-3 w-[100%] flex-wrap relative'>
@@ -22,11 +26,11 @@ const Dashboard = () => {
              <PieChartSimple av={20} ap={20} ar={20}/>   
 
       </div>
-      <div className='flex item-center justify-center p-5 bg-red-200'>
-        <table className='table-auto bg-white rounded-t-xl'>
+      <div className='flex item-center justify-center p-5 bg-red-200 h-auto w-auto'>
+        <table className='table-auto bg-white rounded-t-xl border-all-2 border-separate border'>
           <thead>
-            <tr>
-            <th>Employee</th>
+            <tr >
+            <th >Employee</th>
           <th>Dept</th>
           <th>Status</th>
           <th>Check-in</th>
