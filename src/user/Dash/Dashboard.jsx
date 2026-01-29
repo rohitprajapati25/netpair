@@ -26,28 +26,31 @@ const Dashboard = () => {
              <PieChartSimple av={20} ap={20} ar={20}/>   
 
       </div>
-      <div className='flex item-center justify-center p-5 bg-red-200 h-auto w-auto'>
-        <table className='table-auto bg-white rounded-t-xl border-all-2 border-separate border'>
-          <thead>
-            <tr >
-            <th >Employee</th>
-          <th>Dept</th>
-          <th>Status</th>
-          <th>Check-in</th>
-          <th>Mode</th>
+       <div className="flex items-center justify-center p-6">
+      <table className="table-auto bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+        <thead className="bg-gray-100">
+          <tr className="text-left">
+            <th className="px-6 py-3 border-b">Employee</th>
+            <th className="px-6 py-3 border-b">Dept</th>
+            <th className="px-6 py-3 border-b">Status</th>
+            <th className="px-6 py-3 border-b">Check-in</th>
+            <th className="px-6 py-3 border-b">Mode</th>
           </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Rohit Prajapti</td>
-              <td>Dev</td>
-              <td>Present</td>
-              <td>09:30</td>
-              <td>Office</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        </thead>
+
+        <tbody>
+          <tr className="hover:bg-gray-50">
+            <td className="px-6 py-3 border-b">Rohit Prajapti</td>
+            <td className="px-6 py-3 border-b">Dev</td>
+            <td className="px-6 py-3 border-b text-green-600 font-semibold">
+              Present
+            </td>
+            <td className="px-6 py-3 border-b">09:30</td>
+            <td className="px-6 py-3 border-b">Office</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
       
     </div>
   )
