@@ -1,2 +1,12 @@
 @import "tailwindcss";
+ 
+body::-webkit-scrollbar{
+    display: none;
+}
+tbl::-webkit-scrollbar{
+    display: none;
+}
 
+body {
+    @apply bg-gray-100;
+}

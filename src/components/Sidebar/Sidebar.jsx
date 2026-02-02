@@ -8,32 +8,65 @@ import Dashboard from "../../user/Dash/Dashboard";
 const Sidebar = (props) => {
   const [collapsed, setCollapsed] = useState(false);
 
+
   const sidebarArray = [
     {
-      navipath:"dashboard",
+      navpath:"dashboard",
       icon : "ri-dashboard-line",
       data : "Dashboard",
       coll : collapsed
-    },
-     {
-      navipath:"attendance",
+    },{
+      navpath:"employees",
+      icon : "ri-user-2-line",
+      data : "Employees",
+      coll : collapsed
+    },{
+      navpath:"attendance",
       icon : "ri-calendar-check-line",
       data : "Attendance",
       coll : collapsed
-    },
-     {
-      navipath:"leave",
+    },{
+      navpath:"leave",
       icon : "ri-survey-line",
       data : "Leave",
       coll : collapsed
-    }
+    },{
+      navpath:"projects",
+      icon : "ri-folder-line",
+      data : "Projects",
+      coll : collapsed
+    },{
+      navpath:"task-timesheet",
+      icon : "ri-task-line",
+      data : "Tasks-Timesheet",
+      coll : collapsed
+    },{
+      navpath:"assets",
+      icon : "ri-archive-stack-line",
+      data : "Assets",
+      coll : collapsed
+    },{
+      navpath:"reports",
+      icon : "ri-survey-line",
+      data : "Reports",
+      coll : collapsed
+    },{
+      navpath:"announcements",
+      icon : "ri-megaphone-line",
+      data : "Announcements",
+      coll : collapsed
+    },{
+      navpath:"settings",
+      icon : "ri-equalizer-line",
+      data : "Settings",
+      coll : collapsed
+    },
   ];
-  console.log(sidebarArray);
   
   return (
     <div className="flex">
       <div 
-        className={`h-screen bg-white border-r border-gray-300
+        className={`h-full  bg-white border-r border-gray-300
         transition-all duration-300
         ${collapsed ? "w-20" : "w-75"}`}
       >
@@ -61,14 +94,17 @@ const Sidebar = (props) => {
           ></i>
         </div>
 
-        <div className="p-2">
+        <div className="overflow-y-auto h-[100vh]">
+          <div className="p-2">
              {sidebarArray.map(function(elems,ind){
-              return <div key={ind}>
-                  <Sidedata navipath={elems.navipath} icon={elems.icon} data={elems.data} coll={elems.coll}/>
+              return <div className="mt-1" key={ind}>
+                  <Sidedata navpath={elems.navpath} icon={elems.icon} data={elems.data} coll={elems.coll}/>
              
                 </div>
               })}
         </div> 
+        
+        </div>
       </div>
       
 

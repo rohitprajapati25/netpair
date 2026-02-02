@@ -7,8 +7,8 @@ const Sidedata = (props) => {
   
   return (
     
-      <NavLink to={props.navpath}>
-            <div
+      <NavLink to={props.navpath} >
+                 <div
             className={`h-12 flex items-center p-2 rounded
             hover:bg-gray-100 
             ${props.coll ? "justify-center" : "gap-3"}`}
