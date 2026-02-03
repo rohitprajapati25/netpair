@@ -10,9 +10,8 @@ import Rform from './components/Registration/Rform'
 import Fform from './components/Forgot/Fform'
 import Dashboard from '../src/user/Dash/Dashboard'
 import Employees from './user/Employess/Employees'
-import Attendance from './user/Attendance/Attendance'
-import Leave from './user/Leave/Leave'
-
+import Attendance from './user/Admin_Attendance/Attendance'
+import Leave from './user/Admin_leave_page/Leave'
 const App = () => {
   return (
 
