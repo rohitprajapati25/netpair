@@ -13,7 +13,7 @@ const Attendance = () => {
 
   return (
     <div className="relative h-[100%] m-1 pb-10 pt-5 w-auto bg-white flex flex-col items-start pl-5 pr-5 justify-strat gap-3 min-h-full overflow-y-auto rounded-xl">
-      <h2 className="text-2xl font-semibold mb-4">Attendance Management</h2>
+      <h2 className="text-2xl font-semibold mb-6">Attendance Management</h2>
 
       <AttendanceCards data={attendanceData} />
       <AttendanceTable data={attendanceData} onAdd={() => setOpen(true)} />

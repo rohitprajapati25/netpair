@@ -8,7 +8,7 @@ const AttendanceTable = ({ data, onAdd }) => {
         Mark Attendance
       </button>
 
-      <div className="w-full flex items-start justify-center rounded-xl overflow-x-auto border-2 border-gray-300 h-auto h-min-[400px] overflow-y-auto">
+      <div className="w-full flex items-start justify-center rounded-xl overflow-x-auto border-2 border-gray-400 h-auto h-min-[400px] overflow-y-auto">
         <table className="table-auto m-5 w-full bg-white rounded-xl shadow-lg overflow-hidden">
           
           <thead className="bg-gray-100">

@@ -11,7 +11,7 @@ const LeaveCards = () => {
       {cards.map((card, i) => (
         <div
           key={i}
-          className="bg-white rounded-xl shadow p-5 border"
+          className="bg-white rounded-xl shadow p-5 border border-gray-400"
         >
           <p className="text-gray-500 text-sm">{card.title}</p>
           <h2 className="text-2xl font-bold mt-1">{card.value}</h2>

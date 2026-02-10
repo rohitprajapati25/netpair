@@ -13,7 +13,7 @@ const AttendanceCards = ({ data }) => {
 };
 
 const Card = ({ title, value, color }) => (
-  <div className="border px-6 py-4 text-center border-gray-400 rounded-xl">
+  <div className="border-2 border-gray-400 radius-xl px-6 py-4 text-center rounded-xl">
     <p className="text-sm text-black-200 ">{title}</p>
     <p className={`text-xl font-bold ${color}`}>{value}</p>
   </div>

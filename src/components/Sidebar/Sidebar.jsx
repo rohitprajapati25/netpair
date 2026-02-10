@@ -36,7 +36,7 @@ const Sidebar = (props) => {
       data : "Projects",
       coll : collapsed
     },{
-      navpath:"task-timesheet",
+      navpath:"tasktimesheet",
       icon : "ri-task-line",
       data : "Tasks-Timesheet",
       coll : collapsed

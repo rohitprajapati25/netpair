@@ -1,6 +1,6 @@
 const LeaveTable = () => {
   return (
-    <div className="bg-white rounded-xl shadow border overflow-x-auto">
+    <div className="bg-white rounded-xl shadow border border-gray-400 soverflow-x-auto">
       <table className="w-full">
         <thead className="bg-gray-100">
           <tr>
@@ -15,7 +15,7 @@ const LeaveTable = () => {
         </thead>
 
         <tbody>
-          <tr className="border-t hover:bg-gray-50">
+          <tr className="border-t  border-gray-400 hover:bg-gray-50">
             <td className="px-4 py-3">Rohit Prajapati</td>
             <td className="px-4 py-3">Casual</td>
             <td className="px-4 py-3">12‑02‑2026</td>
