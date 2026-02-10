@@ -1,4 +1,4 @@
-const AttendanceTable = ({ data, onAdd }) => {
+const   AttendanceTable = ({ data, onAdd }) => {
   return (
     <>
       <button

@@ -24,6 +24,7 @@ const statusColor = (status) => {
 const ProjectsTable = () => {
   return (
     <div className="bg-white rounded-xl shadow p-4 overflow-x-auto border-2 border-gray-400">
+      
       <table className="w-full">
         <thead className="bg-gray-100 border-b">
           <tr>

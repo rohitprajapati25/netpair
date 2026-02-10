@@ -17,7 +17,7 @@ const Attendance = () => {
 
       <AttendanceCards data={attendanceData} />
       <AttendanceTable data={attendanceData} onAdd={() => setOpen(true)} />
-      {open && <AttendanceModal onClose={() => setOpen(false)} />}
+      {open && <AttendanceModal close={() => setOpen(false)} />}
     </div>
   );
 };
