@@ -1,5 +1,6 @@
 import React from "react";
 import Card from "../../components/Employee/Cards";
+import { RiUserAddLine } from "react-icons/ri";
 
 const Employees = () => {
 
@@ -31,21 +32,37 @@ const Employees = () => {
   ];
 
   return (
-    <div className="relative h-[100%] m-1 pb-10 pt-5 w-auto bg-white flex flex-col items-start pl-5 pr-5 justify-strat gap-3 min-h-full overflow-y-auto rounded-xl">
-      <h2 className="text-2xl font-semibold mb-4">Employees</h2>
+    <div className="h-full m-1 p-6
+      bg-gray-50 rounded-2xl
+      flex flex-col gap-6 overflow-y-auto">
 
+      {/* Header */}
+      <div className="flex justify-between items-center w-full">
+        <h2 className="text-2xl font-semibold">Employees</h2>
+
+        <button
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700
+          text-white px-4 py-2 rounded-lg shadow transition"
+        >
+          <RiUserAddLine size={18} />
+          Add Employee
+        </button>
+      </div>
+
+      {/* Employee Cards */}
       <div className="flex items-start justify-content-center gap-5 flex-wrap">
         {employeeData.map(emp => (
-        <Card
-          key={emp.id}
-          name={emp.name}
-          designation={emp.designation}
-          working_amount={emp.working_amount}
-          place={emp.place}
-          pimg={emp.pimg}
-        />
-      ))}
+          <Card
+            key={emp.id}
+            name={emp.name}
+            designation={emp.designation}
+            working_amount={emp.working_amount}
+            place={emp.place}
+            pimg={emp.pimg}
+          />
+        ))}
       </div>
+
     </div>
   );
 };

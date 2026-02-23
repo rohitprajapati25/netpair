@@ -5,16 +5,30 @@ import LeaveFilters from "../../components/Leave/LeaveFilter";
 
 const Leave = () => {
   return (
-    <div className="relative h-[100%] m-1 pb-10 pt-5 w-auto bg-white flex flex-col items-start pl-5 pr-5 justify-strat gap-3 min-h-full overflow-y-auto rounded-xl">
+    <div
+      className="h-full m-1 p-6
+      bg-gray-50 rounded-2xl
+      flex flex-col gap-6 overflow-y-auto"
+    >
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        
+        <div>
+          <h1 className="text-2xl font-semibold">
+            Leave Management
+          </h1>
+         
+        </div>
+
       
-      <h1 className="text-2xl font-semibold mb-6">Leave Management</h1>
+      </div>
 
       <LeaveCards />
 
-      <LeaveFilters />
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
+        <LeaveFilters />
+      </div>
 
       <LeaveTable />
-
     </div>
   );
 };

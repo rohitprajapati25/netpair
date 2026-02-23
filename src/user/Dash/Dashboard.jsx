@@ -9,7 +9,9 @@ import Table from '../../components/Dashboard/Table'
 
 const Dashboard = () => {
   return (
-    <div className='relative h-[100%] m-1 pb-10 pt-5 w-auto bg-white flex flex-col items-center justify-strat gap-3 min-h-full overflow-y-auto rounded-xl'>
+    <div className='h-full m-1 p-6
+      bg-gray-50 rounded-2xl
+      flex flex-col gap-6 overflow-y-auto'>
       
       <div className='flex gap-3 items-center justify-center h-auto p-3 w-[100%] flex-wrap relative'>
         <Card icon="ri-account-box-line text-4xl mb-3" num={100} tot="Total number of staff"/>

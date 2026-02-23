@@ -83,11 +83,11 @@ const Sidebar = (props) => {
             onClick={() => setCollapsed(!collapsed)}
             className={`
               ri-layout-left-line absolute right-2 text-2xl
-              hover:bg-gray-100 p-1 rounded-lg cursor-e-resize
+              hover:bg-gray-200 p-1 rounded-lg cursor-e-resize
               transition-opacity duration-200
               ${
                 collapsed
-                  ? "opacity-0 hover:opacity-100 px-4 text-2xl"
+                  ? "opacity-0 hover:opacity-200 px-4 text-2xl"
                   : "opacity-100 px-4"
               }
             `}

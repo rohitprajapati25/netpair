@@ -18,6 +18,7 @@ import Asset from './user/Admin_Asset_Page/Asset'
 import Reports from './user/Admin_Reports/Reports'
 import Announcements from './user/Admin_Announcements/Announcements'
 import Settings from './user/Settings/Settings'
+import NotFound from './components/NotFound'
 
 const App = () => {
   return (
@@ -29,6 +30,8 @@ const App = () => {
       <Route path="/registration" element={<AuthLayout children={<Rform />} />}/>
       
       <Route path="/forgot" element={<AuthLayout children={<Fform/>}/>}/>
+
+      <Route path='/*' element={<NotFound/>}/>
 
       <Route element={<Home/>}>
         <Route path='dashboard' element={<Dashboard/>}/>

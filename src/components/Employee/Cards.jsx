@@ -1,61 +1,53 @@
-import React from 'react'
+import React from "react";
 
-const Cards = ({ name, designation, working_amount, place, pimg }) => {
-
+const Cards = ({ name,  designation,  working_amount,  place,  pimg}) => {
   return (
-    <div className="flex justify-center items-center">
-      
-      <div className="w-[300px] min-h-[400px] bg-white p-5 flex flex-col justify-between border-2 border-gray-400 rounded-xl hover:shadow-xl transition-shadow duration-300">
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 p-5 w-[280px]">
 
-        {/* TOP */}
-        <div className="flex items-center justify-between w-[100px] pt-2 self-center">
-          <img
-            src={pimg}
-            alt="profile"
-            className="h-[100px] w-[100px] rounded-full object-cover border-2 border-gray-200"
-          />
+      <div className="flex items-center gap-4">
+        <img
+          src={pimg}
+          alt="profile"
+          className="w-16 h-16 rounded-full object-cover border-2 border-blue-100"
+        />
+
+        <div>
+          <h3 className="font-semibold text-gray-800">{name}</h3>
+          <p className="text-sm text-gray-500">{designation}</p>
+          <p className="text-xs text-gray-400">{place}</p>
         </div>
-
-        {/* CENTER */}
-        <div className="text-center my-4">
-          <h3 className="text-[1.05rem] font-medium mb-1">
-            {name}
-            <span className="text-[0.65rem] text-gray-400 ml-1">
-              5 days ago
-            </span>
-          </h3>
-
-          <h2 className="text-lg font-semibold">
-            {designation}
-          </h2>
-
-          <div>
-            <h4 className="text-sm font-normal bg-gray-100 px-2 py-1 rounded-md inline-block mt-2">
-              {name.toLowerCase().replace(/\s+/g, '.')}@netpairinfotech.com
-            </h4>
-          </div>
-        </div>
-
-        {/* STATUS BOXES */}
-        <div className="flex justify-center items-center p-3 gap-4">
-
-          <div className="bg-green-500 rounded-xl py-2 px-4 text-white flex items-center justify-center w-full">
-            <p className="font-bold">Present</p>
-          </div>
-
-          <div className="bg-red-500 rounded-xl py-2 px-4 text-white flex items-center justify-center w-full">
-            <p className="font-bold">Absent</p>
-          </div>
-
-          <div className="bg-yellow-500 rounded-xl py-2 px-4 text-white flex items-center justify-center w-full">
-            <p className="font-bold">Leave</p>
-          </div>
-
-        </div>
-
       </div>
-    </div>
-  )
-}
 
-export default Cards
+      <div className="my-4 border-t"></div>
+
+      <div className="flex justify-between text-sm">
+        <div>
+          <p className="text-gray-400">Working Days</p>
+          <p className="font-semibold text-gray-800">
+            {working_amount} Days
+          </p>
+        </div>
+
+        <div>
+          <p className="text-gray-400">Status</p>
+          <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-semibold">
+            Present
+          </span>
+        </div>
+      </div>
+
+      <div className="flex gap-2 mt-5">
+        <button className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+          View
+        </button>
+
+        <button className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg text-sm hover:bg-gray-200 transition">
+          Edit
+        </button>
+      </div>
+
+    </div>
+  );
+};
+
+export default Cards;

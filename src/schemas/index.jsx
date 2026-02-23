@@ -11,3 +11,4 @@ export const loginSchema = Yup.object({
     email:Yup.string().email().required("Enter Your Email Id"),
     password : Yup.string().min(8).required("Enter Your Password Hear"),
 });
+

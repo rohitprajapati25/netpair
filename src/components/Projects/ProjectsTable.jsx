@@ -1,54 +1,83 @@
-const projectData = [
-  {
-    id: 1,
-    name: "EMS Development",
-    start: "01-01-2026",
-    end: "30-03-2026",
-    status: "Ongoing",
-  },
-  {
-    id: 2,
-    name: "HR Portal",
-    start: "10-12-2025",
-    end: "20-02-2026",
-    status: "Completed",
-  },
-];
+import React from "react";
 
-const statusColor = (status) => {
-  if (status === "Completed") return "text-green-600";
-  if (status === "Ongoing") return "text-blue-600";
-  return "text-yellow-600";
+const statusStyle = (status) => {
+  if (status === "Completed")
+    return "bg-green-100 text-green-700";
+  if (status === "Ongoing")
+    return "bg-blue-100 text-blue-700";
+  return "bg-yellow-100 text-yellow-700";
 };
 
-const ProjectsTable = () => {
+const ProjectsTable = ({ data = [] }) => {
   return (
-    <div className="bg-white rounded-xl shadow p-4 overflow-x-auto border-2 border-gray-400">
-      
-      <table className="w-full">
-        <thead className="bg-gray-100 border-b">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-x-auto">
+      <table className="w-full min-w-[800px]">
+        
+        <thead className="bg-gray-50 text-gray-600 text-sm">
           <tr>
-            <th className="p-4 text-left">Project Name</th>
-            <th className="p-4">Start Date</th>
-            <th className="p-4">End Date</th>
-            <th className="p-4">Status</th>
-            <th className="p-4">Actions</th>
+            <th className="px-6 py-4 text-left font-semibold">
+              Project Name
+            </th>
+            <th className="px-6 py-4 text-center font-semibold">
+              Start Date
+            </th>
+            <th className="px-6 py-4 text-center font-semibold">
+              End Date
+            </th>
+            <th className="px-6 py-4 text-center font-semibold">
+              Status
+            </th>
+            <th className="px-6 py-4 text-center font-semibold">
+              Actions
+            </th>
           </tr>
         </thead>
 
-        <tbody>
-          {projectData.map((p) => (
-            <tr key={p.id} className="border-b hover:bg-gray-50">
-              <td className="p-3 font-semibold">{p.name}</td>
-              <td className="p-3 text-center">{p.start}</td>
-              <td className="p-3 text-center">{p.end}</td>
-              <td className={`p-3 text-center font-semibold ${statusColor(p.status)}`}>
-                {p.status}
+        <tbody className="text-sm">
+          {data.map((p) => (
+            <tr
+              key={p.id}
+              className="border-t hover:bg-blue-50/40 transition"
+            >
+            
+              <td className="px-6 py-4 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+                  <i className="ri-folder-line text-blue-600"></i>
+                </div>
+                <span className="font-medium text-gray-800">
+                  {p.name}
+                </span>
               </td>
-              <td className="p-3 flex justify-center gap-4 text-lg">
-                <i className="ri-eye-line cursor-pointer"></i>
-                <i className="ri-edit-line cursor-pointer"></i>
-                <i className="ri-delete-bin-line text-red-600 cursor-pointer"></i>
+
+              <td className="px-6 py-4 text-center">{p.start}</td>
+              <td className="px-6 py-4 text-center">{p.end}</td>
+
+              <td className="px-6 py-4 text-center">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle(
+                    p.status
+                  )}`}
+                >
+                  {p.status}
+                </span>
+              </td>
+
+              <td className="px-6 py-4">
+                <div className="flex justify-center gap-2 text-sm">
+                  
+                  <button className="p-2 rounded-lg hover:bg-blue-100 transition">
+                    <i className="ri-eye-line text-blue-600"></i>
+                  </button>
+
+                  <button className="p-2 rounded-lg hover:bg-green-100 transition">
+                    <i className="ri-edit-line text-green-600"></i>
+                  </button>
+
+                  <button className="p-2 rounded-lg hover:bg-red-100 transition">
+                    <i className="ri-delete-bin-line text-red-600"></i>
+                  </button>
+
+                </div>
               </td>
             </tr>
           ))}

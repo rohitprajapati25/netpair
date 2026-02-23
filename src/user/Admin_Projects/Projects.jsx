@@ -5,26 +5,47 @@ import ProjectCards from "../../components/projects/ProjectCards";
 import ProjectModal from "../../components/Projects/ProjectModal";
 
 const Projects = () => {
-    const [open,setopen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative h-[100%] m-1 pb-10 pt-5 w-auto bg-white flex flex-col items-bitween pl-5 pr-5 justify-strat gap-3 min-h-full overflow-y-auto rounded-xl">
+    <div
+      className="
+      h-full m-1 p-6
+      bg-gray-50 rounded-2xl
+      flex flex-col gap-6
+      overflow-y-auto"
+    >
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">
+            Project Management
+          </h1>
+         
+        </div>
 
-      <div className="flex justify-between items-center mb-6 ">
-        <h1 className="text-2xl font-semibold mb-6">Projects</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 " onClick={()=>setopen(true)}  >
-          + Add Project
+        <button
+          onClick={() => setOpen(true)}
+          className="
+          flex items-center gap-2
+          bg-blue-600 hover:bg-blue-700
+          text-white px-5 py-2 rounded-lg
+          shadow-md transition"
+        >
+          <i className="ri-add-line text-lg"></i>
+          Add Project
         </button>
-      </div>                                                                                    
+      </div>
 
       <ProjectCards />
 
-      <ProjectFilters />
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
+        <ProjectFilters />
+      </div>
 
       <ProjectsTable />
-      {open && <ProjectModal onClose={()=>setopen(false)} />}
 
-
+      {open && <ProjectModal onClose={() => setOpen(false)} />}
     </div>
   );
 };
