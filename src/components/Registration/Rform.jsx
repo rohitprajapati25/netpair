@@ -1,144 +1,184 @@
 import React from "react";
 import { useFormik } from "formik";
-import { signUpSchema } from "../../schemas";
-import { useNavigate, Link } from "react-router-dom";
 
 const initialValues = {
   name: "",
   email: "",
+  phone: "",
+  gender: "",
+  dob: "",
+  department: "",
+  designation: "",
+  role: "Employee",
+  joiningDate: "",
+  employmentType: "",
   password: "",
-  confirm_pass: "",
-  agree: false,
+  status: "Active",
 };
 
 const Rform = () => {
-  const navigate = useNavigate();
 
-  const {
-    values,
-    errors,
-    touched,
-    handleBlur,
-    handleChange,
-    handleSubmit,
-  } = useFormik({
+  const { values, handleChange, handleSubmit, resetForm } = useFormik({
     initialValues,
-    validationSchema: signUpSchema,
-    onSubmit: (values, action) => {
-      console.log(values);
-      alert("Registration Successful");
-      navigate("/login");
-      action.resetForm();
+
+    onSubmit: (values) => {
+      const employees =
+        JSON.parse(localStorage.getItem("employees")) || [];
+
+      const newEmployee = {
+        empId: "EMP-" + Date.now(),
+        ...values,
+      };
+
+      localStorage.setItem(
+        "employees",
+        JSON.stringify([...employees, newEmployee])
+      );
+
+      alert("Employee Created Successfully ✅");
+      resetForm();
     },
   });
 
   return (
-    <form onSubmit={handleSubmit} className="w-full space-y-4 p-8">
-
-      <div>
-        <h2 className="text-3xl font-bold text-gray-800">
-          Create account
+    <div className="flex justify-center items-center w-full">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-2xl space-y-4 border border-gray-200"
+      >
+        <h2 className="text-3xl font-bold text-gray-800 mb-2">
+          Add Employee
         </h2>
-        <p className="text-gray-500">
-          Enter your details
-        </p>
-      </div>
 
-      <div>
-        <label className="block font-medium mb-1">Name</label>
+        {/* PERSONAL DETAILS */}
         <input
-          type="text"
           name="name"
+          placeholder="Full Name"
           value={values.name}
           onChange={handleChange}
-          onBlur={handleBlur}
-          placeholder="Enter your name"
-          className="w-full h-10 border rounded px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full h-11 border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        {errors.name && touched.name && (
-          <p className="text-red-600 text-sm">{errors.name}</p>
-        )}
-      </div>
 
-      <div>
-        <label className="block font-medium mb-1">Email</label>
         <input
-          type="email"
           name="email"
+          placeholder="Email"
           value={values.email}
           onChange={handleChange}
-          onBlur={handleBlur}
-          placeholder="Enter your email"
-          className="w-full h-10 border rounded px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full h-11 border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        {errors.email && touched.email && (
-          <p className="text-red-600 text-sm">{errors.email}</p>
-        )}
-      </div>
 
-      <div>
-        <label className="block font-medium mb-1">Password</label>
+        <input
+          name="phone"
+          placeholder="Phone"
+          value={values.phone}
+          onChange={handleChange}
+          className="w-full h-11 border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <select
+            name="gender"
+            value={values.gender}
+            onChange={handleChange}
+            className="h-11 border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Gender</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+
+          <input
+            type="date"
+            name="dob"
+            value={values.dob}
+            onChange={handleChange}
+            className="h-11 border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* JOB DETAILS */}
+        <select
+          name="department"
+          value={values.department}
+          onChange={handleChange}
+          className="w-full h-11 border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Department</option>
+          <option>Development</option>
+          <option>HR</option>
+          <option>Design</option>
+          <option>QA</option>
+        </select>
+
+        <input
+          name="designation"
+          placeholder="Designation"
+          value={values.designation}
+          onChange={handleChange}
+          className="w-full h-11 border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <select
+            name="role"
+            value={values.role}
+            onChange={handleChange}
+            className="h-11 border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option>Employee</option>
+            <option>HR</option>
+            <option>Admin</option>
+          </select>
+
+          <select
+            name="employmentType"
+            value={values.employmentType}
+            onChange={handleChange}
+            className="h-11 border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Employment Type</option>
+            <option>Full Time</option>
+            <option>Intern</option>
+            <option>Contract</option>
+          </select>
+        </div>
+
+        <input
+          type="date"
+          name="joiningDate"
+          value={values.joiningDate}
+          onChange={handleChange}
+          className="w-full h-11 border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        {/* ACCOUNT */}
         <input
           type="password"
           name="password"
+          placeholder="Temporary Password"
           value={values.password}
           onChange={handleChange}
-          onBlur={handleBlur}
-          placeholder="Enter password"
-          className="w-full h-10 border rounded px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full h-11 border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        {errors.password && touched.password && (
-          <p className="text-red-600 text-sm">{errors.password}</p>
-        )}
-      </div>
 
-      <div>
-        <label className="block font-medium mb-1">Confirm Password</label>
-        <input
-          type="password"
-          name="confirm_pass"
-          value={values.confirm_pass}
+        <select
+          name="status"
+          value={values.status}
           onChange={handleChange}
-          onBlur={handleBlur}
-          placeholder="Confirm password"
-          className="w-full h-10 border rounded px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        {errors.confirm_pass && touched.confirm_pass && (
-          <p className="text-red-600 text-sm">{errors.confirm_pass}</p>
-        )}
-      </div>
+          className="w-full h-11 border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
 
-      <div>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            name="agree"
-            checked={values.agree}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            className="accent-blue-700"
-          />
-          I agree to Terms & Conditions
-        </label>
-        {errors.agree && touched.agree && (
-          <p className="text-red-600 text-sm">{errors.agree}</p>
-        )}
-      </div>
-
-      <button
-        type="submit"
-        className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-600 transition"
-      >
-        Sign Up
-      </button>
-
-      <p className="text-center text-sm">
-        Already have an account?{" "}
-        <Link to="/" className="text-blue-700 font-bold hover:underline">
-          Login
-        </Link>
-      </p>
-    </form>
+        <button
+          type="submit"
+          className="w-full bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-lg font-semibold transition"
+        >
+          Create Employee
+        </button>
+      </form>
+    </div>
   );
 };
 

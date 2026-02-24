@@ -12,6 +12,125 @@ const Employees = () => {
       working_amount: 15,
       place: "Ahmedabad",
       pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
+    },{
+      id: 1,
+      name: "Rahul Patel",
+      designation: "Frontend Developer",
+      working_amount: 15,
+      place: "Ahmedabad",
+      pimg: "https://i.pravatar.cc/150?img=1"
     },
     {
       id: 2,
@@ -32,24 +151,21 @@ const Employees = () => {
   ];
 
   return (
-    <div className="h-full m-1 p-6
-      bg-gray-50 rounded-2xl
-      flex flex-col gap-6 overflow-y-auto">
+    <div className="relative h-full m-1 p-6
+      bg-gradient-to-br from-slate-50 to-gray-100
+      flex flex-col gap-6 overflow-y-auto rounded-2xl">
 
-      {/* Header */}
       <div className="flex justify-between items-center w-full">
         <h2 className="text-2xl font-semibold">Employees</h2>
 
         <button
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700
-          text-white px-4 py-2 rounded-lg shadow transition"
-        >
+          text-white px-4 py-2 rounded-lg shadow transition" >
           <RiUserAddLine size={18} />
           Add Employee
         </button>
       </div>
 
-      {/* Employee Cards */}
       <div className="flex items-start justify-content-center gap-5 flex-wrap">
         {employeeData.map(emp => (
           <Card

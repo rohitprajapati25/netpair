@@ -1,78 +1,108 @@
-import React from 'react'
-import Card from '../../components/Asset/Card'
+import React from "react";
+import Card from "../../components/Asset/Card";
 
 const Asset = () => {
-  const data = [{
-    title: 'Total Assets',
-    tot: '100'
-  }, {
-    title: 'Assigned',
-    tot: '50'
-  },{
-    title: 'Available',
-    tot: '50'
-  },{
-    title: 'Damaged',
-    tot: '10'
-  }]
+  const data = [
+  {
+    title: "Total Assets",
+    tot: "100",
+    bg: "from-indigo-500 to-blue-600"
+  },
+  {
+    title: "Assigned",
+    tot: "50",
+    bg: "from-emerald-500 to-green-600"
+  },
+  {
+    title: "Available",
+    tot: "50",
+    bg: "from-amber-400 to-orange-500"
+  },
+  {
+    title: "Damaged",
+    tot: "10",
+    bg: "from-rose-500 to-red-600"
+  },
+];
+
   return (
-    <div className='relative h-[100%] m-1 pb-10 p-5 w-auto bg-white flex flex-col items-start justify-strat gap-3 min-h-full overflow-y-auto rounded-xl'>
-    <h2 className="text-2xl font-semibold mb-6">Asset Management</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {data.map((d,i)=>(
-        <Card key={i} title={d.title} tot={d.tot}/>
-      ))}
+    <div
+      className="relative h-full m-1 p-6
+      bg-gradient-to-br from-slate-50 to-gray-100
+      flex flex-col gap-6 overflow-y-auto rounded-2xl"
+    >
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">
+          Asset Management
+        </h2>
+
+        <button
+          className="flex items-center gap-2
+          bg-blue-600 hover:bg-blue-700
+          text-white px-4 py-2 rounded-lg
+          shadow-md transition"
+        >
+          <i className="ri-add-line text-lg"></i>
+          Add Asset
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        {data.map((d, i) => (
+          <Card key={i} title={d.title} tot={d.tot} bg={d.bg}/>
+        ))}
+      </div>
+
+      <div
+        className="bg-white rounded-2xl
+        border border-gray-200 shadow-sm
+        overflow-x-auto"
+      >
+        <table className="w-full min-w-[850px]">
+          <thead className="bg-gray-50 text-gray-600 text-sm">
+            <tr>
+              <th className="px-6 py-4 text-left font-semibold">Asset ID</th>
+              <th className="px-6 py-4 text-left font-semibold">Asset Name</th>
+              <th className="px-6 py-4 text-center font-semibold">Category</th>
+              <th className="px-6 py-4 text-center font-semibold">Assigned To</th>
+              <th className="px-6 py-4 text-center font-semibold">Status</th>
+              <th className="px-6 py-4 text-center font-semibold">Action</th>
+            </tr>
+          </thead>
+
+          <tbody className="text-sm">
+            {[1, 2].map((_, i) => (
+              <tr
+                key={i}
+                className="border-t hover:bg-blue-50/40 transition"
+              >
+                <td className="px-6 py-4 font-medium">AST-101</td>
+                <td className="px-6 py-4">Laptop</td>
+                <td className="px-6 py-4 text-center">IT Asset</td>
+                <td className="px-6 py-4 text-center">Rohit</td>
+
+                <td className="px-6 py-4 text-center">
+                  <span
+                    className="px-3 py-1 rounded-full text-xs font-semibold
+                    bg-green-100 text-green-700"
+                  >
+                    Assigned
+                  </span>
+                </td>
+
+                <td className="px-6 py-4">
+                  <div className="flex justify-center gap-4 text-lg">
+                    <i className="ri-edit-2-line cursor-pointer text-blue-600 hover:scale-110 transition"></i>
+                    <i className="ri-refresh-line cursor-pointer text-orange-600 hover:scale-110 transition"></i>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
-<div className="bg-white rounded-xl shadow p-5 w-full mt-5 border-2 border-gray-400">
-    <div className="flex justify-between mb-4">
-    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg">
-      + Add Asset
-    </button>
-  </div>
+  );
+};
 
-  <div className="overflow-x-auto rounded-lg">
-    <table className="w-full text-left">
-      <thead className="bg-gray-100 border-b">
-        <tr>
-          <th className="p-3 ">Asset ID</th>
-          <th className="p-3 ">Asset Name</th>
-          <th className="p-3 ">Category</th>
-          <th className="p-3 ">Assigned To</th>
-          <th className="p-3 ">Status</th>
-          <th className="p-3 ">Action</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr className="hover:bg-gray-50 border-b">
-          <td className="p-3 ">AST-101</td>
-          <td className="p-3 ">Laptop</td>
-          <td className="p-3 ">IT Asset</td>
-          <td className="p-3 ">Rohit</td>
-          <td className="p-3  text-green-600 font-semibold">Assigned</td>
-          <td className="p-3  flex gap-4">
-            <i className="ri-edit-2-line cursor-pointer text-blue-600"></i>
-            <i className="ri-refresh-line cursor-pointer text-orange-600"></i>
-          </td>
-        </tr>
-        <tr className="hover:bg-gray-50 border-b">
-          <td className="p-3 ">AST-101</td>
-          <td className="p-3 ">Laptop</td>
-          <td className="p-3 ">IT Asset</td>
-          <td className="p-3 ">Rohit</td>
-          <td className="p-3  text-green-600 font-semibold">Assigned</td>
-          <td className="p-3  flex gap-4">
-            <i className="ri-edit-2-line cursor-pointer text-blue-600"></i>
-            <i className="ri-refresh-line cursor-pointer text-orange-600"></i>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-    </div>
-  )
-}
-
-export default Asset
+export default Asset;

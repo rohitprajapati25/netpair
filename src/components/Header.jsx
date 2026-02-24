@@ -1,5 +1,4 @@
 import React from 'react'
-// import MainBoard from './MainBoard'
 import { Outlet } from 'react-router-dom'
 
 

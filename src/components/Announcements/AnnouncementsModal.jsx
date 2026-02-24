@@ -1,40 +1,29 @@
-import React from 'react'
-
-const AnnouncementsModal = ({onClose}) => {
+const AnnouncementModal = ({ data, onClose }) => {
   return (
-    <div>
-        <div
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+    <div
+      className="fixed inset-0 bg-black/40 flex items-center justify-center"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white p-6 rounded-2xl max-w-lg w-[90%]"
+        onClick={(e)=>e.stopPropagation()}
+      >
+        <button
           onClick={onClose}
-        >
-          <div
-            className="bg-white w-[90%] max-w-lg rounded-xl p-6 relative overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={onClose}
-              className="absolute top-2 right-3 text-xl text-gray-500 hover:text-black"
-            >
-              ✕
-            </button>
+          className="float-right text-lg">✕</button>
 
-            <h2 className="text-xl font-semibold mb-2 break-words">
-              {selected.title}
-            </h2>
+        <h2 className="text-xl font-bold mb-3">{data.title}</h2>
 
-            <p className="text-gray-700 whitespace-pre-wrap break-words max-h-[60vh] overflow-y-auto mb-4">
-              {selected.msg}
-            </p>
+        <p className="text-gray-700 whitespace-pre-wrap mb-4">
+          {data.msg}
+        </p>
 
-            <div className="text-sm text-gray-500 flex gap-3">
-              <span>{selected.date}</span>
-              <span>{selected.time}</span>
-            </div>
-          </div>
+        <div className="text-sm text-gray-400">
+          {data.date} • {data.time}
         </div>
-      
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default AnnouncementsModal
+export default AnnouncementModal;

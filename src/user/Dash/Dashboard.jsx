@@ -8,17 +8,52 @@ import Table from '../../components/Dashboard/Table'
 // import Sidebar from '../../components/Sidebar'
 
 const Dashboard = () => {
+  const dashboardData = [
+  {
+    icon: "ri-account-box-line",
+    num: 100,
+    tot: "Total number of staff",
+    color: "from-blue-500 to-indigo-600",
+  },
+  {
+    icon: "ri-bar-chart-box-line",
+    num: 200,
+    tot: "Total Application",
+    color: "from-purple-500 to-pink-600",
+  },
+  {
+    icon: "ri-briefcase-line",
+    num: 50,
+    tot: "Total Projects",
+    color: "from-green-500 to-emerald-600",
+  },
+  {
+    icon: "ri-calendar-check-line",
+    num: 10,
+    tot: "Total Leave Request",
+    color: "from-orange-500 to-red-500",
+  },
+];
   return (
     <div className='h-full m-1 p-6
       bg-gray-50 rounded-2xl
       flex flex-col gap-6 overflow-y-auto'>
       
-      <div className='flex gap-3 items-center justify-center h-auto p-3 w-[100%] flex-wrap relative'>
-        <Card icon="ri-account-box-line text-4xl mb-3" num={100} tot="Total number of staff"/>
-        <Card icon="ri-bar-chart-box-line text-4xl mb-3" num={200} tot="Total Aplication"/>
-        <Card icon="ri-briefcase-line text-4xl mb-3" num={50} tot="Total Projects"/>
-        <Card icon="ri-calendar-check-line text-4xl mb-3" num={10} tot="Total Leave Request"/>
-      </div>
+      <div
+  className="
+  grid
+  grid-cols-1
+  sm:grid-cols-2
+  lg:grid-cols-4
+  gap-5
+  w-full
+  p-3
+"
+>
+  {dashboardData.map((item, index) => (
+    <Card key={index} icon={item.icon} num={item.num} tot={item.tot} color={item.color}/>
+  ))}
+</div>
       <div className=' flex gap-5 items-center justify-center  w-[100%] flex-wrap relative p-1'>
                    
              <BarCharts/>
