@@ -8,7 +8,6 @@ const AttendanceModal = ({ onClose }) => {
       
       <div className="bg-white w-[380px] rounded-2xl shadow-2xl p-6 animate-scaleIn">
         
-        {/* Header */}
         <h3 className="text-xl font-semibold text-gray-800 mb-5">
           Mark Attendance
         </h3>

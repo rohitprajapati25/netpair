@@ -3,12 +3,34 @@ import React, { useState } from "react";
 const Cards = ({
   name,
   designation,
-  working_amount,
+  department,
   place,
+  working_amount,
+  status = "Active",
   pimg,
 }) => {
 
   const [open, setOpen] = useState(false);
+
+  const [formData, setFormData] = useState({
+    name,
+    designation,
+    department,
+    place,
+    status,
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSave = () => {
+    console.log("Updated Employee:", formData);
+    setOpen(false);
+  };
 
   return (
     <>
@@ -57,37 +79,57 @@ const Cards = ({
       {open && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
 
-          <div className="bg-white rounded-2xl w-[420px] p-6 shadow-xl relative">
+          <div className="bg-white rounded-2xl w-[420px] p-6 shadow-xl">
 
-            <h2 className="text-xl font-semibold mb-4">
-              Edit Employee
+            <h2 className="text-xl font-semibold mb-5">
+              Edit Employee Details
             </h2>
 
             <div className="space-y-3">
 
               <input
-                defaultValue={name}
-                className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
                 placeholder="Employee Name"
               />
 
               <input
-                defaultValue={designation}
-                className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                name="designation"
+                value={formData.designation}
+                onChange={handleChange}
+                className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
                 placeholder="Designation"
               />
 
               <input
-                defaultValue={place}
-                className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Location"
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+                placeholder="Department"
               />
 
               <input
-                defaultValue={working_amount}
-                className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Working Days"
+                name="place"
+                value={formData.place}
+                onChange={handleChange}
+                className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+                placeholder="Location"
               />
+
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+              >
+                <option>Active</option>
+                <option>Inactive</option>
+                <option>Suspended</option>
+              </select>
+
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
@@ -99,6 +141,7 @@ const Cards = ({
               </button>
 
               <button
+                onClick={handleSave}
                 className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
               >
                 Save Changes

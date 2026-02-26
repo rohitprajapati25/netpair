@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AttendanceCards from "../../components/Attendance/AttendanceCards";
-import AttendanceTable from "../../components/Attendance/AttendanceTable";
+import AttendanceFilter from "../../components/Attendance/AttendanceFilter";
+// import AttendanceTable from "../../components/Attendance/AttendanceTable";
 import AttendanceModal from "../../components/Attendance/AttendanceModal";
 import { RiCalendarCheckLine } from "react-icons/ri";
 
@@ -8,8 +9,8 @@ const Attendance = () => {
   const [open, setOpen] = useState(false);
 
   const attendanceData = [
-    { id: 1, name: "Rohit", date: "03-02-2026", in: "9:30", out: "6:30", status: "Present" },
-    { id: 2, name: "Amit", date: "03-02-2026", in: "-", out: "-", status: "Absent" },
+    { id: 1, name: "Rohit", date: "2026-02-02", in: "9:30", out: "6:30", status: "Present", dept:"Development", mode:"Office" },
+    { id: 2, name: "Amit", date: "2026-02-08", in: "-", out: "-", status: "Absent",dept:"HR", mode:"Office" }
   ];
 
   return (
@@ -34,8 +35,7 @@ const Attendance = () => {
 
       <AttendanceCards data={attendanceData} />
 
-      <AttendanceTable data={attendanceData} />
-
+      <AttendanceFilter attendanceData={attendanceData}/>
       {open && <AttendanceModal onClose={() => setOpen(false)} />}
     </div>
   );

@@ -1,5 +1,4 @@
 import React from "react";
-
 import {
   PieChart,
   Pie,
@@ -9,28 +8,36 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+const PieChartSimple = ({
+  completed = 0,
+  progress = 0,
+  assigned = 0,
+  overdue = 0,
+}) => {
 
+  const COLORS = ["#22c55e","#3b82f6","#f59e0b","#ef4444"];
 
+  const data = [
+    { name: "Completed", value: Number(completed) },
+    { name: "In Progress", value: Number(progress) },
+    { name: "Assigned", value: Number(assigned) },
+    { name: "Overdue", value: Number(overdue) },
+  ];
 
-const PieChartSimple = (props) => {
-const COLORS = ["#22c55e", "#facc15", "#ef4444"];
-
-    const data = [
-  { name: "Approved", value: props.ap },
-  { name: "Pending", value: props.ar },
-  { name: "Rejected", value: props.av },
-];
   return (
-    <div style={{ width: "30%", height: 400 }}  className="border-2 rounded-xl border-gray-400 bg-white">
-      <ResponsiveContainer>
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 h-[400px] w-full">
+
+      <h3 className="text-lg font-semibold mb-4">
+        Task Status Overview
+      </h3>
+
+      <ResponsiveContainer width="100%" height="85%">
         <PieChart>
           <Pie
             data={data}
             dataKey="value"
             nameKey="name"
-            cx="50%"
-            cy="50%"
-            outerRadius={100}
+            outerRadius={90}
             label
           >
             {data.map((entry, index) => (
@@ -42,6 +49,7 @@ const COLORS = ["#22c55e", "#facc15", "#ef4444"];
           <Legend />
         </PieChart>
       </ResponsiveContainer>
+
     </div>
   );
 };

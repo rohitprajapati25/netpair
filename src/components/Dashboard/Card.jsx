@@ -9,16 +9,14 @@ const Card = ({ icon, num, tot, color }) => {
       bg-gradient-to-r ${color} text-white`}
     >
       
-      {/* Icon */}
       <div
         className="flex items-center justify-center h-14 w-14 rounded-xl
         bg-white/20 text-2xl backdrop-blur-sm
-        group-hover:scale-110 transition-all duration-300"
+        transition-all duration-300"
       >
         <i className={icon}></i>
       </div>
 
-      {/* Content */}
       <div className="flex flex-col">
         <span className="text-3xl font-bold">
           {num}

@@ -1,9 +1,17 @@
-import timesheetData from "../../components/Task_Timesheet/timesheetData";
+import TimesheetData from "../../components/Task_Timesheet/TimesheetData";
 import TimesheetCards from "../../components/Task_Timesheet/TimesheetCards";
 import TimesheetFilters from "../../components/Task_Timesheet/TimesheetFilters";
 import TimesheetTable from "../../components/Task_Timesheet/TimesheetTable";
+import AddTaskModal from "../../components/Task_Timesheet/AddTaskBtnModel";
+import { useState } from "react";
 
 const TaskTimesheet = () => {
+   const [open, setOpen] = useState(false);
+  const [tasks, setTasks] = useState([]);
+
+  const saveTask = (newTask) => {
+    setTasks([...tasks, newTask]);
+  };
   return (
     <div className="h-full m-1 p-6
       bg-gray-50 rounded-2xl
@@ -15,20 +23,22 @@ const TaskTimesheet = () => {
         </h1>
 
         <button
-          className="flex items-center gap-2
-          bg-blue-600 hover:bg-blue-700
-          text-white px-4 py-2 rounded-lg
-          shadow-md transition"
-        >
-          <i className="ri-add-line text-lg"></i>
-          Add Task
-        </button>
+        onClick={() => setOpen(true)}
+        className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+      >
+        + Add Task
+      </button>
+      <AddTaskModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onSave={saveTask}
+      />
       </div>
-      <TimesheetCards data={timesheetData} />
+      <TimesheetCards data={TimesheetData} />
 
       <TimesheetFilters />
 
-      <TimesheetTable data={timesheetData} />
+      <TimesheetTable />
 
     </div>
   );

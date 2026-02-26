@@ -1,130 +1,16 @@
 import React from "react";
 import Card from "../../components/Employee/Cards";
 import { RiUserAddLine } from "react-icons/ri";
+import { useNavigate } from "react-router-dom";
+
 
 const Employees = () => {
+  const navigate = useNavigate();
+  
+    
 
   const employeeData = [
     {
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
-      id: 1,
-      name: "Rahul Patel",
-      designation: "Frontend Developer",
-      working_amount: 15,
-      place: "Ahmedabad",
-      pimg: "https://i.pravatar.cc/150?img=1"
-    },{
       id: 1,
       name: "Rahul Patel",
       designation: "Frontend Developer",
@@ -160,7 +46,7 @@ const Employees = () => {
 
         <button
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700
-          text-white px-4 py-2 rounded-lg shadow transition" >
+          text-white px-4 py-2 rounded-lg shadow transition " onClick={()=>{navigate('/registration')}}>
           <RiUserAddLine size={18} />
           Add Employee
         </button>
