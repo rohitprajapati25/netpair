@@ -5,7 +5,13 @@ const TimesheetCards = ({ data }) => {
   const completed = data.filter(d => d.status === "Completed").length;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+    <div className="grid
+  grid-cols-1
+  sm:grid-cols-2
+  lg:grid-cols-3
+  gap-5
+  w-full
+  p-3 mb-6">
 
       <Card
         title="Total Tasks"

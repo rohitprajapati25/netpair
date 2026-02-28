@@ -8,7 +8,7 @@ const statusStyle = (status) => {
   return "bg-yellow-100 text-yellow-700";
 };
 
-const ProjectsTable = ({ data = [] }) => {
+const ProjectsTable = ({data}) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-x-auto">
       <table className="w-full min-w-[800px]">
@@ -54,10 +54,7 @@ const ProjectsTable = ({ data = [] }) => {
 
               <td className="px-6 py-4 text-center">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle(
-                    p.status
-                  )}`}
-                >
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle(p.status)}`} >
                   {p.status}
                 </span>
               </td>

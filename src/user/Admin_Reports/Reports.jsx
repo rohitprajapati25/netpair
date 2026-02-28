@@ -48,9 +48,11 @@ const Reports = () => {
   };
 
   return (
-    <div className="h-full p-6 bg-gradient-to-br from-slate-50 to-gray-100 rounded-2xl flex flex-col gap-6 overflow-y-auto">
+    <div className="relative h-full m-1 p-6
+      bg-gradient-to-br from-slate-50 to-gray-100
+      flex flex-col gap-6 overflow-y-auto rounded-2xl grid-cols-1">
 
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-2xl font-semibold">
           Reports & Analytics
         </h1>
@@ -60,7 +62,13 @@ const Reports = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+      <div className="grid
+  grid-cols-1
+  sm:grid-cols-2
+  lg:grid-cols-4
+  gap-5
+  w-full
+  p-3 gap-5">
         <ReportCard title="Employees" value="40" color="from-blue-500 to-blue-700" icon="ri-team-line"/>
         <ReportCard title="Present Today" value="32" color="from-green-500 to-green-700" icon="ri-user-follow-line"/>
         <ReportCard title="Assets Assigned" value="25" color="from-purple-500 to-purple-700" icon="ri-computer-line"/>

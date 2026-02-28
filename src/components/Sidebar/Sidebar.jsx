@@ -8,7 +8,9 @@ import Dashboard from "../../user/Dash/Dashboard";
 const Sidebar = (props) => {
   const [collapsed, setCollapsed] = useState(false);
 
-
+  const smallScreen=()=>{
+    
+  }
   const sidebarArray = [
     {
       navpath:"dashboard",
@@ -68,7 +70,7 @@ const Sidebar = (props) => {
       <div 
         className={`h-full  bg-white border-r border-gray-300
         transition-all duration-300
-        ${collapsed ? "w-20" : "w-75"}`}
+        ${collapsed ? "w-20" : "w-75"} sm:${smallScreen}`}
       >
       
         <div className="h-15 flex items-center justify-between border-b border-gray-300 relative group">

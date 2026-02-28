@@ -31,23 +31,26 @@ const Asset = () => {
       bg-gradient-to-br from-slate-50 to-gray-100
       flex flex-col gap-6 overflow-y-auto rounded-2xl"
     >
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h2 className="text-2xl font-semibold">
           Asset Management
         </h2>
 
         <button
-          className="flex items-center gap-2
-          bg-blue-600 hover:bg-blue-700
-          text-white px-4 py-2 rounded-lg
-          shadow-md transition"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
         >
           <i className="ri-add-line text-lg"></i>
           Add Asset
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid
+  grid-cols-1
+  sm:grid-cols-2
+  lg:grid-cols-4
+  gap-5
+  w-full
+  p-3 gap-5">
         {data.map((d, i) => (
           <Card key={i} title={d.title} tot={d.tot} bg={d.bg}/>
         ))}

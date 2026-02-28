@@ -35,9 +35,9 @@ const Dashboard = () => {
   },
 ];
   return (
-    <div className='h-full m-1 p-6
-      bg-gray-50 rounded-2xl
-      flex flex-col gap-6 overflow-y-auto'>
+    <div className='relative h-full m-1 p-6
+      bg-gradient-to-br from-slate-50 to-gray-100
+      flex flex-col gap-6 overflow-y-auto rounded-2xl grid-cols-1'>
       
       <div
   className="

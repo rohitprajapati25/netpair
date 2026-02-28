@@ -39,6 +39,7 @@ const AttendanceFilter = ({ attendanceData }) => {
       <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-4">
 
         <input
+          value={filters.search}
           type="text"
           placeholder="Search employee name..."
           className="border border-gray-300 rounded-lg px-4 py-2"
@@ -52,6 +53,8 @@ const AttendanceFilter = ({ attendanceData }) => {
         <div className="flex flex-wrap gap-3">
 
           <select
+          value={filters.department}
+
             onChange={(e)=>
               setFilters({...filters, department:e.target.value})
             }
@@ -64,6 +67,8 @@ const AttendanceFilter = ({ attendanceData }) => {
           </select>
 
           <select
+          value={filters.status}
+
             onChange={(e)=>
               setFilters({...filters, status:e.target.value})
             }
@@ -76,6 +81,8 @@ const AttendanceFilter = ({ attendanceData }) => {
           </select>
 
           <select
+          value={filters.mode}
+
             onChange={(e)=>
               setFilters({...filters, mode:e.target.value})
             }
@@ -86,6 +93,8 @@ const AttendanceFilter = ({ attendanceData }) => {
           </select>
             
           <input type="date"
+          value={filters.fromDate}
+
             onChange={(e)=>
               setFilters({...filters, fromDate:e.target.value})
             }
@@ -93,6 +102,8 @@ const AttendanceFilter = ({ attendanceData }) => {
           />
 
           <input type="date"
+          value={filters.toDate}
+
             onChange={(e)=>
               setFilters({...filters, toDate:e.target.value})
             }

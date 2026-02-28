@@ -39,20 +39,23 @@ const Employees = () => {
   return (
     <div className="relative h-full m-1 p-6
       bg-gradient-to-br from-slate-50 to-gray-100
-      flex flex-col gap-6 overflow-y-auto rounded-2xl">
+      flex flex-col gap-6 overflow-y-auto rounded-2xl grid-cols-1">
 
-      <div className="flex justify-between items-center w-full">
-        <h2 className="text-2xl font-semibold">Employees</h2>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <h2 className="text-2xl font-semibold ">Employees</h2>
 
         <button
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700
-          text-white px-4 py-2 rounded-lg shadow transition " onClick={()=>{navigate('/registration')}}>
+          text-white px-4 py-2 rounded-lg shadow transition justify-center" onClick={()=>{navigate('/registration')}}>
           <RiUserAddLine size={18} />
           Add Employee
         </button>
       </div>
 
-      <div className="flex items-start justify-content-center gap-5 flex-wrap">
+      <div className="flex items-start justify-content-center gap-5 flex-wrap grid
+  grid-cols-1
+  sm:grid-cols-2
+  lg:grid-cols-4">
         {employeeData.map(emp => (
           <Card
             key={emp.id}

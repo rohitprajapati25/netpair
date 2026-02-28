@@ -1,11 +1,22 @@
 import React, { useState } from "react";
 
 const ProjectModal = ({ onClose }) => {
+  const [data,setData]=useState([])
   const [project, setProject] = useState({
     name: "",
     start: "",
     end: "",
+    status:"Ongoing"
   });
+
+  const save = ()=>{
+    setData(project)
+  }  
+
+
+  console.log(data);
+  
+
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
@@ -83,7 +94,7 @@ const ProjectModal = ({ onClose }) => {
             Cancel
           </button>
 
-          <button className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+          <button className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2" onClick={save} >
             <i className="ri-save-line"></i>
             Save
           </button>

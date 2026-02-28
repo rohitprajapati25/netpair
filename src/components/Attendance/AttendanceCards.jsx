@@ -6,27 +6,18 @@ const AttendanceCards = ({ data }) => {
   const absent = data.filter(d => d.status === "Absent").length;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3  gap-5 mb-6">
-      <Card
-        title="Total Employees"
-        value={total}
-        icon="ri-group-line"
-        bg="from-indigo-500 to-blue-600"
-      />
+    <div className="grid
+  grid-cols-1
+  sm:grid-cols-2
+  lg:grid-cols-3
+  gap-5
+  w-full
+  p-3 mb-6">
+      <Card title="Total Employees" value={total} icon="ri-group-line" bg="from-indigo-500 to-blue-600"/>
 
-      <Card
-        title="Present Today"
-        value={present}
-        icon="ri-user-follow-line"
-        bg="from-green-500 to-emerald-600"
-      />
+      <Card title="Present Today" value={present} icon="ri-user-follow-line" bg="from-green-500 to-emerald-600"/>
 
-      <Card
-        title="Absent Today"
-        value={absent}
-        icon="ri-user-unfollow-line"
-        bg="from-red-500 to-rose-600"
-      />
+      <Card title="Absent Today" value={absent} icon="ri-user-unfollow-line" bg="from-red-500 to-rose-600"/>
     </div>
   );
 };

@@ -34,7 +34,7 @@ const Cards = ({
 
   return (
     <>
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition duration-300 w-[300px] overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition duration-300 w-full overflow-hidden">
 
         <div className="flex items-center gap-4 p-5">
           <img

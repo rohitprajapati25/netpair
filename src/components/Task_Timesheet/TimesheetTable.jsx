@@ -27,14 +27,12 @@ const TaskTable = () => {
     }
   };
 
-  // ✅ Approve Task
   const approveTask = (id) => {
     setTasks(tasks.map(t =>
       t.id === id ? { ...t, status:"Completed", reason:"" } : t
     ));
   };
 
-  // ✅ Reject Task with reason
   const rejectTask = (id) => {
     const reason = prompt("Enter rejection reason");
     if(!reason) return;

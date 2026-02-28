@@ -1,42 +1,53 @@
 import React from "react";
 
-const LeaveCards = () => {
+const LeaveCards = ({ stats, setQuickFilter }) => {
+
   const cards = [
     {
       title: "Total Requests",
-      value: 120,
+      key: "All",
+      value: stats.total,
       icon: "ri-file-list-3-line",
       bg: "from-indigo-500 to-blue-600",
     },
     {
       title: "Pending",
-      value: 35,
+      key: "Pending",
+      value: stats.pending,
       icon: "ri-time-line",
       bg: "from-yellow-500 to-orange-500",
     },
     {
       title: "Approved",
-      value: 70,
+      key: "Approved",
+      value: stats.approved,
       icon: "ri-checkbox-circle-line",
       bg: "from-green-500 to-emerald-600",
     },
     {
       title: "Rejected",
-      value: 15,
+      key: "Rejected",
+      value: stats.rejected,
       icon: "ri-close-circle-line",
       bg: "from-red-500 to-rose-600",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+    <div className="grid
+  grid-cols-1
+  sm:grid-cols-2
+  lg:grid-cols-4
+  gap-5
+  w-full
+  p-3 gap-5 mb-6">
       {cards.map((card, i) => (
         <div
           key={i}
-          className={`relative overflow-hidden rounded-2xl text-white p-6
+          onClick={() => setQuickFilter(card.key)}
+          className={`cursor-pointer rounded-2xl text-white p-6
           bg-gradient-to-r ${card.bg}
-          shadow-lg hover:shadow-2xl transition-all duration-300
-          hover:-translate-y-1`}
+          shadow-lg hover:shadow-2xl transition hover:-translate-y-1`}
         >
           <div className="flex justify-between items-center">
             <div>
@@ -48,8 +59,7 @@ const LeaveCards = () => {
               <i className={card.icon}></i>
             </div>
           </div>
-
-          </div>
+        </div>
       ))}
     </div>
   );

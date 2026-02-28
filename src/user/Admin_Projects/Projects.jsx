@@ -2,48 +2,36 @@ import React, { useState } from "react";
 import ProjectFilters from "../../components/Projects/ProjectFilters";
 import ProjectsTable from "../../components/Projects/ProjectsTable";
 import ProjectCards from "../../components/projects/ProjectCards";
-import ProjectModal from "../../components/Projects/ProjectModal";
 
 const Projects = () => {
-  const [open, setOpen] = useState(false);
+
+  const [projects,setProject] = useState([
+    {id:1,name:"Rohit",start:"2026-02-03",end:"2026-02-10",status:"Ongoing"},
+    {id:2,name:"Ram",start:"2026-02-03",end:"2026-02-10",status:"Completed"},
+    {id:3,name:"Dev",start:"2026-02-03",end:"2026-02-10",status:"Ongoing"},
+    {id:4,name:"Prabhat",start:"2026-02-03",end:"2026-02-10",status:"On Hold"},
+    {id:5,name:"Demo",start:"2026-02-03",end:"2026-02-10",status:"Ongoing"}
+  ]);
+
+  const [data,setData] = useState(projects);
+
+  const [c,setC] = useState(data);
+
 
   return (
-    <div
-      className="
-      relative h-full m-1 p-6
+    <div className="relative h-full m-1 p-6
       bg-gradient-to-br from-slate-50 to-gray-100
-      flex flex-col gap-6 overflow-y-auto rounded-2xl"
-    >
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">
-            Project Management
-          </h1>
-         
-        </div>
+      flex flex-col gap-6 overflow-y-auto rounded-2xl">
 
-        <button
-          onClick={() => setOpen(true)}
-          className="
-          flex items-center gap-2
-          bg-blue-600 hover:bg-blue-700
-          text-white px-5 py-2 rounded-lg
-          shadow-md transition"
-        >
-          <i className="ri-add-line text-lg"></i>
-          Add Project
-        </button>
-      </div>
+      <h1 className="text-2xl font-semibold">
+        Project Management
+      </h1>
 
-      <ProjectCards />
+      <ProjectCards data={c}/>
 
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-        <ProjectFilters />
-      </div>
+      <ProjectFilters projects={projects} setData={setData}/>
 
-      <ProjectsTable />
-
-      {open && <ProjectModal onClose={() => setOpen(false)} />}
+      <ProjectsTable data={data}/>
     </div>
   );
 };
