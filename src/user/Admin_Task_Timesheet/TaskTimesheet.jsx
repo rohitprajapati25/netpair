@@ -1,45 +1,48 @@
-import TimesheetData from "../../components/Task_Timesheet/TimesheetData";
+import React, { useState } from "react";
 import TimesheetCards from "../../components/Task_Timesheet/TimesheetCards";
 import TimesheetFilters from "../../components/Task_Timesheet/TimesheetFilters";
 import TimesheetTable from "../../components/Task_Timesheet/TimesheetTable";
 import AddTaskModal from "../../components/Task_Timesheet/AddTaskBtnModel";
-import { useState } from "react";
+import TimesheetData from "../../components/Task_Timesheet/TimesheetData";
 
 const TaskTimesheet = () => {
-   const [open, setOpen] = useState(false);
-  const [tasks, setTasks] = useState([]);
+  const [open, setOpen] = useState(false);
+  // Initial data ko state mein load kiya
+  const [tasks, setTasks] = useState(TimesheetData);
 
   const saveTask = (newTask) => {
-    setTasks([...tasks, newTask]);
+    // Naya task list mein add kiya (top par dikhane ke liye spread use kiya)
+    setTasks([newTask, ...tasks]);
+    setOpen(false);
   };
+
+  const updateTasks = (updatedList) => {
+    setTasks(updatedList);
+  };
+
   return (
-    <div className="relative h-full m-1 p-6
-      bg-gradient-to-br from-slate-50 to-gray-100
-      flex flex-col gap-6 overflow-y-auto rounded-2xl">
-
+    <div className="relative h-full m-1 p-6 bg-gradient-to-br from-slate-50 to-gray-100 flex flex-col gap-6 overflow-y-auto rounded-2xl">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Task & Timesheet
-        </h1>
-
+        <h1 className="text-2xl font-semibold text-gray-800">Task & Timesheet</h1>
         <button
-        onClick={() => setOpen(true)}
-        className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-      >
-        + Add Task
-      </button>
+          onClick={() => setOpen(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+        >
+          + Add Task
+        </button>
+      </div>
+
+      <TimesheetCards data={tasks} />
+      <TimesheetFilters />
+
+      {/* Ab table wahi data dikhayega jo state mein hai */}
+      <TimesheetTable tasks={tasks} setTasks={updateTasks} />
+
       <AddTaskModal
         open={open}
         onClose={() => setOpen(false)}
         onSave={saveTask}
       />
-      </div>
-      <TimesheetCards data={TimesheetData} />
-
-      <TimesheetFilters />
-
-      <TimesheetTable />
-
     </div>
   );
 };

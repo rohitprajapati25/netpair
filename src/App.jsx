@@ -27,7 +27,7 @@ const App = () => {
 <Routes>
       <Route path='/home/*'element={<Home/>}/>
       <Route path="/" element={<AuthLayout children={<Lform />} />}/>
-      <Route path="/registration" element={<AuthLayout children={<Rform />} />}/>
+      <Route path="/employee/registration" element={<AuthLayout children={<Rform />} />}/>
       
       <Route path="/forgot" element={<AuthLayout children={<Fform/>}/>}/>
 

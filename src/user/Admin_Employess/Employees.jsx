@@ -46,7 +46,7 @@ const Employees = () => {
 
         <button
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700
-          text-white px-4 py-2 rounded-lg shadow transition justify-center" onClick={()=>{navigate('/registration')}}>
+          text-white px-4 py-2 rounded-lg shadow transition justify-center" onClick={()=>{navigate('/employee/registration')}}>
           <RiUserAddLine size={18} />
           Add Employee
         </button>

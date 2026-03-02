@@ -69,22 +69,21 @@ const LeaveTable = ({ data, onStatusChange }) => {
                     <div className="flex items-center justify-center gap-2">
                       <button
                         onClick={() => onStatusChange(leave.id, "Approved")}
-                        className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs transition">
-                        Approve
+                        className="p-2 rounded-lg hover:bg-blue-100 transition">
+                        <i className="ri-check-line text-green-600 cursor-pointer hover:scale-110"></i>
                       </button>
 
                       <button
                         onClick={() => onStatusChange(leave.id, "Rejected")}
-                        className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs transition" >
-                        Reject
+                        className="p-2 rounded-lg hover:bg-blue-100 transition">
+                        <i className="ri-close-line text-red-600 cursor-pointer hover:scale-110"></i>
                       </button>
                     </div>
                   )}
 
-                  <button
-                    onClick={() => openEditPopup(leave)}
-                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs transition" >
-                    Edit
+
+                 <button className="p-2 rounded-lg hover:bg-green-100 transition" onClick={() => openEditPopup(leave)}>
+                    <i className="ri-edit-line text-green-600"></i>
                   </button>
                 </div>
               </td>
