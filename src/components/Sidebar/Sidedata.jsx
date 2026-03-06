@@ -1,28 +1,27 @@
+import { NavLink } from "react-router-dom";
 
-import { NavLink } from 'react-router-dom'
-import React, { useState } from 'react';
-
-const Sidedata = (props) => {
-    const [collapsed, setCollapsed] = useState(false);
-  
+const Sidedata = ({ navpath, icon, data, coll }) => {
   return (
-    <NavLink
-  to={props.navpath}
-  className={({ isActive }) =>`block`}>
-  {({ isActive }) => (
-    <div className={`h-12 flex items-center p-2 rounded transition
-        ${isActive ? "bg-gray-200 border-l-4 border-blue-600" : "hover:bg-gray-100"}
-        ${props.coll ? "justify-center" : "gap-3"}`}>
-      <div className="text-2xl">
-        <i className={props.icon}></i>
-      </div>
-      {!props.coll && <p className="text-lg">{props.data}</p>}
-    </div>
-  )}
-</NavLink>
+    <NavLink to={`/${navpath}`} className="block">
+      {({ isActive }) => (
+        <div
+          className={`h-12 flex items-center p-2 rounded transition
+          ${
+            isActive
+              ? "bg-gray-200 border-l-4 border-blue-600"
+              : "hover:bg-gray-100"
+          }
+          ${coll ? "justify-center" : "gap-3"}`}
+        >
+          <div className="text-2xl">
+            <i className={icon}></i>
+          </div>
 
-    
-  )
-}
+          {!coll && <p className="text-lg">{data}</p>}
+        </div>
+      )}
+    </NavLink>
+  );
+};
 
-export default Sidedata
+export default Sidedata;

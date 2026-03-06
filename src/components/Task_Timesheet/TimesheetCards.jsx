@@ -1,9 +1,13 @@
 import React from "react";
 
 const TimesheetCards = ({ data }) => {
-  const totalHours = data.reduce((a, b) => a + b.hours, 0);
-  const completed = data.filter(d => d.status === "Completed").length;
+const totalHours = data.reduce((a, b) => {
+    const hours = Number(b.hours) || 0; 
+    return a + hours;
+  }, 0);  const completed = data.filter(d => d.status === "Completed").length;
 
+  console.log(totalHours);
+  
   return (
     <div className="grid
   grid-cols-1

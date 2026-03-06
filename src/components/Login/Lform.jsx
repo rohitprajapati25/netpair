@@ -1,156 +1,112 @@
 import React from "react";
 import { useFormik } from "formik";
-import { loginSchema } from "../../schemas";
-import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import * as Yup from "yup";
 
-const initialValues = {
-  email: "",
-  password: "",
-  role: "",
-};
-
-const Lform = () => {
+const LForm = () => {
   const navigate = useNavigate();
 
-  const {
-    values,
-    errors,
-    touched,
-    handleBlur,
-    handleChange,
-    handleSubmit,
-  } = useFormik({
-    initialValues,
-    validationSchema: loginSchema,
-    onSubmit: (values, action) => {
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
 
-      const userData = {
-        email: values.email,
-        role: values.role,
-        token: "demo_jwt_token",
-      };
+    validationSchema: Yup.object({
+      email: Yup.string()
+        .email("Invalid email format")
+        .required("Email is required"),
+      password: Yup.string()
+        .min(6, "Minimum 6 characters")
+        .required("Password is required"),
+    }),
 
-      localStorage.setItem("user", JSON.stringify(userData));
+    onSubmit: async (values, { setSubmitting, setErrors }) => {
+      try {
+        const res = await axios.post(
+          "http://localhost:5000/api/auth/login",
+          values
+        );
 
-      alert(`Login Successful as ${values.role}`);
+        const { token, user } = res.data;
 
-      if (values.role === "Admin") {
-        navigate("/dashboard");
-      } 
-      else if (values.role === "HR") {
-        navigate("/employees");
-      } 
-      else {
-        navigate("/attendance");
+        // ✅ Save token & user
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+
+        // ✅ Role Based Redirect
+        if (user.role === "SuperAdmin") {
+          navigate("/dashboard");
+        } else if (user.role === "Admin") {
+          navigate("/dashboard");
+        } else if (user.role === "HR") {
+          navigate("/hr/dashboard");
+        } else {
+          navigate("/dashboard");
+        }
+      } catch (error) {
+        setErrors({
+          password: error.response?.data?.message || "Login Failed",
+        });
+      } finally {
+        setSubmitting(false);
       }
-
-      action.resetForm();
     },
   });
 
   return (
-    <div>
+    <div className="flex justify-center items-center w-full py-10 bg-gray-50">
       <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg w-full max-w-md shadow"
+        onSubmit={formik.handleSubmit}
+        className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-3xl space-y-6 border"
       >
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">
-          Login to your account
-        </h2>
+        <h2 className="text-2xl font-bold border-b pb-3">Login Page</h2>
 
-        <p className="text-gray-500 mb-6">
-          Enter your account details below
-        </p>
-
-        {/* EMAIL */}
         <div className="mb-4">
-          <label className="block font-medium mb-1">Email</label>
           <input
             type="email"
             name="email"
-            value={values.email}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            placeholder="Enter your email"
-            className="w-full h-10 border rounded px-3 focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter Email"
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.email}
+            className="w-full p-2 border rounded"
           />
-          {errors.email && touched.email && (
-            <p className="text-red-600 text-sm">{errors.email}</p>
+          {formik.touched.email && formik.errors.email && (
+            <p className="text-red-500 text-sm mt-1">
+              {formik.errors.email}
+            </p>
           )}
         </div>
 
-        {/* PASSWORD */}
-        <div className="mb-4">
-          <label className="block font-medium mb-1">Password</label>
+        <div className="mb-6">
           <input
             type="password"
             name="password"
-            value={values.password}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            placeholder="Enter your password"
-            className="w-full h-10 border rounded px-3 focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter Password"
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.password}
+            className="w-full p-2 border rounded"
           />
-          {errors.password && touched.password && (
-            <p className="text-red-600 text-sm">{errors.password}</p>
+          {formik.touched.password && formik.errors.password && (
+            <p className="text-red-500 text-sm mt-1">
+              {formik.errors.password}
+            </p>
           )}
-        </div>
-
-        {/* ROLE SELECT */}
-        <div className="mb-4">
-          <label className="block font-medium mb-1">Login As</label>
-          <select
-            name="role"
-            value={values.role}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            className="w-full h-10 border rounded px-3 focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select Role</option>
-            <option value="Admin">Admin</option>
-            <option value="HR">HR</option>
-            <option value="Employee">Employee</option>
-          </select>
-
-          {errors.role && touched.role && (
-            <p className="text-red-600 text-sm">{errors.role}</p>
-          )}
-        </div>
-
-        {/* REMEMBER */}
-        <div className="flex justify-between mb-6 text-sm">
-          <label className="flex gap-2">
-            <input type="checkbox" className="accent-blue-700" />
-            Remember me
-          </label>
-
-          <Link
-            to="/forgot"
-            className="text-blue-700 font-semibold hover:underline"
-          >
-            Forgot Password?
-          </Link>
         </div>
 
         <button
           type="submit"
-          className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-600 transition"
+          disabled={formik.isSubmitting}
+          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
         >
-          Login
+          {formik.isSubmitting ? "Logging in..." : "Login"}
         </button>
-
-        <p className="text-center mt-5 text-sm">
-          Don’t have an account?{" "}
-          <Link
-            to="/registration"
-            className="text-blue-700 font-bold hover:underline"
-          >
-            Sign Up
-          </Link>
-        </p>
       </form>
     </div>
   );
 };
 
-export default Lform;
+export default LForm;

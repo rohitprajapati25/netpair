@@ -35,6 +35,7 @@ const TaskTable = ({ tasks, setTasks }) => {
               <th className="p-4 text-left">Employee</th>
               <th className="p-4 text-left">Task</th>
               <th className="p-4 text-center">Date</th>
+              <th className="p-4 text-center">Hours</th>
               <th className="p-4 text-center">Status</th>
               <th className="p-4 text-center">Actions</th>
             </tr>
@@ -45,6 +46,7 @@ const TaskTable = ({ tasks, setTasks }) => {
                 <td className="p-4 font-medium">{t.employee || t.emp}</td>
                 <td className="p-4">{t.task || t.title}</td>
                 <td className="p-4 text-center">{t.date || t.startDate}</td>
+                <td className="p-4 text-center">{t.hours}</td>
                 <td className="p-4 text-center">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle(t.status)}`}>
                     {t.status}

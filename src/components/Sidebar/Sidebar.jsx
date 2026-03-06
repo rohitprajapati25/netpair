@@ -1,119 +1,82 @@
 import React, { useState } from "react";
 import Header from "../Header";
 import "remixicon/fonts/remixicon.css";
-import { NavLink } from "react-router-dom";
 import Sidedata from "./Sidedata";
-import Dashboard from "../../user/Dash/Dashboard";
 
-const Sidebar = (props) => {
+const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
 
-  const smallScreen=()=>{
-    
-  }
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const role = user?.role?.toLowerCase() || "";
+
   const sidebarArray = [
-    {
-      navpath:"dashboard",
-      icon : "ri-dashboard-line",
-      data : "Dashboard",
-      coll : collapsed
-    },{
-      navpath:"employees",
-      icon : "ri-user-2-line",
-      data : "Employees",
-      coll : collapsed
-    },{
-      navpath:"attendance",
-      icon : "ri-calendar-check-line",
-      data : "Attendance",
-      coll : collapsed
-    },{
-      navpath:"leave",
-      icon : "ri-survey-line",
-      data : "Leave",
-      coll : collapsed
-    },{
-      navpath:"projects",
-      icon : "ri-folder-line",
-      data : "Projects",
-      coll : collapsed
-    },{
-      navpath:"tasktimesheet",
-      icon : "ri-task-line",
-      data : "Tasks-Timesheet",
-      coll : collapsed
-    },{
-      navpath:"assets",
-      icon : "ri-archive-stack-line",
-      data : "Assets",
-      coll : collapsed
-    },{
-      navpath:"reports",
-      icon : "ri-survey-line",
-      data : "Reports",
-      coll : collapsed
-    },{
-      navpath:"announcements",
-      icon : "ri-megaphone-line",
-      data : "Announcements",
-      coll : collapsed
-    },{
-      navpath:"settings",
-      icon : "ri-equalizer-line",
-      data : "Settings",
-      coll : collapsed
-    },
+    { navpath: "dashboard", icon: "ri-dashboard-line", data: "Dashboard" },
+    { navpath: "employees", icon: "ri-user-2-line", data: "Employees" },
+    { navpath: "attendance", icon: "ri-calendar-check-line", data: "Attendance" },
+    { navpath: "leave", icon: "ri-survey-line", data: "Leave" },
+    { navpath: "projects", icon: "ri-folder-line", data: "Projects" },
+    { navpath: "tasktimesheet", icon: "ri-task-line", data: "Tasks-Timesheet" },
+    { navpath: "assets", icon: "ri-archive-stack-line", data: "Assets" },
+    { navpath: "reports", icon: "ri-survey-line", data: "Reports" },
+    { navpath: "announcements", icon: "ri-megaphone-line", data: "Announcements" },
+    { navpath: "settings", icon: "ri-equalizer-line", data: "Settings" },
   ];
-  
+
+  const roleAccess = {
+    superadmin: ["dashboard", "employees", "attendance", "leave", "projects", "tasktimesheet", "assets", "reports", "announcements", "settings"],
+    admin: ["dashboard", "employees", "attendance", "leave", "projects", "reports", "announcements"],
+    hr: ["dashboard", "employees", "attendance", "leave"],
+    employee: ["dashboard", "attendance", "leave", "tasktimesheet"],
+  };
+
+  const allowedPaths = roleAccess[role] || [];
+  const filteredSidebar = sidebarArray.filter((item) => allowedPaths.includes(item.navpath));
+
   return (
     <div className="flex">
-      <div 
-        className={`h-full  bg-white border-r border-gray-300
-        transition-all duration-300
-        ${collapsed ? "w-20" : "w-75"} sm:${smallScreen}`}
+      <div
+        className={`h-full bg-white border-r border-gray-300 transition-all duration-300 ${
+          collapsed ? "w-20" : "w-72"
+        }`}
       >
-      
-        <div className="h-15 flex items-center justify-between border-b border-gray-300 relative group">
-
+        {/* Header Section: 'group' class sirf tab kaam karegi jab collapsed ho */}
+        <div className={`h-15 flex items-center border-b border-gray-300 px-3 relative group ${collapsed ? "justify-center" : "justify-between"}`}>
+          
+          {/* Logo Area */}
           <img
-            src="src/assets/imgs/image-removebg-preview.png"
-            className="h-10 px-2"
+            src="/src/assets/imgs/image-removebg-preview.png"
+            className={`h-10 transition-all duration-300 ${collapsed ? "block" : "block"}`}
             alt="logo"
           />
 
           <i
             onClick={() => setCollapsed(!collapsed)}
-            className={`
-              ri-layout-left-line absolute right-2 text-2xl
-              hover:bg-gray-200 p-1 rounded-lg cursor-e-resize
-              transition-opacity duration-200
-              ${
-                collapsed
-                  ? "opacity-0 hover:opacity-200 px-4 text-2xl"
-                  : "opacity-100 px-4"
-              }
-            `}
+            className={`ri-layout-left-line text-2xl hover:bg-gray-200 p-1 px-3.5 rounded-lg cursor-e-resize
+              ${collapsed 
+                ? "absolute px-3.5 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-white z-10" 
+                : "relative opacity-100 bg-white"
+              }`}
           ></i>
+
         </div>
 
-        <div className="overflow-y-auto h-[100vh]">
-          <div className="p-2">
-             {sidebarArray.map(function(elems,ind){
-              return <div className="mt-1" key={ind}>
-                  <Sidedata navpath={elems.navpath} icon={elems.icon} data={elems.data} coll={elems.coll}/>
-             
-                </div>
-              })}
-        </div> 
-        
+        <div className="overflow-y-auto h-[100vh] p-2">
+          {filteredSidebar.length > 0 &&
+            filteredSidebar.map((item, index) => (
+              <div className="mt-1" key={index}>
+                <Sidedata
+                  navpath={item.navpath}
+                  icon={item.icon}
+                  data={item.data}
+                  coll={collapsed}
+                />
+              </div>
+            ))}
         </div>
       </div>
-      
 
       <Header />
-      
-   
-      
     </div>
   );
 };
