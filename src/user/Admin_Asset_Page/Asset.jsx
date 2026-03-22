@@ -31,7 +31,7 @@ const Asset = () => {
     setOpen(true);
   };
 
-  c
+  
   const handleSave = () => {
     if (!formData.name || !formData.category) return alert("Please fill details");
 

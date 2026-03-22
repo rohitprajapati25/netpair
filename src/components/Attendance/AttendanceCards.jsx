@@ -44,3 +44,4 @@ const Card = ({ title, value, icon, bg }) => (
 );
 
 export default AttendanceCards;
+

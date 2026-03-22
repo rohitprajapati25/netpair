@@ -1,14 +1,12 @@
 import React, { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 import Header from "../Header";
 import "remixicon/fonts/remixicon.css";
 import Sidedata from "./Sidedata";
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
-
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
-  const role = user?.role?.toLowerCase() || "";
+  const { role, user } = useAuth();
 
   const sidebarArray = [
     { navpath: "dashboard", icon: "ri-dashboard-line", data: "Dashboard" },
@@ -26,11 +24,12 @@ const Sidebar = () => {
   const roleAccess = {
     superadmin: ["dashboard", "employees", "attendance", "leave", "projects", "tasktimesheet", "assets", "reports", "announcements", "settings"],
     admin: ["dashboard", "employees", "attendance", "leave", "projects", "reports", "announcements"],
-    hr: ["dashboard", "employees", "attendance", "leave"],
-    employee: ["dashboard", "attendance", "leave", "tasktimesheet"],
+    hr: ["dashboard", "attendance", "leave", "projects", "tasktimesheet"],
+    employee: ["dashboard", "leave", "tasktimesheet"],
   };
 
-  const allowedPaths = roleAccess[role] || [];
+  const currentRole = role?.toLowerCase() || "";
+  const allowedPaths = roleAccess[currentRole] || [];
   const filteredSidebar = sidebarArray.filter((item) => allowedPaths.includes(item.navpath));
 
   return (
@@ -40,10 +39,9 @@ const Sidebar = () => {
           collapsed ? "w-20" : "w-72"
         }`}
       >
-        {/* Header Section: 'group' class sirf tab kaam karegi jab collapsed ho */}
+        {/* Logo Area */}
         <div className={`h-15 flex items-center border-b border-gray-300 px-3 relative group ${collapsed ? "justify-center" : "justify-between"}`}>
           
-          {/* Logo Area */}
           <img
             src="/src/assets/imgs/image-removebg-preview.png"
             className={`h-10 transition-all duration-300 ${collapsed ? "block" : "block"}`}

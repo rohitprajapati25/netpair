@@ -63,75 +63,39 @@ const Table = () => {
   };
 
   return (
-    <div className="w-full bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-6">
-
-      <div className="flex justify-between mb-5">
-        <h2 className="text-xl font-semibold">
-          Workforce Live Activity
-        </h2>
-
-        <input
-          type="text"
-          placeholder="Search employee..."
-          value={search}
-          onChange={(e)=>setSearch(e.target.value)}
-          className="border px-4 py-2 rounded-lg text-sm"
+    <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+        <h3 className="font-semibold text-slate-800">Workforce Activity</h3>
+        <input 
+          type="text" 
+          placeholder="Filter by name..." 
+          className="bg-slate-50 border border-slate-200 text-sm px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
         />
       </div>
-
-      <div className="w-full bg-white rounded-2xl border border-gray-300 shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-
-          <thead className="bg-gray-50 border-b">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left">
+          <thead className="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider">
             <tr>
-              <th className="p-4 text-left">Employee</th>
-              <th className="p-4">Dept</th>
-              <th className="p-4">Attendance</th>
-              <th className="p-4">Check-In</th>
-              <th className="p-4">Task</th>
-              <th className="p-4">Task Status</th>
-              <th className="p-4">Leave</th>
-              <th className="p-4">Mode</th>
+              <th className="px-6 py-4 font-medium">Employee</th>
+              <th className="px-6 py-4 font-medium">Department</th>
+              <th className="px-6 py-4 font-medium text-center">Status</th>
+              <th className="px-6 py-4 font-medium text-center">Mode</th>
             </tr>
           </thead>
-
-          <tbody>
-            {filtered.map((emp, i)=>(
-              <tr key={i} className="border-b hover:bg-blue-50/40">
-
-                <td className="p-4 font-medium">{emp.name}</td>
-                <td className="p-4 text-center">{emp.dept}</td>
-
-                <td className="p-4 text-center">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${badge("attendance",emp.attendance)}`}>
+          <tbody className="divide-y divide-slate-100">
+            {filtered.map((emp, i) => (
+              <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-6 py-4 font-medium text-slate-900">{emp.name}</td>
+                <td className="px-6 py-4 text-slate-500 text-sm">{emp.dept}</td>
+                <td className="px-6 py-4 text-center">
+                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${badge("attendance", emp.attendance)}`}>
                     {emp.attendance}
                   </span>
                 </td>
-
-                <td className="p-4 text-center">{emp.checkin}</td>
-
-                <td className="p-4 text-center">{emp.task}</td>
-
-                <td className="p-4 text-center">
-                  <span className={`px-3 py-1 rounded-full text-xs ${badge("task",emp.taskStatus)}`}>
-                    {emp.taskStatus}
-                  </span>
-                </td>
-
-                <td className="p-4 text-center">
-                  <span className={`px-3 py-1 rounded-full text-xs ${badge("leave",emp.leave)}`}>
-                    {emp.leave}
-                  </span>
-                </td>
-
-                <td className="p-4 text-center">{emp.mode}</td>
-
-                
-
+                <td className="px-6 py-4 text-center text-slate-500 text-sm">{emp.mode}</td>
               </tr>
             ))}
           </tbody>
-
         </table>
       </div>
     </div>

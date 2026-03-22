@@ -50,14 +50,12 @@
 
 
 import React from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 const Header = () => {
   const date = new Date();
-
-  // ✅ Safe user fetch
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  const { user, logout } = useAuth();
 
   const name = user?.name || "User";
   const role = user?.role || "Employee";
@@ -94,8 +92,8 @@ const Header = () => {
 
           </div>
 
-          <div className='p-3 rounded-lg hover:bg-gray-200 cursor-pointer'>
-            <i className="ri-notification-line font-bold text-2xl"></i>
+          <div className='p-3 rounded-lg hover:bg-gray-200 cursor-pointer' onClick={logout} title="Logout">
+            <i className="ri-logout-box-line text-2xl"></i>
           </div>
 
         </div>

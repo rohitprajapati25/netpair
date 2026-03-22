@@ -31,3 +31,22 @@ const Card = ({ icon, num, tot, color }) => {
 };
 
 export default Card;
+
+
+// const  Card = ({ icon, num, tot, color }) => {
+//   return (
+//     <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+//       <div className="flex items-center justify-between">
+//         <div>
+//           <p className="text-sm font-medium text-slate-500 mb-1">{tot}</p>
+//           <h3 className="text-3xl font-bold text-slate-900">{num}</h3>
+//         </div>
+//         <div className={`h-12 w-12 rounded-lg flex items-center justify-center text-xl ${color}`}>
+//           <i className={icon}></i>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Card;
