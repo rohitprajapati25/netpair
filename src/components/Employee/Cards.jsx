@@ -336,51 +336,60 @@
 
 // export default Cards;
 
-
-
 import React, { useState } from "react";
-import { FiEdit3, FiTrash2, FiEye, FiCheckCircle, FiMinusCircle } from "react-icons/fi";
+import {
+  FiEdit3, FiTrash2, FiEye,
+  FiCheckCircle, FiMinusCircle,
+} from "react-icons/fi";
 
 const getStatusStyles = (status) => {
   switch (status) {
-    case "Active": return "bg-emerald-50 text-emerald-700 border-emerald-100";
+    case "Active":   return "bg-emerald-50 text-emerald-700 border-emerald-100";
     case "Inactive": return "bg-amber-50 text-amber-700 border-amber-100";
-    default: return "bg-rose-50 text-rose-700 border-rose-100";
+    default:         return "bg-rose-50 text-rose-700 border-rose-100";
   }
 };
 
 const Cards = ({
-  id, name, designation, department, email, status = "Active",
-  joiningDate, role, attendanceRate = 95, workingDays = 22,
+  id, name, designation, department, email,
+  status = "Active", joiningDate, role,
+  attendanceRate = 95, workingDays = 22,
   profileImage, onStatusToggle, onEdit, onDelete, onView,
 }) => {
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleting, setIsDeleting]         = useState(false);
+  // FIX 2: inline confirm state instead of window.confirm()
+  const [confirmDelete, setConfirmDelete]   = useState(false);
 
-  const formattedJoining = joiningDate ? new Date(joiningDate).toLocaleDateString('en-IN', { 
-    year: 'numeric', month: 'short'
-  }) : 'N/A';
+  const formattedJoining = joiningDate
+    ? new Date(joiningDate).toLocaleDateString("en-IN", {
+        year: "numeric", month: "short",
+      })
+    : "N/A";
 
-  const avatarSrc = profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=eff6ff&color=3b82f6&bold=true`;
+  // FIX 3: added explicit size param to avatar URL
+  const avatarSrc =
+    profileImage ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      name
+    )}&background=eff6ff&color=3b82f6&bold=true&size=128`;
 
   const handleStatusToggle = async () => {
     await onStatusToggle?.(id, status === "Active" ? "Inactive" : "Active");
   };
 
-  const handleDelete = async () => {
-    if (onDelete && confirm(`Are you sure you want to delete ${name}?`)) {
-      setIsDeleting(true);
-      await onDelete(id);
-      setIsDeleting(false);
-    }
+  const handleDeleteConfirmed = async () => {
+    setIsDeleting(true);
+    await onDelete?.(id);
+    setIsDeleting(false);
+    setConfirmDelete(false);
   };
 
   return (
     <div className="group relative bg-white rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 overflow-hidden max-w-sm mx-auto">
-      {/* Top Accent Line */}
       <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600" />
-      
+
       <div className="p-6">
-        {/* Header: Avatar & Badge */}
+        {/* Header */}
         <div className="flex items-start justify-between mb-5">
           <div className="relative">
             <img
@@ -388,63 +397,129 @@ const Cards = ({
               alt={name}
               className="w-16 h-16 rounded-2xl object-cover ring-4 ring-slate-50 shadow-sm group-hover:scale-105 transition-transform duration-300"
             />
-            <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center ${status === 'Active' ? 'bg-emerald-500' : 'bg-slate-300'}`}>
-               {status === 'Active' && <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />}
+            <div
+              className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center ${
+                status === "Active" ? "bg-emerald-500" : "bg-slate-300"
+              }`}
+            >
+              {status === "Active" && (
+                <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+              )}
             </div>
           </div>
-          <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-lg border ${getStatusStyles(status)}`}>
+
+          <span
+            className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-lg border ${getStatusStyles(
+              status
+            )}`}
+          >
             {status}
           </span>
         </div>
 
-        {/* Info Section */}
+        {/* Name / role */}
         <div className="mb-6">
-          <h3 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors truncate">
+          {/* FIX 5: title tooltip for truncated name */}
+          <h3
+            title={name}
+            className="text-lg font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors truncate"
+          >
             {name}
           </h3>
           <p className="text-sm font-medium text-slate-400 mt-0.5">{designation}</p>
+
           <div className="mt-3 flex items-center gap-2">
             <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-md uppercase tracking-tight">
               {role || "Staff"}
             </span>
             <span className="text-slate-200">|</span>
-            <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-tighter">{department || "N/A"}</span>
+            <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-tighter">
+              {department || "N/A"}
+            </span>
           </div>
+
+          {/* FIX 6: show email */}
+          {email && (
+            <p className="text-[11px] text-slate-400 truncate mt-1" title={email}>
+              {email}
+            </p>
+          )}
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        {/* Stats — FIX 4: workingDays now rendered */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 group-hover:bg-white group-hover:border-blue-100 transition-colors">
             <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Attendance</p>
             <p className="text-xl font-bold text-slate-800">{attendanceRate}%</p>
           </div>
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 group-hover:bg-white group-hover:border-blue-100 transition-colors">
+            <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Days</p>
+            <p className="text-xl font-bold text-slate-800">{workingDays}</p>
+          </div>
+          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 group-hover:bg-white group-hover:border-blue-100 transition-colors">
             <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Joined</p>
-            <p className="text-lg font-bold text-slate-800">{formattedJoining}</p>
+            <p className="text-sm font-bold text-slate-800">{formattedJoining}</p>
           </div>
         </div>
 
-        {/* Action Bar */}
+        {/* FIX 2: inline delete confirmation */}
+        {confirmDelete && (
+          <div className="mb-4 flex items-center justify-between gap-2 bg-rose-50 border border-rose-100 rounded-2xl px-4 py-2">
+            <p className="text-xs text-rose-700 font-medium">Delete {name}?</p>
+            <div className="flex gap-2">
+              <button
+                onClick={handleDeleteConfirmed}
+                disabled={isDeleting}
+                className="text-xs text-white bg-rose-500 hover:bg-rose-600 px-3 py-1 rounded-lg transition disabled:opacity-50"
+              >
+                {isDeleting ? "…" : "Yes"}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-lg transition"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Actions */}
         <div className="flex items-center justify-between pt-4 border-t border-slate-100">
           <div className="flex gap-2">
-             <button onClick={() => onView?.(id)} className="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 text-slate-500 rounded-xl hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm">
-                <FiEye size={16} />
-             </button>
-             <button onClick={() => onEdit?.(id)} className="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 text-slate-500 rounded-xl hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 transition-all shadow-sm">
-                <FiEdit3 size={16} />
-             </button>
+            <button
+              onClick={() => onView?.(id)}
+              className="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 text-slate-500 rounded-xl hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm"
+            >
+              <FiEye size={16} />
+            </button>
+            <button
+              onClick={() => onEdit?.(id)}
+              className="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 text-slate-500 rounded-xl hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 transition-all shadow-sm"
+            >
+              <FiEdit3 size={16} />
+            </button>
           </div>
 
           <div className="flex gap-2">
-            <button onClick={handleStatusToggle} className="w-9 h-9 flex items-center justify-center bg-slate-50 text-slate-400 rounded-xl hover:text-emerald-600 hover:bg-emerald-50 transition-all">
-               {status === "Active" ? <FiCheckCircle size={18} /> : <FiMinusCircle size={18} />}
+            {/* FIX 1: toggle icon logic corrected */}
+            <button
+              onClick={handleStatusToggle}
+              className="w-9 h-9 flex items-center justify-center bg-slate-50 text-slate-400 rounded-xl hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+              title={status === "Active" ? "Deactivate" : "Activate"}
+            >
+              {status === "Active"
+                ? <FiCheckCircle size={18} className="text-emerald-500" />
+                : <FiMinusCircle size={18} />
+              }
             </button>
-            <button 
-              disabled={isDeleting} 
-              onClick={handleDelete}
+
+            <button
+              onClick={() => setConfirmDelete(true)}
+              disabled={isDeleting}
               className="w-9 h-9 flex items-center justify-center bg-slate-50 text-slate-400 rounded-xl hover:text-rose-600 hover:bg-rose-50 transition-all disabled:opacity-30"
             >
-               <FiTrash2 size={18} />
+              <FiTrash2 size={18} />
             </button>
           </div>
         </div>

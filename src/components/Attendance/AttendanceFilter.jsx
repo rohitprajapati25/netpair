@@ -142,7 +142,6 @@ const AttendanceFilter = ({ attendanceData }) => {
     toDate: "",
   });
 
-  // Performance Optimization: Only re-filter when data or filters change
   const filteredData = useMemo(() => {
     return attendanceData.filter((item) => {
       const matchesSearch = item.name.toLowerCase().includes(filters.search.toLowerCase());
@@ -173,11 +172,9 @@ const AttendanceFilter = ({ attendanceData }) => {
 
   return (
     <div className="flex flex-col">
-      {/* Filter Toolbar */}
       <div className="p-6 border-b border-slate-100 bg-white">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           
-          {/* Left Side: Search Bar */}
           <div className="relative flex-1 max-w-md">
             <RiSearchLine className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg" />
             <input
@@ -190,7 +187,6 @@ const AttendanceFilter = ({ attendanceData }) => {
             />
           </div>
 
-          {/* Right Side: Quick Actions */}
           <div className="flex items-center gap-3">
             <button 
               onClick={resetFilters}
@@ -207,7 +203,6 @@ const AttendanceFilter = ({ attendanceData }) => {
           </div>
         </div>
 
-        {/* Secondary Filter Row: Selectors & Dates */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-6">
           <FilterSelect 
             label="Department" 
@@ -250,13 +245,11 @@ const AttendanceFilter = ({ attendanceData }) => {
         </div>
       </div>
 
-      {/* The Data Table */}
       <AttendanceTable data={filteredData} />
     </div>
   );
 };
 
-// Reusable Sub-Component for cleaner code
 const FilterSelect = ({ label, value, options, onChange }) => (
   <div className="flex flex-col gap-1.5">
     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{label}</label>

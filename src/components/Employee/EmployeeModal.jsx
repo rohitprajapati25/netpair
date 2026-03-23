@@ -246,126 +246,255 @@
 
 // export default EmployeeModal;
 
-
-
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { FiX, FiUser, FiBriefcase, FiMail, FiPhone, FiCalendar, FiToggleRight } from "react-icons/fi";
+
+// ─── helpers ────────────────────────────────────────────────────────────────
+
+const parseDate = (d) => {
+  if (!d) return "";
+  const s = typeof d === "string" ? d : d.toISOString?.() ?? "";
+  return s.split("T")[0]; // "YYYY-MM-DD" for <input type="date">
+};
+
+const fmtDisplay = (d) => {
+  if (!d) return "N/A";
+  const [y, m, day] = (typeof d === "string" ? d.split("T")[0] : d.toISOString().split("T")[0])
+    .split("-").map(Number);
+  return new Date(y, m - 1, day).toLocaleDateString("en-IN", {
+    day: "2-digit", month: "short", year: "numeric",
+  });
+};
+
+const tenure = (joiningDate) => {
+  if (!joiningDate) return "";
+  const [y, m, day] = (typeof joiningDate === "string"
+    ? joiningDate.split("T")[0]
+    : joiningDate.toISOString().split("T")[0]
+  ).split("-").map(Number);
+  const join  = new Date(y, m - 1, day);
+  const now   = new Date();
+  const months =
+    (now.getFullYear() - join.getFullYear()) * 12 +
+    (now.getMonth() - join.getMonth());
+  if (months < 1)  return "New joiner";
+  if (months < 12) return `${months} month${months > 1 ? "s" : ""}`;
+  const yrs = Math.floor(months / 12);
+  const rem = months % 12;
+  return rem ? `${yrs} yr ${rem} mo` : `${yrs} year${yrs > 1 ? "s" : ""}`;
+};
+
+const DEPARTMENTS = [
+  "Development", "Design", "HR", "Finance & Accounts",
+  "Sales", "Marketing", "Operations", "Customer Support",
+  "Legal & Compliance", "Admin", "Procurement", "Logistics",
+];
+
+// ─── component ──────────────────────────────────────────────────────────────
 
 const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => {
+
+  const handleClose = () => {
+    formik.resetForm();
+    onClose();
+  };
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      name: employee?.name || "",
-      email: employee?.email || "",
-      phone: employee?.phone || "",
-      gender: employee?.gender || "",
-      dob: employee?.dob || "",
-      department: employee?.department || "",
-      designation: employee?.designation || "",
-      role: employee?.role || "employee",
-      status: employee?.status || "Active"
+      // ← only fields that exist in DB schema
+      name:        employee?.name        || "",
+      email:       employee?.email       || "",
+      phone:       employee?.phone       || "",
+      department:  employee?.department  || "",
+      position:    employee?.position    || "",
+      joiningDate: parseDate(employee?.joiningDate),
+      status:      employee?.status      || "active",
     },
     validationSchema: Yup.object({
-      name: Yup.string().required("Name is required"),
-      email: Yup.string().email("Invalid email").required("Email is required"),
-      department: Yup.string().required("Select a department"),
-      designation: Yup.string().required("Designation is required")
+      name:       Yup.string().required("Name is required"),
+      email:      Yup.string().email("Invalid email").required("Email is required"),
+      phone:      Yup.string()
+                    .matches(/^(\+91[\-\s]?)?[6-9]\d{9}$/, "Valid Indian mobile number daalo")
+                    .required("Phone is required"),
+      department: Yup.string().required("Department select karo"),
+      position:   Yup.string().required("Position is required"),
+      joiningDate:Yup.string().required("Joining date is required"),
+      status:     Yup.string().oneOf(["active", "inactive"]).required(),
     }),
-    onSubmit: onSave
+    onSubmit: async (values) => {
+      await onSave(values);
+      handleClose();
+    },
   });
 
   if (!isOpen) return null;
 
+  const avatarSrc =
+    employee?.profileImage ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(employee?.name || "")}&size=160&background=4f46e5&color=fff&bold=true`;
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-      {/* Ultra-smooth Backdrop */}
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
-      
-      {/* Modal Container */}
-      <div className="relative bg-white rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col md:flex-row border border-white/20 animate-in fade-in zoom-in duration-300">
-        
-        {/* Left Profile Panel (Static Info) */}
-        <div className="w-full md:w-72 bg-slate-50 p-8 border-r border-slate-100 flex flex-col items-center text-center">
-           <div className="relative mb-6">
-              <img
-                src={employee?.profileImage || `https://ui-avatars.com/api/?name=${employee?.name}&size=160&background=6366f1&color=fff`}
-                className="w-32 h-32 rounded-[2.5rem] shadow-xl ring-8 ring-white object-cover"
-                alt="Profile"
-              />
-           </div>
-           <h2 className="text-xl font-black text-slate-800 mb-1 leading-tight">{employee?.name}</h2>
-           <p className="text-blue-600 font-bold text-xs tracking-widest uppercase mb-6">{employee?.designation}</p>
-           
-           <div className="w-full space-y-3">
-              <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                 <p className="text-[9px] uppercase text-slate-400 font-black tracking-[0.15em] mb-1">Status</p>
-                 <span className={`text-xs font-bold ${employee?.status === 'Active' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                    {employee?.status}
-                 </span>
-              </div>
-              <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                 <p className="text-[9px] uppercase text-slate-400 font-black tracking-[0.15em] mb-1">Member Since</p>
-                 <span className="text-xs font-bold text-slate-700">
-                    {employee?.joiningDate ? new Date(employee.joiningDate).getFullYear() : 'N/A'}
-                 </span>
-              </div>
-           </div>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+        onClick={handleClose}
+      />
+
+      {/* Modal */}
+      <div className="relative bg-white rounded-3xl w-full max-w-3xl max-h-[92vh] overflow-hidden shadow-2xl flex flex-col md:flex-row">
+
+        {/* ── Left panel: profile summary ── */}
+        <div className="w-full md:w-64 bg-gradient-to-b from-slate-800 to-slate-900 p-7 flex flex-col items-center text-center flex-shrink-0">
+          <img
+            src={avatarSrc}
+            alt={employee?.name}
+            className="w-24 h-24 rounded-2xl object-cover ring-4 ring-white/20 shadow-xl mb-4"
+          />
+          <h2 className="text-white font-bold text-lg leading-tight mb-1">
+            {employee?.name || "—"}
+          </h2>
+          <p className="text-slate-400 text-xs mb-1">{employee?.position || "—"}</p>
+          <span className={`mt-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+            employee?.status === "active"
+              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+              : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+          }`}>
+            {employee?.status || "—"}
+          </span>
+
+          {/* Summary cards */}
+          <div className="w-full mt-6 space-y-2">
+            <SummaryCard icon={<FiBriefcase size={12} />} label="Department" value={employee?.department} />
+            <SummaryCard icon={<FiCalendar size={12} />} label="Joined"     value={fmtDisplay(employee?.joiningDate)} />
+            <SummaryCard icon={<FiCalendar size={12} />} label="Tenure"     value={tenure(employee?.joiningDate)} />
+          </div>
         </div>
 
-        {/* Right Panel (Content/Form) */}
-        <div className="flex-1 flex flex-col h-full bg-white overflow-hidden">
+        {/* ── Right panel ── */}
+        <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
-             <h3 className="font-extrabold text-slate-800 text-lg">
-                {mode === 'view' ? 'Personal Profile' : 'Edit Employee Details'}
-             </h3>
-             <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-slate-600">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
-             </button>
+          <div className="px-7 py-5 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+            <h3 className="font-bold text-slate-800 text-base">
+              {mode === "view" ? "Employee Profile" : "Edit Employee"}
+            </h3>
+            <button
+              onClick={handleClose}
+              className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400 hover:text-slate-700"
+            >
+              <FiX size={20} />
+            </button>
           </div>
 
           {/* Body */}
-          <div className="p-8 overflow-y-auto custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-7">
+
+            {/* ── VIEW MODE ── */}
             {mode === "view" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                 <section className="space-y-6">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-50 pb-2">Primary Details</h4>
-                    <DetailItem label="Email Address" value={employee?.email} />
-                    <DetailItem label="Contact Number" value={employee?.phone} />
-                    <DetailItem label="Gender" value={employee?.gender} />
-                 </section>
-                 <section className="space-y-6">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-50 pb-2">Organizational</h4>
-                    <DetailItem label="Department" value={employee?.department} />
-                    <DetailItem label="Access Role" value={employee?.role} />
-                    <DetailItem label="Date of Birth" value={employee?.dob ? new Date(employee.dob).toLocaleDateString() : 'N/A'} />
-                 </section>
+              <div className="space-y-6">
+                <Section title="Contact Information">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <DetailItem icon={<FiMail size={13} />}    label="Email"   value={employee?.email} />
+                    <DetailItem icon={<FiPhone size={13} />}   label="Phone"   value={employee?.phone} />
+                  </div>
+                </Section>
+
+                <Section title="Job Details">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <DetailItem icon={<FiBriefcase size={13} />} label="Position"   value={employee?.position} />
+                    <DetailItem icon={<FiBriefcase size={13} />} label="Department" value={employee?.department} />
+                    <DetailItem icon={<FiCalendar size={13} />}  label="Joining Date" value={fmtDisplay(employee?.joiningDate)} />
+                    <DetailItem icon={<FiToggleRight size={13} />} label="Status"
+                      value={
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          employee?.status === "active"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-amber-50 text-amber-700"
+                        }`}>
+                          {employee?.status || "—"}
+                        </span>
+                      }
+                    />
+                  </div>
+                </Section>
+
+                <Section title="System Info">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <DetailItem icon={<FiUser size={13} />} label="Employee ID" value={employee?._id} mono />
+                    <DetailItem icon={<FiUser size={13} />} label="Created By"  value={employee?.createdBy?.name || "—"} />
+                  </div>
+                </Section>
               </div>
+
+            /* ── EDIT MODE ── */
             ) : (
-              <form onSubmit={formik.handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
-                <InputGroup label="Full Name" name="name" formik={formik} />
-                <InputGroup label="Email Address" name="email" formik={formik} type="email" />
-                
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">Department</label>
-                  <select {...formik.getFieldProps("department")} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-sm font-semibold">
-                    <option value="">Choose...</option>
-                    <option value="Development">Development</option>
-                    <option value="HR">HR</option>
-                    <option value="Design">Design</option>
-                  </select>
+              <form onSubmit={formik.handleSubmit} className="space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <InputField label="Full Name"    name="name"     formik={formik} />
+                  <InputField label="Email"        name="email"    formik={formik} type="email" />
+                  <InputField label="Phone"        name="phone"    formik={formik} type="tel"
+                    placeholder="+91 9876543210"
+                  />
+                  <InputField label="Position"     name="position" formik={formik} />
+                  <InputField label="Joining Date" name="joiningDate" formik={formik} type="date" />
+
+                  {/* Department */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                      Department
+                    </label>
+                    <select
+                      {...formik.getFieldProps("department")}
+                      className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-sm font-medium outline-none transition-all ${
+                        formik.touched.department && formik.errors.department
+                          ? "border-rose-300 focus:ring-2 focus:ring-rose-200"
+                          : "border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
+                      }`}
+                    >
+                      <option value="">Select department...</option>
+                      {DEPARTMENTS.map((d) => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                    {formik.touched.department && formik.errors.department && (
+                      <p className="text-[10px] text-rose-500 font-bold mt-1">{formik.errors.department}</p>
+                    )}
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                      Status
+                    </label>
+                    <select
+                      {...formik.getFieldProps("status")}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
                 </div>
 
-                <InputGroup label="Designation" name="designation" formik={formik} />
-
-                <div className="md:col-span-2 pt-8 flex gap-3">
-                   <button type="button" onClick={onClose} className="flex-1 bg-slate-100 text-slate-600 py-4 rounded-2xl font-bold hover:bg-slate-200 transition-all">
-                      Discard
-                   </button>
-                   <button type="submit" disabled={formik.isSubmitting} className="flex-2 bg-slate-900 text-white py-4 px-8 rounded-2xl font-bold hover:bg-blue-600 transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-2">
-                      {formik.isSubmitting ? 'Processing...' : 'Save Changes'}
-                   </button>
+                {/* Actions */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all"
+                  >
+                    Discard
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={formik.isSubmitting || !formik.dirty}
+                    className="flex-[2] py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-blue-600 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {formik.isSubmitting ? "Saving..." : "Save Changes"}
+                  </button>
                 </div>
               </form>
             )}
@@ -376,30 +505,61 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
   );
 };
 
-// --- Reusable Internal UI Components ---
+// ─── sub-components ──────────────────────────────────────────────────────────
 
-const DetailItem = ({ label, value }) => (
-  <div className="group">
-    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mb-1">{label}</p>
-    <p className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors">{value || "—"}</p>
+const Section = ({ title, children }) => (
+  <div>
+    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.18em] mb-3 pb-2 border-b border-slate-100">
+      {title}
+    </h4>
+    {children}
   </div>
 );
 
-const InputGroup = ({ label, name, formik, type = "text" }) => (
-  <div className="space-y-1.5">
-    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">{label}</label>
+const DetailItem = ({ icon, label, value, mono }) => (
+  <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
+    <span className="text-slate-400 mt-0.5 flex-shrink-0">{icon}</span>
+    <div className="min-w-0">
+      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide mb-0.5">{label}</p>
+      {typeof value === "string" || !value ? (
+        <p className={`text-sm font-semibold text-slate-700 truncate ${mono ? "font-mono text-xs" : ""}`}>
+          {value || "—"}
+        </p>
+      ) : (
+        value
+      )}
+    </div>
+  </div>
+);
+
+const InputField = ({ label, name, formik, type = "text", placeholder }) => (
+  <div>
+    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+      {label}
+    </label>
     <input
       type={type}
+      placeholder={placeholder}
       {...formik.getFieldProps(name)}
-      className={`w-full px-4 py-3 bg-slate-50 border rounded-xl focus:ring-4 transition-all outline-none text-sm font-semibold ${
-        formik.touched[name] && formik.errors[name] 
-        ? "border-rose-300 focus:ring-rose-500/10" 
-        : "border-slate-200 focus:ring-blue-500/10 focus:border-blue-500"
+      className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-sm font-medium outline-none transition-all ${
+        formik.touched[name] && formik.errors[name]
+          ? "border-rose-300 focus:ring-2 focus:ring-rose-200"
+          : "border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
       }`}
     />
     {formik.touched[name] && formik.errors[name] && (
-      <p className="text-[10px] text-rose-500 font-bold mt-1 ml-1">{formik.errors[name]}</p>
+      <p className="text-[10px] text-rose-500 font-bold mt-1">{formik.errors[name]}</p>
     )}
+  </div>
+);
+
+const SummaryCard = ({ icon, label, value }) => (
+  <div className="bg-white/10 rounded-xl px-3 py-2.5 flex items-center gap-2 text-left">
+    <span className="text-slate-400 flex-shrink-0">{icon}</span>
+    <div className="min-w-0">
+      <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">{label}</p>
+      <p className="text-xs text-slate-200 font-semibold truncate">{value || "—"}</p>
+    </div>
   </div>
 );
 

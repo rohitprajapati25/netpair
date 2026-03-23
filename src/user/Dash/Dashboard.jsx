@@ -115,20 +115,17 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10 text-slate-900">
-      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Workforce Overview</h1>
-        <p className="text-slate-500">Real-time metrics and employee activity logs.</p>
+        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Workforce Overview</h1>
+        <p className="text-slate-500 font-medium text-sm">Real-time metrics and employee activity logs.</p>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {dashboardData.map((item, index) => (
           <Card key={index} icon={item.icon} num={item.num} tot={item.tot} color={item.color}/>
         ))}
       </div>
 
-      {/* Analytics Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="lg:col-span-2">
           <BarCharts />
@@ -138,7 +135,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Bottom Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
          <div className="lg:col-span-1">
             <AreaChartSimple />

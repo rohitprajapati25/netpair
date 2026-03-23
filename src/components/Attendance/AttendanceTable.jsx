@@ -131,7 +131,6 @@ const AttendanceTable = ({ data }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 10;
 
-  // Pagination Calculations
   const totalPages = Math.ceil(data.length / recordsPerPage);
   const currentRecords = data.slice(
     (currentPage - 1) * recordsPerPage,
@@ -224,7 +223,6 @@ const AttendanceTable = ({ data }) => {
         </table>
       </div>
 
-      {/* Modern Pagination Footer */}
       <div className="px-8 py-5 border-t border-slate-100 flex items-center justify-between bg-slate-50/20">
         <p className="text-xs font-bold text-slate-400">
           Showing <span className="text-slate-900">{((currentPage - 1) * 10) + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * 10, data.length)}</span> of <span className="text-slate-900">{data.length}</span>

@@ -79,7 +79,6 @@ const [attendanceData, setAttendanceData] = useState([]);
   const [_loading, setLoading] = useState(true);
   const [_error, setError] = useState('');
 
-  // Fetch from API on mount + refresh
   useEffect(() => {
     const fetchAttendance = async () => {
       try {
@@ -118,11 +117,10 @@ const [attendanceData, setAttendanceData] = useState([]);
     <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10 text-slate-900">
       <div className="max-w-[1400px] mx-auto flex flex-col gap-8">
         
-        {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">Attendance</h1>
-            <p className="text-slate-500 font-medium">Real-time employee presence and work logs</p>
+            <h1 className="text-3xl font-black text-slate-800 tracking-tight">Attendance</h1>
+            <p className="text-slate-500 font-medium text-sm">Real-time employee presence and work logs</p>
           </div>
 
           <button
@@ -138,7 +136,7 @@ const [attendanceData, setAttendanceData] = useState([]);
 
         <AttendanceCards data={attendanceData} />
 
-        {/* Main Table Container */}
+        
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
           <AttendanceFilter attendanceData={attendanceData} />
         </div>

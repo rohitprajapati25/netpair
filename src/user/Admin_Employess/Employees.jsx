@@ -453,104 +453,95 @@
 
 // export default Employees;
 
-
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Card from "../../components/Employee/Cards";
+import PremiumCard from "../../components/Employee/PremiumCard";
 import EmployeeModal from "../../components/Employee/EmployeeModal";
 import EmployeeTable from "../../components/Employee/EmployeeTable";
-import { RiUserAddLine, RiLoader2Line, RiSearchLine, RiLayoutGridFill, RiListUnordered, RiRefreshLine } from "react-icons/ri";
+import {
+  RiUserAddLine, RiLoader2Line, RiSearchLine,
+  RiLayoutGridFill, RiListUnordered, RiRefreshLine
+} from "react-icons/ri";
 
-// ✅ Axios auth helper
+// ─── auth helper ─────────────────────────────────────────────────────────────
 const authHeaders = () => ({
-  headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
 });
 
+// ─── component ───────────────────────────────────────────────────────────────
 const Employees = () => {
   const navigate = useNavigate();
-  const [employees, setEmployees] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');  // ✅ lowercase default
-  const [page, setPage] = useState(1);
+
+  const [employees,        setEmployees]        = useState([]);
+  const [loading,          setLoading]          = useState(true);
+  const [error,            setError]            = useState(null);
+  const [search,           setSearch]           = useState("");
+  const [statusFilter,     setStatusFilter]     = useState("all");
+  const [page,             setPage]             = useState(1);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [modalMode, setModalMode] = useState('view');
-  const [viewMode, setViewMode] = useState('card');
+  const [modalMode,        setModalMode]        = useState("view");
+  const [viewMode,         setViewMode]         = useState("card");
 
-  const calculateWorkingDays = (joinDate) => {
-    if (!joinDate) return 0;
-    const diffDays = Math.ceil(Math.abs(new Date() - new Date(joinDate)) / (1000 * 60 * 60 * 24));
-    return Math.min(diffDays, 30);
-  };
-
-  const calculateAttendance = (joinDate) => {
-    const days = calculateWorkingDays(joinDate);
-    return Math.floor(days * (0.85 + Math.random() * 0.13));
-  };
-
-  // ✅ Fixed: auth token + error reset + lowercase status
+  // ── fetch ──────────────────────────────────────────────────────────────────
   const fetchEmployees = useCallback(async () => {
     try {
       setLoading(true);
-      setError(null); // ✅ reset error before each fetch
+      setError(null);
 
       const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '12',
+        page:  page.toString(),
+        limit: "12",
         ...(search && { search }),
-        ...(statusFilter !== 'all' && { status: statusFilter }) // ✅ lowercase 'all'
+        // DB uses lowercase "active"/"inactive" — send as-is
+        ...(statusFilter !== "all" && { status: statusFilter }),
       });
 
       const res = await axios.get(
         `http://localhost:5000/api/admin/employees?${params}`,
-        authHeaders() // ✅ send token
+        authHeaders()
       );
       setEmployees(res.data.employees || []);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch employees');
+      setError(err.response?.data?.message || "Failed to fetch employees");
     } finally {
       setLoading(false);
     }
   }, [search, statusFilter, page]);
 
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      fetchEmployees();
-    }, 400);
-    return () => clearTimeout(delayDebounceFn);
+    const timer = setTimeout(fetchEmployees, 400);
+    return () => clearTimeout(timer);
   }, [fetchEmployees]);
 
-  // ✅ Fixed: auth token added
+  // ── handlers ───────────────────────────────────────────────────────────────
   const handleStatusToggle = async (id, newStatus) => {
     try {
       await axios.put(
         `http://localhost:5000/api/admin/employees/${id}`,
-        { status: newStatus },
+        { status: newStatus },     // "active" | "inactive" — matches DB enum
         authHeaders()
       );
-      setEmployees(prev => prev.map(emp => emp._id === id ? { ...emp, status: newStatus } : emp));
-    } catch (_) {
-      alert('Status update failed');
+      setEmployees((prev) =>
+        prev.map((emp) => emp._id === id ? { ...emp, status: newStatus } : emp)
+      );
+    } catch (err) {
+      alert(err.response?.data?.message || "Status update failed");
     }
   };
 
-  // ✅ Fixed: auth token added
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this employee?')) return;
     try {
       await axios.delete(
         `http://localhost:5000/api/admin/employees/${id}`,
         authHeaders()
       );
-      setEmployees(prev => prev.filter(emp => emp._id !== id));
-    } catch (_) {
-      alert('Delete failed');
+      setEmployees((prev) => prev.filter((emp) => emp._id !== id));
+    } catch (err) {
+      alert(err.response?.data?.message || "Delete failed");
     }
   };
 
-  // ✅ Fixed: auth token added
   const handleSaveEmployee = async (values) => {
     try {
       const res = await axios.put(
@@ -558,15 +549,38 @@ const Employees = () => {
         values,
         authHeaders()
       );
-      setEmployees(prev => prev.map(emp =>
-        emp._id === selectedEmployee._id ? res.data.employee || res.data : emp
-      ));
-      setSelectedEmployee(null);
-    } catch (_) {
-      alert('Update failed');
+      setEmployees((prev) =>
+        prev.map((emp) =>
+          emp._id === selectedEmployee._id
+            ? { ...emp, ...(res.data.employee || res.data) }
+            : emp
+        )
+      );
+      closeModal();
+    } catch (err) {
+      alert(err.response?.data?.message || "Update failed. Please try again.");
     }
   };
 
+  const openModal = (emp, mode) => {
+    setSelectedEmployee(emp);
+    setModalMode(mode);
+  };
+
+  const closeModal = () => {
+    setSelectedEmployee(null);
+    setModalMode("view");   // always reset
+  };
+
+  // ── shared card props ──────────────────────────────────────────────────────
+  const cardHandlers = (emp) => ({
+    onView:         () => openModal(emp, "view"),
+    onEdit:         () => openModal(emp, "edit"),
+    onDelete:       handleDelete,
+    onStatusToggle: handleStatusToggle,
+  });
+
+  // ── render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-slate-50/50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -574,55 +588,55 @@ const Employees = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Team Directory</h1>
-            <p className="text-slate-500 font-medium mt-1">
-              Manage your organization's <span className="text-blue-600 font-bold">{employees.length}</span> members.
+            <h1 className="text-3xl font-black text-slate-800 tracking-tight">Team Directory</h1>
+            <p className="text-slate-500 font-medium text-sm">
+              Manage your organization's{" "}
+              <span className="text-blue-600 font-bold">{employees.length}</span> members.
             </p>
           </div>
           <button
-            onClick={() => navigate('/employee/registration')}
-            className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-blue-600 text-white px-6 py-3.5 rounded-2xl font-bold shadow-xl shadow-slate-200 transition-all active:scale-95"
+            onClick={() => navigate("/employee/registration")}
+            className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-blue-600 text-white px-6 py-3.5 rounded-2xl font-bold shadow-xl transition-all active:scale-95"
           >
             <RiUserAddLine size={20} />
             <span>Add New Employee</span>
           </button>
         </div>
 
-        {/* Toolbar */}
+        {/* Filters */}
         <div className="bg-white p-3 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col lg:flex-row gap-4 items-center">
           <div className="relative flex-1 w-full">
             <RiSearchLine className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input
               type="text"
-              placeholder="Search by name, position or email..."
+              placeholder="Search by name or email..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 placeholder:text-slate-400"
+              className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 placeholder:text-slate-400 outline-none"
             />
           </div>
 
           <div className="flex items-center gap-3 w-full lg:w-auto">
-            {/* ✅ Fixed: lowercase values to match backend enum */}
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-              className="flex-1 lg:w-40 px-4 py-3 bg-slate-50 border-none rounded-2xl font-bold text-slate-600 focus:ring-2 focus:ring-blue-500/20 appearance-none"
+              className="flex-1 lg:w-40 px-4 py-3 bg-slate-50 border-none rounded-2xl font-bold text-slate-600 focus:ring-2 focus:ring-blue-500/20 appearance-none outline-none"
             >
               <option value="all">All Status</option>
-              <option value="active">Active Only</option>
+              <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
 
             <div className="flex bg-slate-100 p-1 rounded-xl">
               <button
-                onClick={() => setViewMode('card')}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'card' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+                onClick={() => setViewMode("card")}
+                className={`p-2 rounded-lg transition-all ${viewMode === "card" ? "bg-white shadow-sm text-blue-600" : "text-slate-400 hover:text-slate-600"}`}
               >
                 <RiLayoutGridFill size={20} />
               </button>
               <button
-                onClick={() => setViewMode('table')}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+                onClick={() => setViewMode("table")}
+                className={`p-2 rounded-lg transition-all ${viewMode === "table" ? "bg-white shadow-sm text-blue-600" : "text-slate-400 hover:text-slate-600"}`}
               >
                 <RiListUnordered size={20} />
               </button>
@@ -632,7 +646,7 @@ const Employees = () => {
               onClick={fetchEmployees}
               className="p-3 text-slate-400 hover:text-blue-600 transition-colors"
             >
-              <RiRefreshLine size={22} className={loading ? 'animate-spin' : ''} />
+              <RiRefreshLine size={22} className={loading ? "animate-spin" : ""} />
             </button>
           </div>
         </div>
@@ -646,36 +660,35 @@ const Employees = () => {
         ) : error ? (
           <div className="bg-rose-50 border border-rose-100 p-6 rounded-3xl text-center">
             <p className="text-rose-600 font-bold mb-3">{error}</p>
-            <button onClick={fetchEmployees} className="bg-rose-600 text-white px-6 py-2 rounded-xl font-bold">Try Again</button>
+            <button
+              onClick={fetchEmployees}
+              className="bg-rose-600 text-white px-6 py-2 rounded-xl font-bold"
+            >
+              Try Again
+            </button>
           </div>
         ) : employees.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-200">
-            <p className="text-slate-400 font-bold text-lg mb-2">No results found</p>
+            <p className="text-slate-400 font-bold text-lg mb-2">No employees found</p>
             <p className="text-slate-400 text-sm">Try adjusting your filters or search query.</p>
           </div>
         ) : (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {viewMode === 'card' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div>
+            {viewMode === "card" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {employees.map((emp) => (
-                  <Card
+                  <PremiumCard
                     key={emp._id}
                     {...emp}
-                    id={emp._id}
-                    workingDays={calculateWorkingDays(emp.joiningDate)}
-                    attendanceRate={calculateAttendance(emp.joiningDate)}
-                    onStatusToggle={handleStatusToggle}
-                    onEdit={() => { setSelectedEmployee(emp); setModalMode('edit'); }}
-                    onDelete={handleDelete}
-                    onView={() => { setSelectedEmployee(emp); setModalMode('view'); }}
+                    {...cardHandlers(emp)}
                   />
                 ))}
               </div>
             ) : (
               <EmployeeTable
                 employees={employees}
-                onView={(id) => { setSelectedEmployee(employees.find(e => e._id === id)); setModalMode('view'); }}
-                onEdit={(id) => { setSelectedEmployee(employees.find(e => e._id === id)); setModalMode('edit'); }}
+                onView={(id)  => { const e = employees.find(e => e._id === id); if (e) openModal(e, "view"); }}
+                onEdit={(id)  => { const e = employees.find(e => e._id === id); if (e) openModal(e, "edit"); }}
                 onDelete={handleDelete}
                 onStatusToggle={handleStatusToggle}
               />
@@ -684,9 +697,10 @@ const Employees = () => {
         )}
       </div>
 
+      {/* Modal */}
       <EmployeeModal
         isOpen={!!selectedEmployee}
-        onClose={() => setSelectedEmployee(null)}
+        onClose={closeModal}
         employee={selectedEmployee}
         onSave={handleSaveEmployee}
         mode={modalMode}
