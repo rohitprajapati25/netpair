@@ -1,162 +1,10 @@
-// import React, { useState } from "react";
-// import AttendanceTable from "../Attendance/AttendanceTable";
-
-// const AttendanceFilter = ({ attendanceData }) => {
-
-//   const [filters, setFilters] = useState({
-//     search: "",
-//     department: "All",
-//     status: "All",
-//     mode: "All",
-//     fromDate: "",
-//     toDate: "",
-//   });
-
-
-//   const filteredData = attendanceData.filter((item) => {
-//     return (
-//       item.name.toLowerCase().includes(filters.search.toLowerCase()) &&(filters.department === "All" || item.dept === filters.department) &&
-//       (filters.status === "All" || item.status === filters.status) &&(filters.mode === "All" || item.mode === filters.mode) &&
-//       (!filters.fromDate || item.date >= filters.fromDate) &&(!filters.toDate || item.date <= filters.toDate)
-//     );
-//   });
-
-//   const resetFilters = () => {
-    
-//     setFilters({
-//       search: "",
-//       department: "All",
-//       status: "All",
-//       mode: "All",
-//       fromDate: "",
-//       toDate: "",
-//     });
-//   };
-  
-
-//   return (
-//     <div className="flex flex-col gap-5">
-//       <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-4">
-
-//         <input
-//           value={filters.search}
-//           type="text"
-//           placeholder="Search employee name..."
-//           className="border border-gray-300 rounded-lg px-4 py-2"
-//           onChange={(e)=>
-//             setFilters({...filters, search:e.target.value})
-//           }
-//         />
-
-    
-
-//         <div className="flex flex-wrap gap-3">
-
-//           <select
-//           value={filters.department}
-
-//             onChange={(e)=>
-//               setFilters({...filters, department:e.target.value})
-//             }
-//             className="border border-gray-300 rounded-lg px-3 py-2">
-//             <option value="All">All Departments</option>
-//             <option>Development</option>
-//             <option>HR</option>
-//             <option>Design</option>
-//             <option>QA</option>
-//           </select>
-
-//           <select
-//           value={filters.status}
-
-//             onChange={(e)=>
-//               setFilters({...filters, status:e.target.value})
-//             }
-//             className="border border-gray-300 rounded-lg px-3 py-2">
-//             <option value="All">All Status</option>
-//             <option>Present</option>
-//             <option>Absent</option>
-//             <option>Late</option>
-//             <option>Leave</option>
-//           </select>
-
-//           <select
-//           value={filters.mode}
-
-//             onChange={(e)=>
-//               setFilters({...filters, mode:e.target.value})
-//             }
-//             className="border border-gray-300 rounded-lg px-3 py-2">
-//             <option value="All">All Mode</option>
-//             <option>Office</option>
-//             <option>Remote</option>
-//           </select>
-            
-//           <input type="date"
-//           value={filters.fromDate}
-
-//             onChange={(e)=>
-//               setFilters({...filters, fromDate:e.target.value})
-//             }
-//             className="border border-gray-300 rounded-lg px-3 py-2"
-//           />
-
-//           <input type="date"
-//           value={filters.toDate}
-
-//             onChange={(e)=>
-//               setFilters({...filters, toDate:e.target.value})
-//             }
-//             className="border border-gray-300 rounded-lg px-3 py-2"
-//           />
-            
-//           <button
-            
-//             onClick = {resetFilters}
-//             className="bg-gray-300 hover:bg-gray-200 active:border px-4 py-2 rounded-lg">
-//             Reset
-//           </button>
-
-//         </div>
-//       </div>
-
-//       <AttendanceTable data={filteredData} />
-//     </div>
-//   );
-// };
-
-// export default AttendanceFilter;
-
-
-import React, { useState, useMemo } from "react";
-import AttendanceTable from "../Attendance/AttendanceTable";
+import React from "react";
+import AttendanceTable from "./AttendanceTable";
 import { RiSearchLine, RiFilter3Line, RiRestartLine } from "react-icons/ri";
 
-const AttendanceFilter = ({ attendanceData }) => {
-  const [filters, setFilters] = useState({
-    search: "",
-    department: "All",
-    status: "All",
-    mode: "All",
-    fromDate: "",
-    toDate: "",
-  });
-
-  const filteredData = useMemo(() => {
-    return attendanceData.filter((item) => {
-      const matchesSearch = item.name.toLowerCase().includes(filters.search.toLowerCase());
-      const matchesDept = filters.department === "All" || item.dept === filters.department;
-      const matchesStatus = filters.status === "All" || item.status === filters.status;
-      const matchesMode = filters.mode === "All" || item.mode === filters.mode;
-      const matchesFromDate = !filters.fromDate || item.date >= filters.fromDate;
-      const matchesToDate = !filters.toDate || item.date <= filters.toDate;
-
-      return matchesSearch && matchesDept && matchesStatus && matchesMode && matchesFromDate && matchesToDate;
-    });
-  }, [filters, attendanceData]);
-
-  const resetFilters = () => {
-    setFilters({
+const AttendanceFilter = ({ attendanceData, filters, onFilterChange, onRefresh, loading }) => {
+  const handleReset = () => {
+    onFilterChange({
       search: "",
       department: "All",
       status: "All",
@@ -166,15 +14,16 @@ const AttendanceFilter = ({ attendanceData }) => {
     });
   };
 
-  const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  };
+  const filteredData = React.useMemo(() => {
+    // Client-side for small data, server for large
+    // Since server filtering now handles, use data.length for count
+    return attendanceData;
+  }, [attendanceData]);
 
   return (
     <div className="flex flex-col">
       <div className="p-6 border-b border-slate-100 bg-white">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          
           <div className="relative flex-1 max-w-md">
             <RiSearchLine className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg" />
             <input
@@ -183,14 +32,16 @@ const AttendanceFilter = ({ attendanceData }) => {
               placeholder="Search by employee name..."
               className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm 
                          focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
-              onChange={(e) => handleFilterChange("search", e.target.value)}
+              onChange={(e) => onFilterChange("search", e.target.value)}
+              disabled={loading}
             />
           </div>
 
           <div className="flex items-center gap-3">
             <button 
-              onClick={resetFilters}
-              className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+              onClick={handleReset}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all disabled:opacity-50"
             >
               <RiRestartLine size={18} />
               Reset
@@ -198,7 +49,7 @@ const AttendanceFilter = ({ attendanceData }) => {
             <div className="h-8 w-px bg-slate-200 mx-2 hidden lg:block" />
             <div className="flex items-center gap-2 text-slate-400 text-sm font-bold">
               <RiFilter3Line size={18} />
-              <span>{filteredData.length} Results Found</span>
+              <span>{loading ? 'Loading...' : `${attendanceData.length} Results Found`}</span>
             </div>
           </div>
         </div>
@@ -208,19 +59,22 @@ const AttendanceFilter = ({ attendanceData }) => {
             label="Department" 
             value={filters.department} 
             options={["All", "Development", "HR", "Design", "Testing", "Support"]}
-            onChange={(val) => handleFilterChange("department", val)}
+            onChange={(val) => onFilterChange("department", val)}
+            disabled={loading}
           />
           <FilterSelect 
             label="Status" 
             value={filters.status} 
             options={["All", "Present", "Absent", "Late", "Leave"]}
-            onChange={(val) => handleFilterChange("status", val)}
+            onChange={(val) => onFilterChange("status", val)}
+            disabled={loading}
           />
           <FilterSelect 
             label="Work Mode" 
             value={filters.mode} 
             options={["All", "Office", "WFH", "Remote"]}
-            onChange={(val) => handleFilterChange("mode", val)}
+            onChange={(val) => onFilterChange("mode", val)}
+            disabled={loading}
           />
           
           <div className="flex flex-col gap-1.5">
@@ -228,8 +82,9 @@ const AttendanceFilter = ({ attendanceData }) => {
             <input 
               type="date" 
               value={filters.fromDate}
-              className="border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:border-blue-500 bg-slate-50 focus:bg-white"
-              onChange={(e) => handleFilterChange("fromDate", e.target.value)}
+              className="border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:border-blue-500 bg-slate-50 focus:bg-white disabled:bg-slate-100 disabled:cursor-not-allowed"
+              onChange={(e) => onFilterChange("fromDate", e.target.value)}
+              disabled={loading}
             />
           </div>
 
@@ -238,8 +93,9 @@ const AttendanceFilter = ({ attendanceData }) => {
             <input 
               type="date" 
               value={filters.toDate}
-              className="border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:border-blue-500 bg-slate-50 focus:bg-white"
-              onChange={(e) => handleFilterChange("toDate", e.target.value)}
+              className="border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:border-blue-500 bg-slate-50 focus:bg-white disabled:bg-slate-100 disabled:cursor-not-allowed"
+              onChange={(e) => onFilterChange("toDate", e.target.value)}
+              disabled={loading}
             />
           </div>
         </div>
@@ -250,13 +106,14 @@ const AttendanceFilter = ({ attendanceData }) => {
   );
 };
 
-const FilterSelect = ({ label, value, options, onChange }) => (
+const FilterSelect = ({ label, value, options, onChange, disabled }) => (
   <div className="flex flex-col gap-1.5">
     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{label}</label>
     <select 
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:border-blue-500 bg-slate-50 focus:bg-white cursor-pointer"
+      disabled={disabled}
+      className="border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:border-blue-500 bg-slate-50 focus:bg-white cursor-pointer disabled:bg-slate-100 disabled:cursor-not-allowed"
     >
       {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
     </select>
@@ -264,3 +121,4 @@ const FilterSelect = ({ label, value, options, onChange }) => (
 );
 
 export default AttendanceFilter;
+

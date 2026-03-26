@@ -68,12 +68,48 @@ const statusConfig = {
   inactive: { label: "Inactive", dot: "#f59e0b", badge: "bg-amber-50 text-amber-700 border-amber-200"     },
 };
 
+// ─── Role colors like registration selection ────────────────────────────────
+const roleConfig = {
+  superadmin: {
+    bg: "bg-gradient-to-r from-red-200 to-red-300",
+    text: "text-red-900",
+    border: "ring-red-400",
+  },
+  admin: {
+    bg: "bg-gradient-to-r from-indigo-200 to-blue-300",
+    text: "text-indigo-900",
+    border: "ring-indigo-400",
+  },
+  hr: {
+    bg: "bg-gradient-to-r from-green-200 to-emerald-300",
+    text: "text-green-900",
+    border: "ring-green-400",
+  },
+  employee: {
+    bg: "bg-gradient-to-r from-gray-200 to-slate-300",
+    text: "text-gray-900",
+    border: "ring-gray-400",
+  },
+};
+
+const getRoleBadge = (role) => {
+  const cfg = roleConfig[role] || roleConfig.employee;
+  return (
+    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide shadow-sm ring-1 ${cfg.border}`}>
+      <span className={`block ${cfg.bg} ${cfg.text}`}>
+        {role?.toUpperCase() || "EMPLOYEE"}
+      </span>
+    </span>
+  );
+};
+
 // ─── component ──────────────────────────────────────────────────────────────
 
 const PremiumCard = ({
   _id, id,
   name, email, phone,
   department, position,   // ← DB fields (position, not designation)
+  role = "employee",
   status = "active",
   joiningDate,
   profileImage,
@@ -117,7 +153,7 @@ const PremiumCard = ({
         {cfg.label}
       </div>
 
-      <div className="p-6">
+      <div className="p-5">
         {/* Avatar + name */}
         <div className="flex items-center gap-4 mb-5">
           <div className="relative flex-shrink-0">
@@ -134,13 +170,12 @@ const PremiumCard = ({
               style={{ background: cfg.dot }}
             />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h3 className="text-base font-bold text-slate-900 truncate" title={name}>{name}</h3>
             <p className="text-xs text-slate-500 mt-0.5 truncate">{position || "—"}</p>
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-md uppercase">
-                {department || "N/A"}
-              </span>
+            {/* ─── SYSTEM ROLE BADGE ───────────────────────────────────── */}
+            <div className="flex items-center gap-1.5 mt-2">
+              {getRoleBadge(role)}
               <span className="text-[10px] text-slate-400">{tenure(joiningDate)}</span>
             </div>
           </div>
@@ -166,7 +201,7 @@ const PremiumCard = ({
           </div>
         </div>
 
-        {/* Stats — actual data from joiningDate */}
+        {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mb-5">
           <div className="bg-slate-50 rounded-xl p-3 text-center">
             <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Days</p>
@@ -259,7 +294,7 @@ const ActionBtn = ({ onClick, color, title, disabled, children }) => {
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 bg-white transition-all disabled:opacity-30 ${colors[color]}`}
+      className={`w-5 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 bg-white transition-all disabled:opacity-30 ${colors[color]}`}
     >
       {children}
     </button>

@@ -67,6 +67,7 @@ import * as Yup from "yup";
 
 import { genderRole } from "../components/Registration/genderRole";
 import { ROLES } from "../../../backend/constants/roles";
+import { empTypes } from "../components/Registration/empTypes";
 
 // --- Sign Up / Add Employee Schema ---
 export const signUpSchema = Yup.object({
@@ -91,23 +92,27 @@ export const signUpSchema = Yup.object({
   dob: Yup.date()
     .nullable()
     .transform((value, originalValue) => (originalValue === "" ? null : value))
-    .max(new Date(), "Date of Birth cannot be in the future")
+    .max(new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000), "Must be at least 18 years old")
+    .test('dob-before-joining', 'Birth date must be before joining date', function(value) {
+      const { joiningDate } = this.parent;
+      return !value || !joiningDate || new Date(value) < new Date(joiningDate);
+    })
     .required("Date of Birth is required"),
 
   department: Yup.string()
     .required("Department is required"),
 
-  position: Yup.string()
+  designation: Yup.string()
     .trim()
-    .min(2, "Position title is too short")
-    .required("Position is required"),
+    .min(2, "Designation title is too short")
+    .required("Designation is required"),
 
   role: Yup.string()
     .oneOf([ROLES.EMPLOYEE, ROLES.HR, ROLES.ADMIN], "Invalid role selected")
     .required("Role is required"),
 
   employmentType: Yup.string()
-    .oneOf(["Full Time", "Intern", "Contract"], "Select employment type")
+    .oneOf([empTypes.FULL_TIME,empTypes.PART_TIME, empTypes.CONTRACT, empTypes.INTERN], "Select employment type")
     .required("Employment Type is required"),
 
   joiningDate: Yup.date()

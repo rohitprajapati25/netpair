@@ -1,134 +1,12 @@
-// import React from "react";
-
-// const AttendanceTable = ({ data }) => {
-
-//   const convertToMinutes = (time) => {
-//     if (!time || time === "-") return null;
-//     const [hour, minute] = time.split(":").map(Number);
-//     return hour * 60 + minute;
-//   };
-
-//   const calculateHours = (checkIn, checkOut) => {
-//     if (!checkIn || !checkOut || checkIn === "-" || checkOut === "-")
-//       return "-";
-
-//     let start = convertToMinutes(checkIn);
-//     let end = convertToMinutes(checkOut);
-
-//     if (end < start) end += 12 * 60;
-
-//     const diff = end - start;
-//     const hrs = Math.floor(diff / 60);
-//     const mins = diff % 60;
-
-//     return `${hrs}h ${mins}m`;
-//   };
-
-//   const statusStyle = (status) => {
-//     switch (status) {
-//       case "Present":
-//         return "bg-green-100 text-green-700";
-//       case "Late":
-//         return "bg-yellow-100 text-yellow-700";
-//       case "Leave":
-//         return "bg-blue-100 text-blue-700";
-//       default:
-//         return "bg-red-100 text-red-700";
-//     }
-//   };
-
-//   return (
-//     <div className="w-full bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-
-//       <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
-//         <table className="w-full text-sm">
-
-//           <thead className="bg-gray-50 sticky top-0 z-10">
-//             <tr className="text-left text-gray-600">
-//               <th className="px-6 py-4 font-semibold">Employee</th>
-//               <th className="px-6 py-4 font-semibold">Department</th>
-//               <th className="px-6 py-4 font-semibold">Date</th>
-//               <th className="px-6 py-4 font-semibold">Check In</th>
-//               <th className="px-6 py-4 font-semibold">Check Out</th>
-//               <th className="px-6 py-4 font-semibold">Work Mode</th>
-//               <th className="px-6 py-4 font-semibold">Working Hours</th>
-//               <th className="px-6 py-4 font-semibold text-center">Status</th>
-//             </tr>
-//           </thead>
-
-//           <tbody>
-//             {data.map((item) => {
-
-//               const hours = calculateHours(item.in, item.out);
-
-//               return (
-//                 <tr
-//                   key={item.id}
-//                   className="border-t hover:bg-gray-50 transition"
-//                 >
-//                   <td className="px-6 py-4 font-medium text-gray-800 flex items-center gap-3">
-                    
-//                     {item.name}
-//                   </td>
-
-//                   <td className="px-6 py-4">{item.dept}</td>
-
-//                   <td className="px-6 py-4 text-gray-600">
-//                     {item.date}
-//                   </td>
-
-//                   <td className="px-6 py-4">
-//                     {item.in || "-"}
-//                   </td>
-
-//                   <td className="px-6 py-4">
-//                     {item.out || "-"}
-//                   </td>
-
-//                   <td className="px-6 py-4">
-//                     <span className={`px-3 py-1 rounded-full text-xs font-semibold
-//                       ${item.mode === "Remote"
-//                         ? "bg-purple-100 text-purple-700"
-//                         : "bg-blue-100 text-blue-700"}`}>
-//                       {item.mode || "-"}
-//                     </span>
-//                   </td>
-
-//                   <td className={`px-6 py-4 font-medium
-//                     ${hours !== "-" && hours.startsWith("4")
-//                       ? "text-red-500"
-//                       : "text-gray-700"}`}>
-//                     {hours}
-//                   </td>
-
-//                   <td className="px-6 py-4 text-center">
-//                     <span
-//                       className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle(item.status)}`}
-//                     >
-//                       {item.status}
-//                     </span>
-//                   </td>
-
-//                 </tr>
-//               );
-//             })}
-//           </tbody>
-
-//         </table>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default AttendanceTable;
-
-
-
 import React, { useState } from "react";
-import { RiArrowLeftSLine, RiArrowRightSLine, RiTimeLine } from "react-icons/ri";
+import axios from 'axios';
+import { useAuth } from "../../contexts/AuthContext";
+import { RiArrowLeftSLine, RiArrowRightSLine, RiTimeLine, RiEditLine, RiDeleteBinLine } from "react-icons/ri";
 
-const AttendanceTable = ({ data }) => {
+const AttendanceTable = ({ data, onRefresh, onEdit, loading }) => {
+  const { token } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteLoading, setDeleteLoading] = useState({});
   const recordsPerPage = 10;
 
   const totalPages = Math.ceil(data.length / recordsPerPage);
@@ -146,15 +24,42 @@ const AttendanceTable = ({ data }) => {
     return `${Math.floor(diff / 60)}h ${diff % 60}m`;
   };
 
-  const getStatusBadge = (status) => {
-    const theme = {
-      Present: "bg-emerald-50 text-emerald-700 border-emerald-100",
-      Absent: "bg-rose-50 text-rose-700 border-rose-100",
-      Late: "bg-amber-50 text-amber-700 border-amber-100",
-      Leave: "bg-blue-50 text-blue-700 border-blue-100",
-    };
-    return theme[status] || "bg-slate-50 text-slate-600 border-slate-100";
+  const getStatusBadge = (status) => ({
+    Present: "bg-emerald-50 text-emerald-700 border-emerald-100",
+    Absent: "bg-rose-50 text-rose-700 border-rose-100",
+    Late: "bg-amber-50 text-amber-700 border-amber-100",
+    Leave: "bg-blue-50 text-blue-700 border-blue-100",
+  }[status] || "bg-slate-50 text-slate-600 border-slate-100");
+
+  const handleDelete = async (itemId) => {
+    if (!confirm('Delete this attendance record? This action cannot be undone.')) return;
+    
+    try {
+      setDeleteLoading(prev => ({...prev, [itemId]: true}));
+      await axios.delete(`/api/admin/attendance/${itemId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Delete failed');
+    } finally {
+      setDeleteLoading(prev => ({...prev, [itemId]: false}));
+    }
   };
+
+  const handleEdit = (item) => {
+    if (onEdit) onEdit(item);
+  };
+
+  if (loading || !data.length) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-400 mb-4"></div>
+        <p className="text-lg font-semibold">Loading attendance records...</p>
+        <p className="text-sm mt-1">Please wait while we fetch latest data</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full">
@@ -162,20 +67,22 @@ const AttendanceTable = ({ data }) => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50/50 border-b border-slate-200">
-              <th className="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400">Employee / Dept</th>
+              <th className="px-6 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400">Employee / Dept</th>
               <th className="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center">In-Out Timeline</th>
               <th className="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center">Work Mode</th>
               <th className="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center">Net Hours</th>
               <th className="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center">Status</th>
+              <th className="px-4 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center w-24">Actions</th>
             </tr>
           </thead>
 
           <tbody className="divide-y divide-slate-100">
             {currentRecords.map((item) => {
               const totalHrs = calculateHours(item.in, item.out);
+              const isDeleting = deleteLoading[item.id];
               return (
                 <tr key={item.id} className="group hover:bg-blue-50/30 transition-all duration-200">
-                  <td className="px-8 py-5">
+                  <td className="px-6 py-5">
                     <div className="flex flex-col">
                       <span className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{item.name}</span>
                       <span className="text-[11px] font-semibold text-slate-400 mt-0.5">{item.dept} • {item.date}</span>
@@ -216,6 +123,30 @@ const AttendanceTable = ({ data }) => {
                       {item.status}
                     </span>
                   </td>
+
+                  <td className="px-4 py-5 text-center">
+                    <div className="flex items-center gap-1 justify-center">
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all group/edit"
+                        title="Edit record"
+                      >
+                        <RiEditLine size={16} className="group-hover/edit:rotate-12" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        disabled={isDeleting}
+                        className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all disabled:opacity-40"
+                        title="Delete record"
+                      >
+                        {isDeleting ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-rose-600"></div>
+                        ) : (
+                          <RiDeleteBinLine size={16} />
+                        )}
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               );
             })}
@@ -225,7 +156,7 @@ const AttendanceTable = ({ data }) => {
 
       <div className="px-8 py-5 border-t border-slate-100 flex items-center justify-between bg-slate-50/20">
         <p className="text-xs font-bold text-slate-400">
-          Showing <span className="text-slate-900">{((currentPage - 1) * 10) + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * 10, data.length)}</span> of <span className="text-slate-900">{data.length}</span>
+          Showing <span className="text-slate-900">{((currentPage - 1) * 10) + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * 10, data.length)}</span> of <span className="text-slate-900">{data.length}</span> records
         </p>
 
         <div className="flex items-center gap-1">
@@ -267,3 +198,4 @@ const AttendanceTable = ({ data }) => {
 };
 
 export default AttendanceTable;
+

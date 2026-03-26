@@ -673,16 +673,16 @@ const Employees = () => {
             <p className="text-slate-400 text-sm">Try adjusting your filters or search query.</p>
           </div>
         ) : (
-          <div>
+          <div className="">
             {viewMode === "card" ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {employees.map((emp) => (
-                  <PremiumCard
-                    key={emp._id}
-                    {...emp}
-                    {...cardHandlers(emp)}
-                  />
-                ))}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+{employees.map((emp, index) => (
+                    <PremiumCard
+                      key={emp._id || index}
+                      {...emp}
+                      {...cardHandlers(emp)}
+                    />
+                  ))}
               </div>
             ) : (
               <EmployeeTable

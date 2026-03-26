@@ -1,91 +1,216 @@
+import React, { useState, useEffect } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import axios from 'axios';
+import { useAuth } from "../../contexts/AuthContext";
+import { RiCloseLine, RiTimeLine, RiMapPinLine, RiCheckLine, RiUserLine } from "react-icons/ri";
 
+const AttendanceModal = ({ onClose, onRefresh }) => {
+  const { token } = useAuth();
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [employeesLoading, setEmployeesLoading] = useState(true);
 
-import React from "react";
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
 
-const AttendanceModal = ({ onClose }) => {
-  // return (
-  //   <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      
-  //     <div className="bg-white w-[380px] rounded-2xl shadow-2xl p-6 animate-scaleIn">
-        
-  //       <h3 className="text-xl font-semibold text-gray-800 mb-5">
-  //         Mark Attendance
-  //       </h3>
+  const fetchEmployees = async () => {
+    try {
+      const res = await axios.get('/api/admin/employees?page=1&limit=100', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        setEmployees(res.data.employees || []);
+      }
+    } catch (err) {
+      console.error('Employees fetch error:', err);
+    } finally {
+      setEmployeesLoading(false);
+    }
+  };
 
-  //       <div className="space-y-4">
-  //         <input
-  //           type="text"
-  //           placeholder="Employee Name"
-  //           className="w-full border border-gray-300 rounded-lg px-4 py-2
-  //           focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-  //         />
+  const formik = useFormik({
+    initialValues: {
+      employeeId: '',
+      status: 'Present',
+      checkIn: '',
+      checkOut: '',
+      workMode: 'Office',
+      notes: ''
+    },
+    validationSchema: Yup.object({
+      employeeId: Yup.string().required('Employee required'),
+      status: Yup.string().required('Status required')
+    }),
+    onSubmit: async (values) => {
+      try {
+        setLoading(true);
+        const attendanceData = {
+          employeeId: values.employeeId,
+          status: values.status,
+          workMode: values.workMode,
+          checkIn: values.checkIn,
+          checkOut: values.checkOut,
+          notes: values.notes
+        };
 
-  //         <select
-  //           className="w-full border border-gray-300 rounded-lg px-4 py-2
-  //           focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-  //         >
-  //           <option>Present</option>
-  //           <option>Absent</option>
-  //         </select>
-  //       </div>
+        const res = await axios.post('/api/admin/attendance/mark', attendanceData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-  //       <div className="flex justify-end gap-3 mt-6">
-  //         <button
-  //           onClick={onClose}
-  //           className="px-4 py-2 rounded-lg border border-gray-300
-  //           hover:bg-gray-100 transition"
-  //         >
-  //           Cancel
-  //         </button>
-
-  //         <button
-  //           className="px-5 py-2 rounded-lg text-white
-  //           bg-gradient-to-r from-blue-600 to-indigo-600
-  //           hover:opacity-90 transition shadow-md"
-  //         >
-  //           Save
-  //         </button>
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
+        if (res.data.success) {
+          onRefresh();
+          onClose();
+        }
+      } catch (err) {
+        console.error('Mark attendance error:', err);
+        alert(err.response?.data?.message || 'Failed to mark attendance');
+      } finally {
+        setLoading(false);
+      }
+    }
+  });
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center z-[100] p-4">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 transform transition-all">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold text-slate-800">Mark Attendance</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><i className="ri-close-line text-2xl"></i></button>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 -m-1 rounded-lg hover:bg-slate-100 transition">
+            <RiCloseLine size={24} />
+          </button>
         </div>
 
-        <div className="space-y-5">
+        <form onSubmit={formik.handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Employee Name</label>
-            <input type="text" placeholder="e.g. Rohit Prajapati" className="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20" />
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
+              <RiUserLine size={16} />
+
+              Employee
+            </label>
+            <select 
+              name="employeeId"
+              value={formik.values.employeeId}
+              onChange={formik.handleChange}
+              disabled={employeesLoading}
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-50"
+            >
+              <option value="">Select Employee</option>
+              {employees.map(emp => (
+                <option key={emp._id} value={emp._id}>
+                  {emp.name} ({emp.department} - {emp.position})
+                </option>
+              ))}
+            </select>
+            {formik.touched.employeeId && formik.errors.employeeId && (
+              <p className="mt-1 text-xs text-rose-600">{formik.errors.employeeId}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">Status</label>
-            <select className="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 bg-white">
-              <option>Present</option>
-              <option>Absent</option>
-              <option>Late</option>
-              <option>On Leave</option>
+            <select 
+              name="status"
+              value={formik.values.status}
+              onChange={formik.handleChange}
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 bg-white"
+            >
+              <option value="Present">Present</option>
+              <option value="Absent">Absent</option>
+              <option value="Late">Late</option>
+              <option value="Leave">On Leave</option>
             </select>
           </div>
-        </div>
 
-        <div className="flex gap-3 mt-8">
-          <button onClick={onClose} className="flex-1 px-4 py-3 rounded-xl border border-slate-200 font-medium text-slate-600 hover:bg-slate-50 transition">
-            Cancel
-          </button>
-          <button className="flex-1 px-4 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition">
-            Save Record
-          </button>
-        </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
+                <RiTimeLine size={12} /> Check In
+              </label>
+              <input
+                type="time"
+                name="checkIn"
+                value={formik.values.checkIn}
+                onChange={formik.handleChange}
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
+                <RiTimeLine size={12} /> Check Out
+              </label>
+              <input
+                type="time"
+                name="checkOut"
+                value={formik.values.checkOut}
+                onChange={formik.handleChange}
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
+              <RiMapPinLine size={16} />
+              Work Mode
+            </label>
+            <select 
+              name="workMode"
+              value={formik.values.workMode}
+              onChange={formik.handleChange}
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 bg-white"
+            >
+              <option value="Office">Office</option>
+              <option value="WFH">WFH</option>
+              <option value="Remote">Remote</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Notes (Optional)</label>
+            <textarea
+              name="notes"
+              value={formik.values.notes}
+              onChange={formik.handleChange}
+              rows={2}
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 resize-none outline-none focus:ring-2 focus:ring-blue-500/20"
+              placeholder="Any special notes..."
+            />
+          </div>
+
+          <div className="flex gap-3 mt-8 pt-6 border-t border-slate-100">
+            <button 
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="flex-1 px-6 py-3 rounded-xl border border-slate-200 font-semibold text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              disabled={loading || employeesLoading}
+              className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <RiCheckLine size={18} />
+                  Save Record
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
 export default AttendanceModal;
+
