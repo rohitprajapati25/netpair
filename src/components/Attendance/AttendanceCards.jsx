@@ -32,13 +32,12 @@ useEffect(() => {
         setStats(prev => ({...prev, loading: true}));
         
         // Get total employees count (first page total)
-
-        const totalRes = await axios.get('/api/employees?page=1&limit=1', {
+        const totalRes = await axios.get('http://localhost:5000/api/admin/employees?page=1&limit=1', {
           headers: { Authorization: `Bearer ${token}` }
         });
         
         // Get active employees count
-        const activeRes = await axios.get('/api/employees/active?page=1&limit=1', {
+        const activeRes = await axios.get('http://localhost:5000/api/admin/active-employees?page=1&limit=1', {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -84,8 +83,8 @@ useEffect(() => {
         value={stats.totalEmployees.toLocaleString()} 
         icon="ri-group-line" 
         bg="from-indigo-500 to-blue-600"
-        subtitle="All staff"
-        change="+12.5%"
+        subtitle="All Employees"
+        
       />
       
       <Card 
@@ -94,7 +93,6 @@ useEffect(() => {
         icon="ri-team-line" 
         bg="from-emerald-500 to-teal-600"
         subtitle="Currently active"
-        change="+2 today"
       />
 
       <Card 
@@ -103,7 +101,6 @@ useEffect(() => {
         icon="ri-user-follow-line" 
         bg="from-green-500 to-emerald-600"
         subtitle="Today attendance"
-        change={`+${attendanceStats.todayRecords}`}
       />
 
       <Card 
@@ -112,26 +109,19 @@ useEffect(() => {
         icon="ri-user-unfollow-line" 
         bg="from-red-500 to-rose-600"
         subtitle="Today attendance"
-        change={`-${attendanceStats.todayRecords - attendanceStats.present - attendanceStats.absent}`}
       />
     </div>
   );
 };
 
-const Card = ({ title, value, icon, bg, subtitle, change }) => (
+const Card = ({ title, value, icon, bg, subtitle }) => (
   <div className={`relative overflow-hidden rounded-2xl text-white p-6 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br ${bg}`}>
     <div className="flex justify-between items-start">
       <div className="flex-1 space-y-1">
         <p className="text-xs opacity-90 font-bold uppercase tracking-wide">{title}</p>
         <h2 className="text-3xl md:text-4xl font-black leading-tight">{value}</h2>
         <p className="text-xs opacity-80">{subtitle}</p>
-        {change && (
-          <p className="text-xs font-bold mt-1 flex items-center gap-1">
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${change.startsWith('+') ? 'bg-emerald-400/20 text-emerald-400' : 'bg-rose-400/20 text-rose-400'}`}>
-              {change}
-            </span>
-          </p>
-        )}
+       
       </div>
       <div className="bg-white/20 backdrop-blur-sm p-4 rounded-2xl ml-auto shadow-lg">
         <i className={`${icon} text-xl opacity-90`}></i>

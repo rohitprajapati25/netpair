@@ -101,7 +101,8 @@ const AttendanceFilter = ({ attendanceData, filters, onFilterChange, onRefresh, 
         </div>
       </div>
 
-      <AttendanceTable data={filteredData} />
+
+
     </div>
   );
 };

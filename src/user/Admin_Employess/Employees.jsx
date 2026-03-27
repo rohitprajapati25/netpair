@@ -532,15 +532,19 @@ const Employees = () => {
 
   const handleDelete = async (id) => {
     try {
+      console.log('Deleting employee ID:', id);
       await axios.delete(
         `http://localhost:5000/api/admin/employees/${id}`,
         authHeaders()
       );
-      setEmployees((prev) => prev.filter((emp) => emp._id !== id));
+      console.log('Delete success, refetching...');
+      fetchEmployees(); // Refetch from backend
     } catch (err) {
+      console.error('Delete error:', err.response?.data);
       alert(err.response?.data?.message || "Delete failed");
     }
   };
+
 
   const handleSaveEmployee = async (values) => {
     try {
@@ -595,8 +599,8 @@ const Employees = () => {
             </p>
           </div>
           <button
-            onClick={() => navigate("/employee/registration")}
-            className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-blue-600 text-white px-6 py-3.5 rounded-2xl font-bold shadow-xl transition-all active:scale-95"
+onClick={() => navigate("/employee/registration?role=employee")}
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-2xl font-bold shadow-xl transition-all active:scale-95"
           >
             <RiUserAddLine size={20} />
             <span>Add New Employee</span>

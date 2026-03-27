@@ -309,7 +309,7 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
       email:       employee?.email       || "",
       phone:       employee?.phone       || "",
       department:  employee?.department  || "",
-      position:    employee?.position    || "",
+      designation: employee?.designation || "",
       joiningDate: parseDate(employee?.joiningDate),
       status:      employee?.status      || "active",
     },
@@ -320,7 +320,7 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
                     .matches(/^(\+91[\-\s]?)?[6-9]\d{9}$/, "Valid Indian mobile number daalo")
                     .required("Phone is required"),
       department: Yup.string().required("Department select karo"),
-      position:   Yup.string().required("Position is required"),
+      designation: Yup.string().required("Designation is required"),
       joiningDate:Yup.string().required("Joining date is required"),
       status:     Yup.string().oneOf(["active", "inactive"]).required(),
     }),
@@ -357,7 +357,7 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
           <h2 className="text-white font-bold text-lg leading-tight mb-1">
             {employee?.name || "—"}
           </h2>
-          <p className="text-slate-400 text-xs mb-1">{employee?.position || "—"}</p>
+          <p className="text-slate-400 text-xs mb-1">{employee?.designation || "—"}</p>
           <span className={`mt-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
             employee?.status === "active"
               ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
@@ -404,7 +404,7 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
 
                 <Section title="Job Details">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <DetailItem icon={<FiBriefcase size={13} />} label="Position"   value={employee?.position} />
+                    <DetailItem icon={<FiBriefcase size={13} />} label="Designation"   value={employee?.designation} />
                     <DetailItem icon={<FiBriefcase size={13} />} label="Department" value={employee?.department} />
                     <DetailItem icon={<FiCalendar size={13} />}  label="Joining Date" value={fmtDisplay(employee?.joiningDate)} />
                     <DetailItem icon={<FiToggleRight size={13} />} label="Status"
@@ -438,7 +438,7 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
                   <InputField label="Phone"        name="phone"    formik={formik} type="tel"
                     placeholder="+91 9876543210"
                   />
-                  <InputField label="Position"     name="position" formik={formik} />
+                  <InputField label="Designation"     name="designation" formik={formik} />
                   <InputField label="Joining Date" name="joiningDate" formik={formik} type="date" />
 
                   {/* Department */}

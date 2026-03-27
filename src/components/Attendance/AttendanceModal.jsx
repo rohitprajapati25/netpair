@@ -5,11 +5,12 @@ import axios from 'axios';
 import { useAuth } from "../../contexts/AuthContext";
 import { RiCloseLine, RiTimeLine, RiMapPinLine, RiCheckLine, RiUserLine } from "react-icons/ri";
 
-const AttendanceModal = ({ onClose, onRefresh }) => {
+const AttendanceModal = ({ onClose, onRefresh, editData }) => {
   const { token } = useAuth();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [employeesLoading, setEmployeesLoading] = useState(true);
+  const isEdit = !!editData;
 
   useEffect(() => {
     fetchEmployees();
@@ -17,11 +18,11 @@ const AttendanceModal = ({ onClose, onRefresh }) => {
 
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get('/api/admin/employees?page=1&limit=100', {
+      const res = await axios.get('http://localhost:5000/api/admin/employees?page=1&limit=100', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
-        setEmployees(res.data.employees || []);
+        setEmployees(res.data.employees || res.data.records || []);
       }
     } catch (err) {
       console.error('Employees fetch error:', err);
@@ -32,22 +33,23 @@ const AttendanceModal = ({ onClose, onRefresh }) => {
 
   const formik = useFormik({
     initialValues: {
-      employeeId: '',
-      status: 'Present',
-      checkIn: '',
-      checkOut: '',
-      workMode: 'Office',
-      notes: ''
+      employee: editData?.employee?._id || '',
+      status: editData?.status || 'Present',
+      checkIn: editData?.checkIn || '',
+      checkOut: editData?.checkOut || '',
+      workMode: editData?.workMode || 'Office',
+      notes: editData?.notes || ''
     },
     validationSchema: Yup.object({
-      employeeId: Yup.string().required('Employee required'),
+      employee: Yup.string().required('Employee required'),
       status: Yup.string().required('Status required')
     }),
+    enableReinitialize: true, // Reset form when editData changes
     onSubmit: async (values) => {
       try {
         setLoading(true);
         const attendanceData = {
-          employeeId: values.employeeId,
+          employeeId: values.employee, // ✅ Backend expects 'employeeId'
           status: values.status,
           workMode: values.workMode,
           checkIn: values.checkIn,
@@ -55,17 +57,26 @@ const AttendanceModal = ({ onClose, onRefresh }) => {
           notes: values.notes
         };
 
-        const res = await axios.post('/api/admin/attendance/mark', attendanceData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        let res;
+        if (isEdit) {
+          // Edit existing
+          res = await axios.put(`http://localhost:5000/api/admin/attendance/${editData._id}`, attendanceData, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        } else {
+          // New attendance
+          res = await axios.post('http://localhost:5000/api/admin/attendance/mark', attendanceData, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        }
 
         if (res.data.success) {
-          onRefresh();
+          onRefresh(); // Refresh parent table
           onClose();
         }
       } catch (err) {
-        console.error('Mark attendance error:', err);
-        alert(err.response?.data?.message || 'Failed to mark attendance');
+        console.error('Attendance save error:', err);
+        alert(err.response?.data?.message || (isEdit ? 'Update failed' : 'Mark failed'));
       } finally {
         setLoading(false);
       }
@@ -76,7 +87,9 @@ const AttendanceModal = ({ onClose, onRefresh }) => {
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center z-[100] p-4">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 transform transition-all">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-slate-800">Mark Attendance</h3>
+          <h3 className="text-xl font-bold text-slate-800">
+            {isEdit ? 'Edit Attendance' : 'Mark Attendance'}
+          </h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 -m-1 rounded-lg hover:bg-slate-100 transition">
             <RiCloseLine size={24} />
           </button>
@@ -86,25 +99,24 @@ const AttendanceModal = ({ onClose, onRefresh }) => {
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
               <RiUserLine size={16} />
-
               Employee
             </label>
             <select 
-              name="employeeId"
-              value={formik.values.employeeId}
+              name="employee"
+              value={formik.values.employee}
               onChange={formik.handleChange}
-              disabled={employeesLoading}
+              disabled={employeesLoading || isEdit}
               className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-50"
             >
               <option value="">Select Employee</option>
               {employees.map(emp => (
                 <option key={emp._id} value={emp._id}>
-                  {emp.name} ({emp.department} - {emp.position})
+                  {emp.name} ({emp.department} - {emp.designation})
                 </option>
               ))}
             </select>
-            {formik.touched.employeeId && formik.errors.employeeId && (
-              <p className="mt-1 text-xs text-rose-600">{formik.errors.employeeId}</p>
+            {formik.touched.employee && formik.errors.employee && (
+              <p className="mt-1 text-xs text-rose-600">{formik.errors.employee}</p>
             )}
           </div>
 
@@ -120,6 +132,7 @@ const AttendanceModal = ({ onClose, onRefresh }) => {
               <option value="Absent">Absent</option>
               <option value="Late">Late</option>
               <option value="Leave">On Leave</option>
+              <option value="Half Day">Half Day</option>
             </select>
           </div>
 
@@ -164,6 +177,7 @@ const AttendanceModal = ({ onClose, onRefresh }) => {
               <option value="Office">Office</option>
               <option value="WFH">WFH</option>
               <option value="Remote">Remote</option>
+              <option value="Offline">Offline</option>
             </select>
           </div>
 
@@ -196,12 +210,12 @@ const AttendanceModal = ({ onClose, onRefresh }) => {
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Saving...
+                  {isEdit ? 'Updating...' : 'Saving...'}
                 </>
               ) : (
                 <>
                   <RiCheckLine size={18} />
-                  Save Record
+                  {isEdit ? 'Update Record' : 'Save Record'}
                 </>
               )}
             </button>

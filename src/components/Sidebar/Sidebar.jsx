@@ -95,6 +95,8 @@ const Sidebar = () => {
   const sidebarArray = [
     { navpath: "dashboard", icon: "ri-dashboard-fill", data: "Dashboard" },
     { navpath: "employees", icon: "ri-team-fill", data: "Employees" },
+    { navpath: "hrs", icon: "ri-team-fill", data: "Hrs" },
+    { navpath: "admins", icon: "ri-team-fill", data: "Admins" },
     { navpath: "attendance", icon: "ri-calendar-check-fill", data: "Attendance" },
     { navpath: "leave", icon: "ri-survey-fill", data: "Leave" },
     { navpath: "projects", icon: "ri-folders-fill", data: "Projects" },
@@ -106,7 +108,7 @@ const Sidebar = () => {
   ];
 
   const roleAccess = {
-    superadmin: ["dashboard", "employees", "attendance", "leave", "projects", "tasktimesheet", "assets", "reports", "announcements", "settings"],
+    superadmin: ["dashboard", "employees", "hrs" ,"admins", "attendance", "leave", "projects", "tasktimesheet", "assets", "reports", "announcements", "settings"],
     admin: ["dashboard", "employees", "attendance", "leave", "projects", "reports", "announcements"],
     hr: ["dashboard", "attendance", "leave", "projects", "tasktimesheet"],
     employee: ["dashboard", "leave", "tasktimesheet"],

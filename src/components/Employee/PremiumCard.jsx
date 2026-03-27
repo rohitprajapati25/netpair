@@ -108,7 +108,7 @@ const getRoleBadge = (role) => {
 const PremiumCard = ({
   _id, id,
   name, email, phone,
-  department, position,   // ← DB fields (position, not designation)
+  department, designation,   // ← DB fields (position, not designation)
   role = "employee",
   status = "active",
   joiningDate,
@@ -172,7 +172,7 @@ const PremiumCard = ({
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-base font-bold text-slate-900 truncate" title={name}>{name}</h3>
-            <p className="text-xs text-slate-500 mt-0.5 truncate">{position || "—"}</p>
+            <p className="text-xs text-slate-500 mt-0.5 truncate">{designation || "—"}</p>
             {/* ─── SYSTEM ROLE BADGE ───────────────────────────────────── */}
             <div className="flex items-center gap-1.5 mt-2">
               {getRoleBadge(role)}

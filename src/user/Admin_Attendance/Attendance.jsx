@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import axios from 'axios';
 import { useAuth } from "../../contexts/AuthContext";
@@ -12,6 +11,7 @@ const Attendance = () => {
   const { token } = useAuth();
   const [open, setOpen] = useState(false);
   const [attendanceData, setAttendanceData] = useState([]);
+  const [stats, setStats] = useState({ totalEmployees: 0, activeEmployees: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({
@@ -25,6 +25,23 @@ const Attendance = () => {
     limit: 50
   });
 
+  const fetchStats = async () => {
+    try {
+      const totalRes = await axios.get('http://localhost:5000/api/admin/employees?page=1&limit=1', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const activeRes = await axios.get('http://localhost:5000/api/admin/active-employees?page=1&limit=1', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setStats({
+        totalEmployees: totalRes.data.pagination?.total || 0,
+        activeEmployees: activeRes.data.totalActive || activeRes.data.activeCount || 0
+      });
+    } catch (err) {
+      console.error('Stats fetch error:', err);
+    }
+  };
+
   const fetchAttendance = useCallback(async (currentFilters = filters) => {
     try {
       setLoading(true);
@@ -32,12 +49,16 @@ const Attendance = () => {
 
       const params = new URLSearchParams();
       Object.keys(currentFilters).forEach(key => {
-        if (currentFilters[key] && currentFilters[key] !== 'All') {
-          params.append(key, currentFilters[key]);
-        }
+
+      if (currentFilters[key] && currentFilters[key] !== 'All') {
+        params.append(key, currentFilters[key]);
+      } else if (key === 'status') {
+        params.append('status', 'Present'); // Default active
+      }
+
       });
 
-      const res = await axios.get(`/api/admin/attendance?${params.toString()}`, {
+      const res = await axios.get(`http://localhost:5000/api/admin/attendance?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -60,7 +81,7 @@ const Attendance = () => {
       }
     } catch (err) {
       console.error('Attendance fetch error:', err);
-      setError('Failed to load attendance data. Check if backend server is running on port 5000.');
+      setError('Failed to load attendance data. Backend port 5000?');
       setAttendanceData([]);
     } finally {
       setLoading(false);
@@ -70,11 +91,13 @@ const Attendance = () => {
   useEffect(() => {
     if (token) {
       fetchAttendance();
+      fetchStats();
     }
   }, [fetchAttendance]);
 
   const handleRefresh = () => {
     fetchAttendance();
+    fetchStats();
   };
 
   const handleFilterChange = (newFilters) => {
@@ -122,6 +145,13 @@ const Attendance = () => {
             onRefresh={handleRefresh}
             loading={loading}
           />
+          <AttendanceTable 
+            data={attendanceData} 
+            totalEmployees={stats.totalEmployees}
+            activeEmployees={stats.activeEmployees}
+            onRefresh={handleRefresh}
+          />
+
         </div>
       </div>
     </div>
