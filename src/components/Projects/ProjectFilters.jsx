@@ -48,7 +48,7 @@ import { RiSearchLine, RiFilter3Line, RiRestartLine } from "react-icons/ri";
 
 const ProjectFilters = ({ filters, setFilters, totalResults }) => {
   const resetFilters = () => {
-    setFilters({ search: "", status: "All" });
+    setFilters({ search: "", status: "All", priority: "All", project_type: "All", department: "All", createdBy: "All" });
   };
 
   return (
@@ -74,18 +74,50 @@ const ProjectFilters = ({ filters, setFilters, totalResults }) => {
         </div>
 
         <div className="flex flex-wrap items-end gap-4">
-          <div className="flex flex-col gap-1.5 w-full sm:w-48">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Project Status</label>
+          <div className="flex flex-col gap-1.5 w-full sm:w-44">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Status</label>
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold 
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold 
                          text-slate-600 outline-none focus:border-blue-500 cursor-pointer transition-all"
             >
-              <option value="All">All Projects</option>
+              <option value="All">All Status</option>
               <option value="Ongoing">Ongoing</option>
               <option value="Completed">Completed</option>
               <option value="On Hold">On Hold</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5 w-full sm:w-44">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Priority</label>
+            <select
+              value={filters.priority}
+              onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold 
+                         text-slate-600 outline-none focus:border-blue-500 cursor-pointer transition-all"
+            >
+              <option value="All">All Priority</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5 w-full sm:w-44">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Type</label>
+            <select
+              value={filters.project_type}
+              onChange={(e) => setFilters({ ...filters, project_type: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold 
+                         text-slate-600 outline-none focus:border-blue-500 cursor-pointer transition-all"
+            >
+              <option value="All">All Types</option>
+              <option value="Internal">Internal</option>
+              <option value="Client">Client</option>
+              <option value="Product">Product</option>
             </select>
           </div>
 

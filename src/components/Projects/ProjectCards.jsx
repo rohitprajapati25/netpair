@@ -19,11 +19,13 @@ const Card = ({ icon, num, title, bg }) => (
   </div>
 );
 
-const ProjectCards = ({data}) => {
-  const total = data.length;
-  const op = data.filter((d)=>d.status == "Ongoing").length;
-  const c =  data.filter((d)=>d.status == "Completed").length;
-  const oh =  data.filter((d)=>d.status == "On Hold").length;
+const ProjectCards = ({data, stats = {}}) => {
+  const total = (stats.total || 0) || data.length;
+  const op = (stats.ongoing || 0) || data.filter((d)=>d.status === "Ongoing").length;
+  const c = (stats.completed || 0) || data.filter((d)=>d.status === "Completed").length;
+  const oh = (stats.onHold || 0) || data.filter((d)=>d.status === "On Hold").length;
+
+
   return (
     <div className="grid
   grid-cols-1

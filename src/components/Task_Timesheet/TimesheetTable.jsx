@@ -1,177 +1,251 @@
-// import React, { useState } from "react";
-// import TaskModal from "../Task_Timesheet/TimeSheetModel";
+import React, { useState, useEffect } from "react";
+import TaskDetailsModal from "./TaskModel";
+import TimesheetApprovalModal from "./TimesheetApprovalModal";
+import { useAuth } from "../../contexts/AuthContext";
+import axios from "axios";
+import { RiEditLine, RiDeleteBinLine, RiLoader4Line, RiCheckLine } from "react-icons/ri";
 
-// const TaskTable = ({ tasks, setTasks }) => {
-//   const [open, setOpen] = useState(false);
-//   const [selectedTask, setSelectedTask] = useState(null);
-
-//   const statusStyle = (status) => {
-//     switch (status) {
-//       case "Completed": return "bg-green-100 text-green-700";
-//       case "In Progress": return "bg-blue-100 text-blue-700";
-//       case "Rejected": return "bg-red-100 text-red-700";
-//       default: return "bg-purple-100 text-purple-700";
-//     }
-//   };
-
-//   const deleteTask = (id) => {
-//     if (window.confirm("Delete this task?")) {
-//       setTasks(tasks.filter((t) => t.id !== id));
-//     }
-//   };
-
-//   const onUpdateTask = (updatedTask) => {
-//     const updated = tasks.map((t) => (t.id === updatedTask.id ? updatedTask : t));
-//     setTasks(updated);
-//     setOpen(false);
-//   };
-
-//   return (
-//     <div className="bg-white rounded-2xl shadow border border-gray-200 p-6">
-//       <div className="overflow-x-auto">
-//         <table className="w-full text-sm">
-//           <thead className="bg-gray-50 border-b text-gray-600">
-//             <tr>
-//               <th className="p-4 text-left">Employee</th>
-//               <th className="p-4 text-left">Task</th>
-//               <th className="p-4 text-center">Date</th>
-//               <th className="p-4 text-center">Hours</th>
-//               <th className="p-4 text-center">Status</th>
-//               <th className="p-4 text-center">Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {tasks.map((t) => (
-//               <tr key={t.id} className="border-b hover:bg-blue-50 transition">
-//                 <td className="p-4 font-medium">{t.employee || t.emp}</td>
-//                 <td className="p-4">{t.task || t.title}</td>
-//                 <td className="p-4 text-center">{t.date || t.startDate}</td>
-//                 <td className="p-4 text-center">{t.hours}</td>
-//                 <td className="p-4 text-center">
-//                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle(t.status)}`}>
-//                     {t.status}
-//                   </span>
-//                 </td>
-//                 <td className="p-4">
-//                   <div className="flex justify-center gap-4 text-lg">
-//                     <i
-//                       className="ri-edit-line cursor-pointer text-blue-600 hover:scale-110"
-//                       onClick={() => { setSelectedTask(t); setOpen(true); }}
-//                     ></i>
-//                     <i
-//                       className="ri-delete-bin-line text-red-600 cursor-pointer hover:scale-110"
-//                       onClick={() => deleteTask(t.id)}
-//                     ></i>
-//                   </div>
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {open && (
-//         <TaskModal
-//           task={selectedTask}
-//           close={() => setOpen(false)}
-//           onSave={onUpdateTask}
-//         />
-//       )}
-//     </div>
-//   );
-// };
-
-// export default TaskTable;
-
-import React, { useState } from "react";
-import TaskModal from "./TaskModel";
-import { RiEditLine, RiDeleteBinLine, RiTimeLine, RiUserLine } from "react-icons/ri";
-
-const TaskTable = ({ tasks, setTasks, allTasks }) => {
-  const [selectedTask, setSelectedTask] = useState(null);
+const TasksTable = ({ 
+  data, 
+  type = "tasks", // "tasks" or "timesheets"
+  onRefresh, 
+  filters = {},
+  role 
+}) => {
+  const { token } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedTimesheet, setSelectedTimesheet] = useState(null);
 
   const getStatusStyle = (status) => {
-    const styles = {
-      Completed: "bg-emerald-50 text-emerald-700 border-emerald-100",
-      "In Progress": "bg-blue-50 text-blue-700 border-blue-100",
-      Pending: "bg-amber-50 text-amber-700 border-amber-100",
-      Assigned: "bg-purple-50 text-purple-700 border-purple-100",
+    const taskStyles = {
+      Todo: "bg-amber-100 text-amber-800",
+      "In Progress": "bg-blue-100 text-blue-800",
+      Review: "bg-purple-100 text-purple-800",
+      Completed: "bg-emerald-100 text-emerald-800",
+      Blocked: "bg-red-100 text-red-800"
     };
-    return styles[status] || "bg-slate-50 text-slate-500";
+    const timesheetStyles = {
+      Submitted: "bg-orange-100 text-orange-800",
+      Approved: "bg-emerald-100 text-emerald-800",
+      Rejected: "bg-red-100 text-red-800"
+    };
+    return type === "tasks" ? taskStyles[status] : timesheetStyles[status] || "bg-slate-100 text-slate-800";
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Permanent delete this task?")) {
-      setTasks(allTasks.filter(t => t.id !== id));
+// const handleDelete = async (e, id) => {
+//   e.preventDefault();
+//   e.stopPropagation();
+//     if (window.confirm(`Delete this ${type}?`)) {
+//       try {
+//         await axios.delete(`http://localhost:5000/api/admin/${type}/${id}`, {
+//           headers: { Authorization: `Bearer ${token}` }
+//         });
+//         onRefresh();
+//       } catch (error) {
+//         alert("Delete failed");
+//       }
+//     }
+//   };
+
+
+const handleDelete = async (e, id) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (!id) return alert("Invalid ID");
+
+  if (!["admin", "superadmin"].includes(role)) {
+    return alert("Not authorized");
+  }
+
+  if (window.confirm("Delete this task?")) {
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/admin/tasks/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      onRefresh();
+    } catch (error) {
+      console.error(error.response || error.message);
+      alert(error.response?.data?.message || "Delete failed");
     }
-  };
+  }
+};
+  const filteredData = data.filter(item => {
+    if (filters.search) {
+      const search = filters.search.toLowerCase();
+      return item.task_title?.toLowerCase().includes(search) || 
+             item.work_description?.toLowerCase().includes(search) ||
+             item.assigned_to?.name?.toLowerCase().includes(search);
+    }
+    if (filters.status !== "All") {
+      return item.status === filters.status;
+    }
+    return true;
+  });
 
   return (
     <div className="bg-white rounded-b-3xl border-x border-b border-slate-100 overflow-hidden">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="bg-slate-50/50 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">
-            <th className="px-8 py-5">Assignee</th>
-            <th className="px-8 py-5">Task Overview</th>
-            <th className="px-8 py-5 text-center">Timeline</th>
+            <th className="px-8 py-5">Owner</th>
+            <th className="px-8 py-5">Title/Work</th>
+            {type === "tasks" && <th className="px-8 py-5">Project</th>}
+            <th className="px-8 py-5 text-center">Date</th>
             <th className="px-8 py-5 text-center">Hours</th>
             <th className="px-8 py-5 text-center">Status</th>
             <th className="px-8 py-5 text-right">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-50">
-          {tasks.map((t) => (
-            <tr key={t.id} className="group hover:bg-blue-50/30 transition-colors">
-              <td className="px-8 py-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 border border-slate-200">
-                    <RiUserLine />
-                  </div>
-                  <span className="font-bold text-slate-700 text-sm">{t.employee || t.emp || "Unassigned"}</span>
-                </div>
-              </td>
-              <td className="px-8 py-5">
-                <p className="font-semibold text-slate-800 text-sm leading-tight">{t.task || t.title}</p>
-                <p className="text-[10px] text-slate-400 mt-1 font-medium italic">Project: Internal System</p>
-              </td>
-              <td className="px-8 py-5 text-center">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 rounded-lg text-[11px] font-bold text-slate-600">
-                  <RiTimeLine className="text-blue-500" /> {t.date || t.startDate || t.deadline}
-                </div>
-              </td>
-              <td className="px-8 py-5 text-center font-black text-slate-600 text-sm">{t.hours || "0"}h</td>
-              <td className="px-8 py-5 text-center">
-                <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black border uppercase tracking-wider ${getStatusStyle(t.status)}`}>
-                  {t.status}
-                </span>
-              </td>
-              <td className="px-8 py-5 text-right">
-                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => setSelectedTask(t)} className="p-2.5 text-blue-600 hover:bg-white rounded-xl shadow-sm border border-transparent hover:border-blue-100 transition-all">
-                    <RiEditLine size={18} />
-                  </button>
-                  <button onClick={() => handleDelete(t.id)} className="p-2.5 text-rose-500 hover:bg-white rounded-xl shadow-sm border border-transparent hover:border-rose-100 transition-all">
-                    <RiDeleteBinLine size={18} />
-                  </button>
-                </div>
+          {loading ? (
+            <tr>
+              <td colSpan={7} className="p-8 text-center">
+                <RiLoader4Line className="animate-spin mx-auto text-2xl text-slate-400" />
               </td>
             </tr>
-          ))}
+          ) : filteredData.length === 0 ? (
+            <tr>
+              <td colSpan={7} className="p-12 text-center text-slate-400">
+                No {type} found matching filters
+              </td>
+            </tr>
+          ) : (
+            filteredData.map((item) => (
+              <tr key={item._id || item.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="px-8 py-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 border">
+                      {item.assigned_to?.name?.[0] || item.employee_id?.name?.[0] || "U"}
+                    </div>
+                    <span className="font-bold text-slate-700 text-sm">{item.assigned_to?.name || item.employee_id?.name}</span>
+                  </div>
+                </td>
+                <td className="px-8 py-5 max-w-xs">
+                  <div>
+                    <p className="font-semibold text-slate-800 text-sm line-clamp-2">{item.task_title || item.work_description}</p>
+                    {type === "timesheets" && item.task_id && (
+                      <p className="text-xs text-slate-500">Task: {item.task_id.task_title}</p>
+                    )}
+                  </div>
+                </td>
+                {type === "tasks" && (
+                  <td className="px-8 py-5">
+                    <span className="px-3 py-1 bg-slate-100 rounded-full text-xs font-medium text-slate-700">
+                      {item.project_id?.name}
+                    </span>
+                  </td>
+                )}
+                <td className="px-8 py-5 text-center text-sm text-slate-600">
+                  {new Date(item.start_date || item.date).toLocaleDateString()}
+                </td>
+                <td className="px-8 py-5 text-center font-bold text-slate-700 text-lg">
+                  {item.hours_worked || item.hours || "0"}h
+                </td>
+                <td className="px-8 py-5 text-center">
+                  <span className={`px-4 py-2 rounded-xl text-[11px] font-bold border-2 uppercase tracking-wide inline-block ${getStatusStyle(item.status)}`}>
+                    {item.status}
+                  </span>
+                </td>
+                {/* <td className="px-8 py-5 text-right">
+                  <div className="flex justify-end gap-1">
+                    {type === "tasks" && (
+                      <button 
+                        onClick={() => setSelectedItem(item)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all hover:shadow-lg hover:scale-[1.05]"
+                        title="Edit Task"
+                      >
+                        <RiEditLine size={16} />
+                      </button>
+                    )}
+                    <button 
+onClick={(e) => handleDelete(e, item._id || item.id)}
+                      className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-all hover:shadow-lg hover:scale-[1.05]"
+                      title="Delete"
+                    >
+                      <RiDeleteBinLine size={16} />
+                    </button>
+                    {type === "timesheets" && ["Submitted"].includes(item.status) && role !== 'employee' && (
+                      <button 
+                        onClick={() => setSelectedTimesheet(item)}
+                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all hover:shadow-lg hover:scale-[1.05]"
+                        title="Approve/Reject"
+                      >
+                        <RiCheckLine size={16} />
+                      </button>
+                    )}
+                  </div>
+                </td> */}
+
+
+                <td className="px-8 py-5 text-right">
+  <div className="flex justify-end gap-1">
+
+    {/* ✏️ Edit Task */}
+    {type === "tasks" && (
+      <button 
+        onClick={() => setSelectedItem(item)}
+        className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl"
+        title="Edit Task"
+      >
+        <RiEditLine size={16} />
+      </button>
+    )}
+
+    {/* 🗑 Delete Task (ONLY ADMIN / SUPER_ADMIN) */}
+    {type === "tasks" && ["admin", "superadmin"].includes(role) && (
+      <button 
+        onClick={(e) => handleDelete(e, item._id || item.id)}
+        className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl"
+        title="Delete Task"
+      >
+        <RiDeleteBinLine size={16} />
+      </button>
+    )}
+
+    {/* ✅ Approve Timesheet */}
+    {type === "timesheets" &&
+      item.status === "Submitted" &&
+      role !== "employee" && (
+        <button 
+          onClick={() => setSelectedTimesheet(item)}
+          className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-xl"
+          title="Approve / Reject"
+        >
+          <RiCheckLine size={16} />
+        </button>
+    )}
+
+  </div>
+</td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
 
-      {selectedTask && (
-        <TaskModal
-          task={selectedTask}
-          close={() => setSelectedTask(null)}
-          onSave={(updated) => {
-            setTasks(allTasks.map(tk => tk.id === updated.id ? updated : tk));
-            setSelectedTask(null);
-          }}
+      {selectedItem && (
+        <TaskDetailsModal 
+          task={selectedItem} 
+          onClose={() => setSelectedItem(null)} 
+          onRefresh={onRefresh}
+        />
+      )}
+
+      {selectedTimesheet && (
+        <TimesheetApprovalModal 
+          timesheet={selectedTimesheet}
+          onClose={() => setSelectedTimesheet(null)}
+          onRefresh={onRefresh}
         />
       )}
     </div>
   );
 };
 
-export default TaskTable;
+export default TasksTable;

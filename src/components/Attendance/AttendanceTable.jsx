@@ -9,6 +9,14 @@ import {
   RiDeleteBinLine,
 } from "react-icons/ri";
 
+const formatDateDDMMYYYY = (dateStr) => {
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
+
 const AttendanceTable = ({
   data = [],
   onRefresh,
@@ -22,8 +30,8 @@ const AttendanceTable = ({
   const [deleteLoading, setDeleteLoading] = useState({});
   const recordsPerPage = 10;
 
-  // Filter active/Present records only
-  const activeRecords = data.filter(item => item.status === "Present");
+// Show ALL records
+  const activeRecords = data;
 
   const totalPages = Math.ceil(activeRecords.length / recordsPerPage);
   const currentRecords = activeRecords.slice(
@@ -36,7 +44,7 @@ const AttendanceTable = ({
   }, [data]);
 
   const calculateHours = (checkIn, checkOut) => {
-    if (!checkIn || !checkOut || checkIn === "-" || checkOut === "-") return "--";
+    if (!checkIn || !checkOut || checkIn === "--" || checkOut === "--") return "--";
     const [h1, m1] = checkIn.split(":").map(Number);
     const [h2, m2] = checkOut.split(":").map(Number);
     let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
@@ -66,6 +74,8 @@ const AttendanceTable = ({
     }
   };
 
+
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-slate-500">
@@ -81,6 +91,9 @@ const AttendanceTable = ({
         <table className="w-full">
           <thead className="bg-gradient-to-r from-slate-50 to-slate-100">
             <tr>
+              <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-500">
+                Date
+              </th>
               <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
                 Employee / Department
               </th>
@@ -96,6 +109,9 @@ const AttendanceTable = ({
               <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-500">
                 Status
               </th>
+              <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
+                Notes / Reason
+              </th>
               <th className="px-3 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-500 w-20">
                 Actions
               </th>
@@ -104,10 +120,13 @@ const AttendanceTable = ({
           <tbody className="divide-y divide-slate-100">
             {currentRecords.length > 0 ? (
               currentRecords.map((item) => {
-                const totalHrs = calculateHours(item.in, item.out);
+                const totalHrs = calculateHours(item.checkIn, item.checkOut);
                 const isDeleting = deleteLoading[item.id];
                 return (
                   <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-4 text-center">
+                      <div className="font-mono text-sm font-bold text-slate-900">{formatDateDDMMYYYY(item.date)}</div>
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center">
@@ -123,14 +142,14 @@ const AttendanceTable = ({
                     </td>
                     <td className="px-4 py-4 text-center">
                       <div className="flex items-center justify-center space-x-2 text-xs">
-                        <span className="font-mono bg-slate-100 px-2 py-1 rounded">{item.in || '--'}</span>
+                        <span className="font-mono bg-slate-100 px-2 py-1 rounded">{item.checkIn || '--'}</span>
                         <span className="text-slate-400">→</span>
-                        <span className="font-mono bg-slate-100 px-2 py-1 rounded">{item.out || '--'}</span>
+                        <span className="font-mono bg-slate-100 px-2 py-1 rounded">{item.checkOut || '--'}</span>
                       </div>
                     </td>
                     <td className="px-4 py-4 text-center">
-                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-bold border ${item.mode === "WFH" ? "bg-purple-100 text-purple-800 border-purple-200" : "bg-blue-100 text-blue-800 border-blue-200"}`}>
-                        {item.mode || "Office"}
+                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-bold border ${item.workMode === "WFH" ? "bg-purple-100 text-purple-800 border-purple-200" : "bg-blue-100 text-blue-800 border-blue-200"}`}>
+                        {item.workMode || "--"}
                       </span>
                     </td>
                     <td className="px-4 py-4 text-center">
@@ -141,10 +160,15 @@ const AttendanceTable = ({
                         {item.status || "--"}
                       </span>
                     </td>
+                    <td className="px-4 py-4 max-w-xs">
+                      <div title={item.notes || 'No notes'} className="text-xs text-slate-600 truncate">
+                        {item.notes || '--'}
+                      </div>
+                    </td>
                     <td className="px-3 py-4">
                       <div className="flex items-center space-x-1 justify-center">
                         <button
-                          onClick={() => handleEdit(item)}
+                          onClick={() => onEdit(item)}
                           title="Edit"
                           className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                         >
@@ -169,7 +193,7 @@ const AttendanceTable = ({
               })
             ) : (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                <td colSpan={8} className="px-6 py-12 text-center text-slate-400">
                   <div className="text-lg font-semibold mb-1">No Active Records</div>
                   <div className="text-sm">All employees marked Absent or no attendance today</div>
                 </td>

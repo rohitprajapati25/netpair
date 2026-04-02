@@ -92,15 +92,16 @@ const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const { role } = useAuth();
 
-  const sidebarArray = [
+const sidebarArray = [
     { navpath: "dashboard", icon: "ri-dashboard-fill", data: "Dashboard" },
     { navpath: "employees", icon: "ri-team-fill", data: "Employees" },
-    { navpath: "hrs", icon: "ri-team-fill", data: "Hrs" },
+    { navpath: "hrs", icon: "ri-team-fill", data: "HRs" },
     { navpath: "admins", icon: "ri-team-fill", data: "Admins" },
     { navpath: "attendance", icon: "ri-calendar-check-fill", data: "Attendance" },
     { navpath: "leave", icon: "ri-survey-fill", data: "Leave" },
     { navpath: "projects", icon: "ri-folders-fill", data: "Projects" },
-    { navpath: "tasktimesheet", icon: "ri-time-fill", data: "Timesheet" },
+    { navpath: "tasktimesheet", icon: "ri-task-line", data: "Tasks & Timesheets" },
+    { navpath: "my-tasks", icon: "ri-task-line", data: "My Tasks" },
     { navpath: "assets", icon: "ri-computer-fill", data: "Assets" },
     { navpath: "reports", icon: "ri-file-chart-fill", data: "Reports" },
     { navpath: "announcements", icon: "ri-megaphone-fill", data: "Announcements" },
@@ -155,7 +156,7 @@ const Sidebar = () => {
         {!collapsed && (
           <div className="p-5 border-t border-slate-50">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">
-              v1.0.4 © G97 AutoHub
+              Version 1.0 NetPair Infotech
             </p>
           </div>
         )}

@@ -23,6 +23,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { ROLES } from "../../backend/constants/roles";
 import HRs from "./user/Admin_HR/HRs";
 import Admins from "./user/Admin_Admins/Admins";
+import MyTasks from "./user/Employee_MyTasks/MyTasks";
 
 const App = () => {
   return (
@@ -34,7 +35,7 @@ const App = () => {
       <Route element={<ProtectedRoute><Home /></ProtectedRoute>}>
 
         <Route path="/dashboard" element={
-          <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.ADMIN]}>
+          <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.HR]}>
             <Dashboard />
           </ProtectedRoute>
         } />
@@ -66,6 +67,11 @@ const App = () => {
         <Route path="/leave" element={<Leave />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/tasktimesheet" element={<TaskTimesheet />} />
+        <Route path="/my-tasks" element={
+          <ProtectedRoute allowedRoles={[ROLES.EMPLOYEE]}>
+            <MyTasks />
+          </ProtectedRoute>
+        } />
         <Route path="/assets" element={
           <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.HR]}>
             <Asset />

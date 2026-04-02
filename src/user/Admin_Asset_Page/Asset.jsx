@@ -1,233 +1,165 @@
-// import React, { useState } from "react";
-// import Card from "../../components/Asset/Card";
-
-// const Asset = () => {
-//   const [assets, setAssets] = useState([
-//     { id: "AST-101", name: "Laptop", category: "IT Asset", assignedTo: "Rohit", status: "Assigned" },
-//     { id: "AST-102", name: "Mouse", category: "IT Asset", assignedTo: "", status: "Available" },
-//   ]);
-
-//   const [open, setOpen] = useState(false);
-//   const [editingAsset, setEditingAsset] = useState(null);
-//   const [formData, setFormData] = useState({ id: "", name: "", category: "", assignedTo: "", status: "Available" });
-
-//   const cardData = [
-//     { title: "Total Assets", tot: assets.length, bg: "from-indigo-500 to-blue-600" },
-//     { title: "Assigned", tot: assets.filter(a => a.status === "Assigned").length, bg: "from-emerald-500 to-green-600" },
-//     { title: "Available", tot: assets.filter(a => a.status === "Available").length, bg: "from-amber-400 to-orange-500" },
-//     { title: "Damaged", tot: "0", bg: "from-rose-500 to-red-600" },
-//   ];
-
-//     const handleAdd = () => {
-//     setEditingAsset(null);
-//     setFormData({ id: `AST-${Math.floor(100 + Math.random() * 900)}`, name: "", category: "", assignedTo: "", status: "Available" });
-//     setOpen(true);
-//   };
-
-  
-//   const handleEdit = (asset) => {
-//     setEditingAsset(asset);
-//     setFormData(asset);
-//     setOpen(true);
-//   };
-
-  
-//   const handleSave = () => {
-//     if (!formData.name || !formData.category) return alert("Please fill details");
-
-//     if (editingAsset) {
-//       setAssets(assets.map(a => a.id === editingAsset.id ? formData : a));
-//     } else {
-//       setAssets([...assets, formData]);
-//     }
-//     setOpen(false);
-//   };
-
-//   return (
-//     <div className="relative h-full m-1 p-6 bg-gradient-to-br from-slate-50 to-gray-100 flex flex-col gap-6 overflow-y-auto rounded-2xl">
-      
-//       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-//         <h2 className="text-2xl font-semibold">Asset Management</h2>
-//         <button onClick={handleAdd} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
-//           <i className="ri-add-line text-lg"></i> Add Asset
-//         </button>
-//       </div>
-
-//       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full p-1">
-//         {cardData.map((d, i) => (
-//           <Card key={i} title={d.title} tot={d.tot} bg={d.bg} />
-//         ))}
-//       </div>
-
-//       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-x-auto">
-//         <table className="w-full min-w-[850px]">
-//           <thead className="bg-gray-50 text-gray-600 text-sm">
-//             <tr>
-//               <th className="px-6 py-4 text-left font-semibold">Asset ID</th>
-//               <th className="px-6 py-4 text-left font-semibold">Asset Name</th>
-//               <th className="px-6 py-4 text-center font-semibold">Category</th>
-//               <th className="px-6 py-4 text-center font-semibold">Assigned To</th>
-//               <th className="px-6 py-4 text-center font-semibold">Status</th>
-//               <th className="px-6 py-4 text-center">Action</th>
-//             </tr>
-//           </thead>
-//           <tbody className="text-sm">
-//             {assets.map((asset) => (
-//               <tr key={asset.id} className="border-t hover:bg-blue-50/40 transition">
-//                 <td className="px-6 py-4 font-medium">{asset.id}</td>
-//                 <td className="px-6 py-4">{asset.name}</td>
-//                 <td className="px-6 py-4 text-center">{asset.category}</td>
-//                 <td className="px-6 py-4 text-center">{asset.assignedTo || "—"}</td>
-//                 <td className="px-6 py-4 text-center">
-//                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${asset.status === 'Assigned' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-//                     {asset.status}
-//                   </span>
-//                 </td>
-//                 <td className="px-6 py-4 text-center">
-//                   <i onClick={() => handleEdit(asset)} className="ri-edit-2-line cursor-pointer text-blue-600 hover:scale-125 transition text-lg"></i>
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {open && (
-//         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-//           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
-//             <div className="flex justify-between items-center mb-6">
-//               <h3 className="text-xl font-bold">{editingAsset ? "Edit Asset" : "Add New Asset"}</h3>
-//               <i onClick={() => setOpen(false)} className="ri-close-line text-2xl cursor-pointer hover:text-red-500"></i>
-//             </div>
-            
-//             <div className="space-y-4">
-//               <div>
-//                 <label className="text-xs font-bold text-gray-500 uppercase">Asset Name</label>
-//                 <input 
-//                   className="w-full border border-gray-300 p-2.5 rounded-lg outline-none focus:border-blue-500 mt-1"
-//                   value={formData.name}
-//                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-//                   placeholder="e.g. MacBook Pro"
-//                 />
-//               </div>
-              
-//               <div>
-//                 <label className="text-xs font-bold text-gray-500 uppercase">Category</label>
-//                 <select 
-//                   className="w-full border border-gray-300 p-2.5 rounded-lg outline-none mt-1"
-//                   value={formData.category}
-//                   onChange={(e) => setFormData({...formData, category: e.target.value})}
-//                 >
-//                   <option value="">Select Category</option>
-//                   <option value="IT Asset">IT Asset</option>
-//                   <option value="Furniture">Furniture</option>
-//                   <option value="Electronics">Electronics</option>
-//                 </select>
-//               </div>
-
-//               <div>
-//                 <label className="text-xs font-bold text-gray-500 uppercase">Assigned To</label>
-//                 <input 
-//                   className="w-full border border-gray-300 p-2.5 rounded-lg outline-none mt-1"
-//                   value={formData.assignedTo}
-//                   onChange={(e) => setFormData({...formData, assignedTo: e.target.value})}
-//                   placeholder="Employee Name"
-//                 />
-//               </div>
-
-//               <div>
-//                 <label className="text-xs font-bold text-gray-500 uppercase">Status</label>
-//                 <select 
-//                   className="w-full border border-gray-300 p-2.5 rounded-lg outline-none mt-1"
-//                   value={formData.status}
-//                   onChange={(e) => setFormData({...formData, status: e.target.value})}
-//                 >
-//                   <option value="Available">Available</option>
-//                   <option value="Assigned">Assigned</option>
-//                   <option value="Damaged">Damaged</option>
-//                 </select>
-//               </div>
-//             </div>
-
-//             <div className="flex gap-3 mt-8">
-//               <button onClick={() => setOpen(false)} className="flex-1 py-2.5 border border-gray-300 rounded-lg font-medium hover:bg-gray-50">Cancel</button>
-//               <button onClick={handleSave} className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
-//                 {editingAsset ? "Update Asset" : "Save Asset"}
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Asset;
-
-
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import AssetFilter from "../../components/Asset/AssetFilter.jsx";
+import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
 import Card from "../../components/Asset/Card";
-import { RiAddLine, RiEdit2Line, RiDeleteBinLine, RiCloseLine, RiMacbookLine, RiStackLine } from "react-icons/ri";
+import { RiAddLine, RiEdit2Line, RiDeleteBinLine, RiCloseLine, RiMacbookLine, RiStackLine, RiLoader2Line } from "react-icons/ri";
 
 const Asset = () => {
-  const [assets, setAssets] = useState([
-    { id: "AST-101", name: "Laptop", category: "IT Asset", assignedTo: "Rohit", status: "Assigned" },
-    { id: "AST-102", name: "Mouse", category: "IT Asset", assignedTo: "", status: "Available" },
-  ]);
-
+  const { token } = useAuth();
+  const [assets, setAssets] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [filters, setFilters] = useState({ search: "", category: "All", status: "All" });
+  const [stats, setStats] = useState({ total: 0, available: 0, assigned: 0, damaged: 0, disposed: 0 });
   const [open, setOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState(null);
-  const [formData, setFormData] = useState({ id: "", name: "", category: "", assignedTo: "", status: "Available" });
+  const [formData, setFormData] = useState({ name: "", category: "", serialNumber: "", purchaseDate: "", assignedTo: "", status: "Available", location: "", notes: "" });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const cardData = [
-    { title: "Total Assets", tot: assets.length, bg: "from-indigo-600 to-blue-700" },
-    { title: "Assigned", tot: assets.filter(a => a.status === "Assigned").length, bg: "from-emerald-500 to-teal-600" },
-    { title: "Available", tot: assets.filter(a => a.status === "Available").length, bg: "from-amber-400 to-orange-500" },
-    { title: "Damaged", tot: assets.filter(a => a.status === "Damaged").length, bg: "from-rose-500 to-red-600" },
-  ];
+  useEffect(() => {
+    if (token) {
+      fetchAssets();
+      fetchEmployees();
+      fetchStats();
+    }
+  }, [token, filters]);
+
+  const filteredAssets = useMemo(() => {
+    return assets.filter(asset => {
+      if (filters.search && !asset.name?.toLowerCase().includes(filters.search.toLowerCase()) && 
+          !asset.assetId?.toLowerCase().includes(filters.search.toLowerCase())) return false;
+      if (filters.category !== "All" && asset.category !== filters.category) return false;
+      if (filters.status !== "All" && asset.status !== filters.status) return false;
+      return true;
+    });
+  }, [assets, filters]);
+
+  const fetchAssets = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/admin/assets', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        setAssets(res.data.assets || []);
+      }
+    } catch (error) {
+      console.error('Assets fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchEmployees = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/admin/employees', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setEmployees(res.data?.employees || []);
+    } catch (error) {
+      console.error('Employees fetch error:', error);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/admin/assets/stats', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        setStats(res.data.stats);
+      }
+    } catch (error) {
+      console.error('Stats fetch error:', error);
+    }
+  };
 
   const handleAdd = () => {
     setEditingAsset(null);
-    setFormData({ id: `AST-${Math.floor(100 + Math.random() * 900)}`, name: "", category: "", assignedTo: "", status: "Available" });
+    setFormData({ name: "", category: "", serialNumber: "", purchaseDate: "", assignedTo: "", status: "Available", location: "", notes: "" });
     setOpen(true);
   };
 
   const handleEdit = (asset) => {
     setEditingAsset(asset);
-    setFormData(asset);
+    setFormData({
+      name: asset.name,
+      category: asset.category,
+      serialNumber: asset.serialNumber || '',
+      purchaseDate: asset.purchaseDate ? asset.purchaseDate.split('T')[0] : '',
+      assignedTo: asset.assignedTo?._id || '',
+      status: asset.status,
+      location: asset.location || '',
+      notes: asset.notes || ''
+    });
     setOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to remove this asset?")) {
-      setAssets(assets.filter(a => a.id !== id));
+      try {
+        await axios.delete(`http://localhost:5000/api/admin/assets/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        fetchAssets();
+        fetchStats();
+      } catch (error) {
+        alert('Delete failed: ' + (error.response?.data?.message || error.message));
+      }
     }
   };
 
-  const handleSave = () => {
-    if (!formData.name || !formData.category) return alert("Please fill details");
-    
-    if (editingAsset) {
-      setAssets(assets.map(a => a.id === editingAsset.id ? formData : a));
-    } else {
-      setAssets([...assets, formData]);
+  const handleSave = async () => {
+    if (!formData.name || !formData.category) return alert("Name and category required");
+
+    try {
+      setSaving(true);
+      let res;
+      if (editingAsset) {
+        res = await axios.put(`http://localhost:5000/api/admin/assets/${editingAsset._id}`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else {
+        res = await axios.post('http://localhost:5000/api/admin/assets', formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+
+      if (res.data.success) {
+        fetchAssets();
+        fetchStats();
+        setOpen(false);
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || 'Save failed');
+    } finally {
+      setSaving(false);
     }
-    setOpen(false);
   };
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case "Assigned": return "bg-emerald-50 text-emerald-700 border-emerald-100";
-      case "Available": return "bg-blue-50 text-blue-700 border-blue-100";
-      case "Damaged": return "bg-rose-50 text-rose-700 border-rose-100";
-      default: return "bg-gray-50 text-gray-700 border-gray-100";
+      case "Assigned": return "bg-emerald-100 text-emerald-800 border-emerald-200";
+      case "Available": return "bg-blue-100 text-blue-800 border-blue-200";
+      case "Damaged": return "bg-rose-100 text-rose-800 border-rose-200";
+      case "Disposed": return "bg-gray-100 text-gray-800 border-gray-200";
+      default: return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
+  const cardData = [
+    { title: "Total Assets", tot: stats.total, bg: "from-indigo-600 to-blue-700" },
+    { title: "Assigned", tot: stats.assigned, bg: "from-emerald-500 to-teal-600" },
+    { title: "Available", tot: stats.available, bg: "from-amber-400 to-orange-500" },
+    { title: "Damaged", tot: stats.damaged, bg: "from-rose-500 to-red-600" }
+  ];
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center"><RiLoader2Line className="animate-spin text-4xl text-slate-400" /></div>;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10 flex flex-col gap-8">
-      
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-800 tracking-tight">Asset Inventory</h1>
@@ -241,17 +173,17 @@ const Asset = () => {
         </button>
       </div>
 
-      {/* Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {cardData.map((d, i) => (
           <Card key={i} title={d.title} tot={d.tot} bg={d.bg} />
         ))}
       </div>
 
-      {/* Table Container */}
+      <AssetFilter filters={filters} setFilters={setFilters} totalResults={filteredAssets.length} />
+
       <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full">
             <thead>
               <tr className="bg-slate-50/50 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">
                 <th className="px-8 py-5">Asset Details</th>
@@ -262,8 +194,8 @@ const Asset = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {assets.map((asset) => (
-                <tr key={asset.id} className="group hover:bg-blue-50/30 transition-colors">
+              {filteredAssets.map((asset) => (
+                <tr key={asset._id} className="hover:bg-blue-50/30 transition-colors">
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 border border-slate-200">
@@ -271,7 +203,7 @@ const Asset = () => {
                       </div>
                       <div>
                         <p className="font-bold text-slate-700 text-sm leading-tight">{asset.name}</p>
-                        <p className="text-[11px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5">{asset.id}</p>
+                        <p className="text-[11px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5">{asset.assetId}</p>
                       </div>
                     </div>
                   </td>
@@ -281,7 +213,7 @@ const Asset = () => {
                     </span>
                   </td>
                   <td className="px-8 py-5 text-center font-semibold text-slate-600 text-sm">
-                    {asset.assignedTo || <span className="text-slate-300 italic">—</span>}
+                    {asset.assignedTo?.name || <span className="text-slate-300 italic">—</span>}
                   </td>
                   <td className="px-8 py-5 text-center">
                     <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black border uppercase tracking-wider ${getStatusStyle(asset.status)}`}>
@@ -289,11 +221,11 @@ const Asset = () => {
                     </span>
                   </td>
                   <td className="px-8 py-5 text-right">
-                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => handleEdit(asset)} className="p-2.5 text-blue-600 hover:bg-white rounded-xl shadow-sm border border-transparent hover:border-blue-100 transition-all">
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => handleEdit(asset)} className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-xl shadow-sm border border-blue-100">
                         <RiEdit2Line size={18} />
                       </button>
-                      <button onClick={() => handleDelete(asset.id)} className="p-2.5 text-rose-500 hover:bg-white rounded-xl shadow-sm border border-transparent hover:border-rose-100 transition-all">
+                      <button onClick={() => handleDelete(asset._id)} className="p-2.5 text-rose-500 hover:bg-rose-50 rounded-xl shadow-sm border border-rose-100">
                         <RiDeleteBinLine size={18} />
                       </button>
                     </div>
@@ -305,10 +237,9 @@ const Asset = () => {
         </div>
       </div>
 
-      {/* Asset Modal */}
       {open && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-md p-10 shadow-2xl animate-in zoom-in duration-200">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-lg p-10 shadow-2xl animate-in zoom-in duration-200">
             <div className="flex justify-between items-center mb-8">
               <div>
                 <h3 className="text-2xl font-black text-slate-800 tracking-tight">{editingAsset ? "Edit Asset" : "New Asset"}</h3>
@@ -338,10 +269,11 @@ const Asset = () => {
                     value={formData.category}
                     onChange={(e) => setFormData({...formData, category: e.target.value})}
                   >
-                    <option value="">Select</option>
+                    <option value="">Select Category</option>
                     <option value="IT Asset">IT Asset</option>
                     <option value="Furniture">Furniture</option>
                     <option value="Electronics">Electronics</option>
+                    <option value="Office Supplies">Office Supplies</option>
                   </select>
                 </div>
                 <div className="space-y-2">
@@ -354,25 +286,74 @@ const Asset = () => {
                     <option value="Available">Available</option>
                     <option value="Assigned">Assigned</option>
                     <option value="Damaged">Damaged</option>
+                    <option value="Disposed">Disposed</option>
                   </select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">Assign to Employee</label>
-                <input 
-                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:bg-white outline-none transition-all"
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">Assigned Employee</label>
+                <select 
+                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:bg-white focus:border-blue-500 outline-none transition-all"
                   value={formData.assignedTo}
                   onChange={(e) => setFormData({...formData, assignedTo: e.target.value})}
-                  placeholder="Enter employee name"
+                >
+                  <option value="">No Assignment</option>
+                  {employees.map((emp) => (
+                    <option key={emp._id} value={emp._id}>{emp.name} ({emp.designation})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">Serial Number</label>
+                  <input 
+                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:bg-white outline-none transition-all"
+                    value={formData.serialNumber}
+                    onChange={(e) => setFormData({...formData, serialNumber: e.target.value})}
+                    placeholder="Optional"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">Purchase Date</label>
+                  <input 
+                    type="date"
+                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:bg-white outline-none transition-all"
+                    value={formData.purchaseDate}
+                    onChange={(e) => setFormData({...formData, purchaseDate: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">Location</label>
+                <input 
+                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:bg-white outline-none transition-all"
+                  value={formData.location}
+                  onChange={(e) => setFormData({...formData, location: e.target.value})}
+                  placeholder="e.g. Floor 2, Room B12"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">Notes</label>
+                <textarea 
+                  rows={3}
+                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:bg-white outline-none transition-all resize-none"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  placeholder="Additional information..."
                 />
               </div>
             </div>
 
             <div className="flex gap-4 mt-10">
-              <button onClick={() => setOpen(false)} className="flex-1 py-4 font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-all">Cancel</button>
-              <button onClick={handleSave} className="flex-[2] py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all">
-                {editingAsset ? "Update Configuration" : "Finalize Asset"}
+              <button onClick={() => setOpen(false)} className="flex-1 py-4 font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-all" disabled={saving}>
+                Cancel
+              </button>
+              <button onClick={handleSave} className="flex-[2] py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-50" disabled={saving}>
+                {saving ? <RiLoader2Line className="animate-spin mx-auto" /> : editingAsset ? "Update Asset" : "Create Asset"}
               </button>
             </div>
           </div>
@@ -383,3 +364,4 @@ const Asset = () => {
 };
 
 export default Asset;
+

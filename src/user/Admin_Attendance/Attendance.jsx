@@ -9,7 +9,9 @@ import { RiCalendarCheckLine } from "react-icons/ri";
 
 const Attendance = () => {
   const { token } = useAuth();
-  const [open, setOpen] = useState(false);
+const [open, setOpen] = useState(false);
+  const [editData, setEditData] = useState(null);
+  const [fullAttendanceData, setFullAttendanceData] = useState([]);
   const [attendanceData, setAttendanceData] = useState([]);
   const [stats, setStats] = useState({ totalEmployees: 0, activeEmployees: 0 });
   const [loading, setLoading] = useState(true);
@@ -49,13 +51,9 @@ const Attendance = () => {
 
       const params = new URLSearchParams();
       Object.keys(currentFilters).forEach(key => {
-
-      if (currentFilters[key] && currentFilters[key] !== 'All') {
-        params.append(key, currentFilters[key]);
-      } else if (key === 'status') {
-        params.append('status', 'Present'); // Default active
-      }
-
+        if (currentFilters[key] && currentFilters[key] !== 'All') {
+          params.append(key, currentFilters[key]);
+        }
       });
 
       const res = await axios.get(`http://localhost:5000/api/admin/attendance?${params.toString()}`, {
@@ -63,17 +61,20 @@ const Attendance = () => {
       });
 
       if (res.data.success && res.data.records) {
+        setFullAttendanceData(res.data.records);
         const mappedData = res.data.records.map(record => ({
           id: record._id,
           name: record.employee?.name || 'Unknown',
           date: new Date(record.date).toLocaleDateString('en-CA'),
-          in: record.checkIn || '-',
-          out: record.checkOut || '-',
+          checkIn: record.checkIn || '--',
+          checkOut: record.checkOut || '--',
           status: record.status || 'Absent',
           dept: record.employee?.department || 'N/A',
-          mode: record.workMode || 'Office',
+          workMode: record.workMode || '',
+          notes: record.notes || '',
           workingHours: record.workingHours || 0
         }));
+        console.log('Mapped attendance data:', mappedData);
         setAttendanceData(mappedData);
       } else {
         setAttendanceData([]);
@@ -133,7 +134,7 @@ const Attendance = () => {
           </div>
         )}
 
-        {open && <AttendanceModal onClose={() => setOpen(false)} onRefresh={handleRefresh} />}
+{open && <AttendanceModal onClose={() => { setOpen(false); setEditData(null); }} onRefresh={handleRefresh} editData={editData} />}
 
         <AttendanceCards data={attendanceData} />
 
@@ -150,6 +151,22 @@ const Attendance = () => {
             totalEmployees={stats.totalEmployees}
             activeEmployees={stats.activeEmployees}
             onRefresh={handleRefresh}
+            onEdit={(item) => {
+              const fullRecord = fullAttendanceData.find(r => r._id === item.id);
+              if (fullRecord) {
+                setEditData({
+                  ...fullRecord,
+                  // Use table display values for proper modal defaults
+                  date: item.date ? new Date(item.date) : fullRecord.date,
+                  checkIn: item.checkIn === '--' ? '' : item.checkIn,
+                  checkOut: item.checkOut === '--' ? '' : item.checkOut,
+                  status: item.status || fullRecord.status,
+                  notes: item.notes || fullRecord.notes,
+                  workMode: item.workMode || fullRecord.workMode
+                });
+                setOpen(true);
+              }
+            }}
           />
 
         </div>

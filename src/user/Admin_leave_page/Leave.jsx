@@ -320,62 +320,148 @@
 // export default Leave;
 
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import axios from 'axios';
 import LeaveCards from "../../components/Leave/LeaveCards";
 import LeaveTable from "../../components/Leave/LeaveTable";
 import LeaveFilters from "../../components/Leave/LeaveFilter";
 
 const Leave = () => {
-  const [leaveData, setLeaveData] = useState([
-    /* ... your 20 records ... */
-    { id: 1, name: "Rohit Prajapati", type: "Casual", from: "2026-02-12", to: "2026-02-14", days: 3, status: "Pending" },
-    { id: 2, name: "Amit Patel", type: "Sick", from: "2026-02-10", to: "2026-02-10", days: 1, status: "Approved" },
-    // ... all other records
-  ]);
-
+  const { token } = useAuth();
+  const [leaveData, setLeaveData] = useState([]);
+  const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
   const [filters, setFilters] = useState({
     search: "",
     status: "All",
     type: "All",
+    page: 1,
+    limit: 10
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchLeaves = async (pageFilters = filters) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const params = new URLSearchParams({
+        page: pageFilters.page.toString(),
+        limit: pageFilters.limit.toString(),
+        ...(pageFilters.search && { search: pageFilters.search }),
+        ...(pageFilters.status !== 'All' && { status: pageFilters.status }),
+        ...(pageFilters.type !== 'All' && { type: pageFilters.type })
+      });
+
+      const res = await axios.get(`http://localhost:5000/api/admin/leaves?${params}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setLeaveData(res.data.leaves || []);
+      setStats(res.data.stats || {});
+    } catch (err) {
+      console.error('Fetch leaves error:', err);
+      setError(err.response?.data?.message || 'Failed to fetch leaves');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const setQuickFilter = (status) => {
-    setFilters((prev) => ({ ...prev, status }));
+    setFilters(prev => ({ ...prev, status, page: 1 }));
   };
 
-  const handleStatusChange = (id, newStatus) => {
-    setLeaveData(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l));
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await axios.put(`http://localhost:5000/api/admin/leaves/${id}`, 
+        { status: newStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Optimistic update
+      setLeaveData(prev => prev.map(l => 
+        l._id === id ? { ...l, status: newStatus } : l
+      ));
+    } catch (err) {
+      console.error('Status update error:', err);
+      alert('Failed to update status');
+    }
   };
 
-  // Performance optimized filtering
+  // Client-side search (server does most filtering)
   const filteredData = useMemo(() => {
     return leaveData.filter((leave) => {
-      const matchesSearch = leave.name.toLowerCase().includes(filters.search.toLowerCase());
-      const matchesStatus = filters.status === "All" || leave.status === filters.status;
-      const matchesType = filters.type === "All" || leave.type === filters.type;
-      return matchesSearch && matchesStatus && matchesType;
+      const matchesSearch = !filters.search || 
+        leave.employeeId?.name?.toLowerCase().includes(filters.search.toLowerCase()) ||
+        leave.name?.toLowerCase().includes(filters.search.toLowerCase());
+      return matchesSearch;
     });
-  }, [leaveData, filters]);
+  }, [leaveData, filters.search]);
 
-  const stats = {
-    total: leaveData.length,
-    pending: leaveData.filter(l => l.status === "Pending").length,
-    approved: leaveData.filter(l => l.status === "Approved").length,
-    rejected: leaveData.filter(l => l.status === "Rejected").length,
-  };
+  // Filter change handler with debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchLeaves({ ...filters, page: 1 });
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [filters.status, filters.type]);
+
+  useEffect(() => {
+    if (token) {
+      fetchLeaves();
+    }
+  }, [token]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-lg text-slate-500">Loading leaves...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-red-500 text-lg p-8 bg-white rounded-xl shadow">
+          {error}
+          <button 
+            onClick={() => fetchLeaves()} 
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50/50 p-4 lg:p-8 flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-black text-slate-800 tracking-tight">Leave Management</h1>
-        <p className="text-slate-500 font-medium text-sm">Review and manage employee time-off requests</p>
+        <p className="text-slate-500 font-medium text-sm">
+          {stats.total} total requests | {stats.pending} pending
+        </p>
       </div>
 
       <LeaveCards stats={stats} setQuickFilter={setQuickFilter} />
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-        <LeaveFilters filters={filters} setFilters={setFilters} />
-        <LeaveTable data={filteredData} onStatusChange={handleStatusChange} />
+        <LeaveFilters 
+          filters={filters} 
+          setFilters={setFilters} 
+          totalResults={stats.total}
+        />
+        <LeaveTable 
+          data={filteredData.map(l => ({
+            ...l,
+            id: l._id,
+            name: l.employeeId?.name || l.name,
+            from: l.fromDate.split('T')[0],
+            to: l.toDate.split('T')[0]
+          }))} 
+          onStatusChange={handleStatusChange} 
+        />
       </div>
     </div>
   );

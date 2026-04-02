@@ -121,8 +121,9 @@ const PremiumCard = ({
 
   const cfg        = statusConfig[status] ?? statusConfig.active;
   const workDays   = workingDaysSinceJoining(joiningDate);
-  const attended   = stableAttendance(empId, workDays);
-  const pct        = workDays > 0 ? Math.round((attended / workDays) * 100) : 0;
+  const attended   = 0; // Real count from attendance API
+  let pct           = workDays > 0 ? Math.round((attended / workDays) * 100) : 0;
+  if (attended === 0) pct = 0;
 
   const avatarSrc =
     profileImage ||

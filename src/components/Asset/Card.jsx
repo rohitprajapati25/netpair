@@ -1,25 +1,16 @@
-import React from "react";
+import React from 'react';
+import { RiArrowUpLine } from 'react-icons/ri';
 
 const Card = ({ title, tot, bg }) => {
   return (
-    <div
-      className={`relative overflow-hidden rounded-2xl
-      shadow-sm hover:shadow-xl transition-all duration-300
-      hover:-translate-y-1 p-5 text-white bg-gradient-to-r ${bg}`}
-    >
-      <div className="flex justify-between items-center">
+    <div className={`group bg-gradient-to-br ${bg} p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-0`}>
+      <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm opacity-90 font-medium">
-            {title}
-          </p>
-
-          <h2 className="text-3xl font-bold mt-1">
-            {tot}
-          </h2>
+          <p className="text-white/80 font-bold text-sm uppercase tracking-wide">{title}</p>
+          <p className="text-4xl font-black text-white mt-2 leading-none">{tot}</p>
         </div>
-
-        <div className="bg-white/20 backdrop-blur p-3 rounded-xl">
-          <i className="ri-computer-line text-xl"></i>
+        <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl group-hover:bg-white/30 transition-all duration-300">
+          <RiArrowUpLine className="text-white text-xl" />
         </div>
       </div>
     </div>
@@ -27,3 +18,4 @@ const Card = ({ title, tot, bg }) => {
 };
 
 export default Card;
+

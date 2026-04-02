@@ -49,59 +49,139 @@
 
 // export default TaskTimesheet;
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import axios from "axios";
+import { RiAddLine, RiLoader2Line } from "react-icons/ri";
+import AddTaskModal from "../../components/Task_Timesheet/AddTaskModal";
+import TasksTable from "../../components/Task_Timesheet/TimesheetTable";
+import TimesheetSubmitModal from "../../components/Task_Timesheet/TimesheetSubmitModal";
 import TimesheetCards from "../../components/Task_Timesheet/TimesheetCards";
 import TimesheetFilters from "../../components/Task_Timesheet/TimesheetFilters";
-import TimesheetTable from "../../components/Task_Timesheet/TimesheetTable";
-import AddTaskModal from "../../components/Task_Timesheet/AddTaskModal";
-import TimesheetData from "../../components/Task_Timesheet/TimesheetData";
-import { RiAddLine } from "react-icons/ri";
 
 const TaskTimesheet = () => {
-  const [open, setOpen] = useState(false);
-  const [tasks, setTasks] = useState(TimesheetData);
+  const { role, token } = useAuth();
+  const [activeTab, setActiveTab] = useState("tasks");
+  const [tasks, setTasks] = useState([]);
+  const [timesheets, setTimesheets] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ search: "", status: "All" });
+  const [addTaskOpen, setAddTaskOpen] = useState(false);
+  const [submitTimesheetOpen, setSubmitTimesheetOpen] = useState(false);
 
-  // Filter Logic: Ye original 'tasks' ko modify nahi karega
-  const filteredTasks = useMemo(() => {
-    return tasks.filter((t) => {
-      const taskTitle = (t.task || t.title || "").toLowerCase();
-      const empName = (t.employee || t.emp || "").toLowerCase();
-      const matchesSearch = taskTitle.includes(filters.search.toLowerCase()) || 
-                           empName.includes(filters.search.toLowerCase());
-      const matchesStatus = filters.status === "All" || t.status === filters.status;
-      return matchesSearch && matchesStatus;
-    });
-  }, [tasks, filters]);
+  useEffect(() => {
+    fetchData();
+  }, [activeTab]);
 
-  const saveTask = (newTask) => {
-    setTasks([newTask, ...tasks]);
-    setOpen(false);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const tasksRes = await axios.get('http://localhost:5000/api/admin/tasks', { headers: { Authorization: `Bearer ${token}` } });
+      const timesheetsRes = await axios.get('http://localhost:5000/api/admin/timesheets', { headers: { Authorization: `Bearer ${token}` } });
+      const projectsRes = await axios.get('http://localhost:5000/api/admin/projects', { headers: { Authorization: `Bearer ${token}` } });
+      console.log('Projects full response:', projectsRes.data);
+      setTasks(tasksRes.data.tasks || []);
+      setTimesheets(timesheetsRes.data || []);
+      setProjects(projectsRes.data.projects || projectsRes.data || []);
+
+    } catch (error) {
+      console.error("Fetch failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const handleRefresh = () => fetchData();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <RiLoader2Line className="animate-spin text-4xl text-slate-400" />
+      </div>
+    );
+  }
+
+  const data = activeTab === "tasks" ? tasks : timesheets;
+  const totalTasks = tasks.length;
+  const totalHours = timesheets.reduce((sum, ts) => sum + (ts.hours_worked || 0), 0);
+  const approvedTimesheets = timesheets.filter(ts => ts.status === "Approved").length;
+
   return (
-    <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10 flex flex-col gap-8">
+    <div className="p-6 lg:p-10 space-y-8">
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight">Task & Timesheet</h1>
-          <p className="text-slate-500 font-medium text-sm">Monitor productivity and track task lifecycles</p>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight">Tasks & Timesheets</h1>
+          <p className="text-slate-500 font-medium mt-1">Manage team workload and track productivity</p>
         </div>
-        <button
-          onClick={() => setOpen(true)}
-          className="bg-blue-600 text-white px-6 py-3 rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all font-bold flex items-center gap-2 active:scale-95"
-        >
-          <RiAddLine size={24} /> Create New Task
-        </button>
+        {role === 'employee' ? (
+          <button
+            onClick={() => setSubmitTimesheetOpen(true)}
+            className="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all flex items-center gap-2"
+          >
+            <RiAddLine />
+            Log Timesheet
+          </button>
+        ) : (
+          <button
+            onClick={() => setAddTaskOpen(true)}
+            className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center gap-2"
+          >
+            <RiAddLine />
+            New Task
+          </button>
+        )}
       </div>
 
-      <TimesheetCards data={tasks} />
-      
-      <div className="flex flex-col shadow-sm">
-        <TimesheetFilters filters={filters} setFilters={setFilters} total={filteredTasks.length} />
-        <TimesheetTable tasks={filteredTasks} setTasks={setTasks} allTasks={tasks} />
+      {/* Stats Cards */}
+      <TimesheetCards data={tasks} timesheets={timesheets} />
+
+      {/* Filters */}
+      <TimesheetFilters filters={filters} setFilters={setFilters} total={data.length} />
+
+      {/* Tabbed Tables */}
+      <div className="space-y-2">
+        <div className="flex border-b border-slate-200">
+          <button 
+            className={`pb-3 px-6 font-bold text-sm uppercase tracking-wider ${
+              activeTab === "tasks" 
+                ? "border-b-2 border-blue-500 text-blue-600" 
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+            onClick={() => setActiveTab("tasks")}
+          >
+            Tasks ({tasks.length})
+          </button>
+          <button 
+            className={`pb-3 px-6 font-bold text-sm uppercase tracking-wider ${
+              activeTab === "timesheets" 
+                ? "border-b-2 border-indigo-500 text-indigo-600" 
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+            onClick={() => setActiveTab("timesheets")}
+          >
+            Timesheets ({timesheets.length})
+          </button>
+        </div>
+        <TasksTable 
+          data={data} 
+          type={activeTab} 
+          onRefresh={handleRefresh}
+          filters={filters}
+          role={role}
+        />
       </div>
 
-      {open && <AddTaskModal open={open} onClose={() => setOpen(false)} onSave={saveTask} />}
+      {/* Modals */}
+<AddTaskModal open={addTaskOpen} onClose={() => setAddTaskOpen(false)} onRefresh={handleRefresh} projects={projects} />
+      <TimesheetSubmitModal 
+        open={submitTimesheetOpen} 
+        onClose={() => setSubmitTimesheetOpen(false)} 
+        onRefresh={handleRefresh} 
+        projects={projects}
+        tasks={tasks}
+      />
     </div>
   );
 };

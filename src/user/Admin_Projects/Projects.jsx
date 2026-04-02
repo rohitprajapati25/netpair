@@ -90,48 +90,157 @@
 // export default Projects;
 
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import axios from 'axios';
+import { useAuth } from "../../contexts/AuthContext";
 import ProjectFilters from "../../components/Projects/ProjectFilters";
 import ProjectsTable from "../../components/Projects/ProjectsTable";
 import ProjectCards from "../../components/Projects/ProjectCards";
 import ProjectModal from "../../components/Projects/ProjectModal";
-import { RiAddLine, RiFolderSettingsLine } from "react-icons/ri";
+import { RiAddLine } from "react-icons/ri";
+
+
 
 const Projects = () => {
-  const [projects, setProjects] = useState([
-    { id: 1, name: "G97 AutoHub", start: "2026-03-01", end: "2026-06-10", status: "Ongoing" },
-    { id: 2, name: "Internal Management System", start: "2026-01-15", end: "2026-04-20", status: "Ongoing" },
-    { id: 3, name: "E-commerce App", start: "2025-12-03", end: "2026-02-10", status: "Completed" },
-  ]);
-
-  const [filters, setFilters] = useState({ search: "", status: "All" });
+  const { token, user } = useAuth();
+  const isAdminRole = ['superadmin', 'SuperAdmin', 'admin', 'Admin'].includes(user?.role) || ['superadmin', 'admin'].includes(user?.role?.toLowerCase());
+  const [projects, setProjects] = useState([]);
+  const [logs, setLogs] = useState([]);
+  const [stats, setStats] = useState({});
+  const [filters, setFilters] = useState({ search: "", status: "All", priority: "All", project_type: "All", department: "All", createdBy: "All" });
   const [open, setOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // INDUSTRY STANDARD: Memoized Filtering
-  const filteredData = useMemo(() => {
-    return projects.filter((p) => {
-      const matchesSearch = p.name.toLowerCase().includes(filters.search.toLowerCase());
-      const matchesStatus = filters.status === "All" || p.status === filters.status;
-      return matchesSearch && matchesStatus;
-    });
-  }, [projects, filters]);
+  // Fetch projects on mount and refresh
+  const fetchProjects = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const params = new URLSearchParams({
+        ...filters,
+        page: '1',
+        limit: '1000'
+      });
+      const res = await axios.get(`http://localhost:5000/api/admin/projects?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (res.data.success) {
+        // Fix for table expecting 'id' instead of '_id'
+        const mappedProjects = (res.data.projects || []).map(p => ({
+          ...p,
+          id: p._id,
+          assignedEmployees: p.assignedEmployees || []
+        }));
+        setProjects(mappedProjects);
+      }
 
-  const saveProject = (projectData) => {
-    if (editingProject) {
-      setProjects(projects.map(p => p.id === editingProject.id ? { ...projectData, id: p.id } : p));
-      setEditingProject(null);
-    } else {
-      setProjects([{ ...projectData, id: Date.now() }, ...projects]);
-      setOpen(false);
+    } catch (err) {
+      console.error('Fetch projects error:', err);
+      setError('Failed to load projects');
+    } finally {
+      setLoading(false);
+    }
+  }, [filters, token]);
+
+  // Fetch stats
+// Logs only for SuperAdmin (404 fixed)
+  const fetchLogs = useCallback(async () => {
+    if (user?.role !== "superadmin") return;
+    try {
+      const res = await axios.get('http://localhost:5000/api/admin/projects/logs', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        setLogs(res.data.logs);
+      }
+    } catch (err) {
+      console.error('Logs error:', err);
+    }
+  }, [token, user?.role]);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/admin/projects/stats', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        setStats(res.data.stats);
+      }
+    } catch (err) {
+      console.error('Stats error:', err);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      fetchProjects();
+      fetchStats();
+      fetchLogs();
+    }
+  }, [fetchProjects, fetchStats, fetchLogs, token]);
+
+  const refreshData = useCallback(() => {
+    fetchProjects();
+    fetchStats();
+  }, [fetchProjects, fetchStats]);
+
+  const saveProject = async (projectData) => {
+    try {
+      let res;
+      if (editingProject) {
+        // Convert FormData to object for PUT
+        const projectObj = Object.fromEntries(projectData.entries());
+        
+        // Clean ObjectId empty strings for backend
+        const cleanProject = { ...projectObj };
+        if (cleanProject.projectOwnerId === '') cleanProject.projectOwnerId = null;
+        if (cleanProject.manager === '') cleanProject.manager = null;
+        
+        res = await axios.put(`http://localhost:5000/api/admin/projects/${editingProject._id}`, cleanProject, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      } else {
+        res = await axios.post('http://localhost:5000/api/admin/projects', projectData, {
+          headers: { 
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+
+      }
+      
+      if (res.data.success) {
+        refreshData();
+        setOpen(false);
+        setEditingProject(null);
+      }
+    } catch (err) {
+      console.error('Save error:', err.response?.data);
+      alert(err.response?.data?.message || 'Operation failed');
     }
   };
 
-  const deleteProject = (id) => {
-    if (window.confirm("Move this project to trash?")) {
-      setProjects(projects.filter(p => p.id !== id));
+  const deleteProject = async (projectId) => {
+    if (window.confirm("⚠️ This will permanently delete the project, all tasks, and members. Continue?")) {
+      try {
+        const res = await axios.delete(`http://localhost:5000/api/admin/projects/${projectId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.data.success) {
+          refreshData();
+        }
+      } catch (err) {
+        alert('Delete failed',err);
+      }
     }
   };
+
 
   return (
     <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10 flex flex-col gap-8">
@@ -140,12 +249,14 @@ const Projects = () => {
           <h1 className="text-3xl font-black text-slate-800 tracking-tight">Project Management</h1>
           <p className="text-slate-500 font-medium text-sm">Track development cycles and delivery timelines</p>
         </div>
-        <button 
-          onClick={() => setOpen(true)} 
-          className="bg-blue-600 text-white px-6 py-3 rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all font-bold flex items-center gap-2 active:scale-95"
-        >
-          <RiAddLine size={22} /> Add New Project
-        </button>
+       
+          <button 
+            onClick={() => setOpen(true)} 
+            className="bg-blue-600 text-white px-6 py-3 rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all font-bold flex items-center gap-2 active:scale-95"
+          >
+            <RiAddLine size={22} /> Add New Project
+          </button>
+        
       </div>
 
       <ProjectCards data={projects} />
@@ -154,17 +265,18 @@ const Projects = () => {
         <ProjectFilters 
           filters={filters} 
           setFilters={setFilters} 
-          totalResults={filteredData.length} 
+          totalResults={projects.length} 
         />
         <ProjectsTable 
-          data={filteredData} 
-          onDelete={deleteProject} 
-          onEdit={setEditingProject} 
+          data={projects} 
+          onDelete={isAdminRole ? deleteProject : undefined} 
+          onEdit={isAdminRole ? setEditingProject : undefined}
+          isAdminRole={isAdminRole}
         />
       </div>
 
       {/* Unified Modal (Add/Edit) */}
-      {(open || editingProject) && (
+      {(open || editingProject) && isAdminRole && (
         <ProjectModal 
           onClose={() => { setOpen(false); setEditingProject(null); }} 
           onSave={saveProject} 

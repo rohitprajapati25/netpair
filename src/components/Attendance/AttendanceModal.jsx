@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+    import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from 'axios';
 import { useAuth } from "../../contexts/AuthContext";
-import { RiCloseLine, RiTimeLine, RiMapPinLine, RiCheckLine, RiUserLine } from "react-icons/ri";
+import { RiCloseLine, RiTimeLine, RiMapPinLine, RiCheckLine, RiUserLine, RiCalendarLine } from "react-icons/ri";
 
 const AttendanceModal = ({ onClose, onRefresh, editData }) => {
   const { token } = useAuth();
@@ -18,9 +18,10 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
 
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/employees?page=1&limit=100', {
+      const res = await axios.get('http://localhost:5000/api/admin/active-employees?page=1&limit=1000', {
         headers: { Authorization: `Bearer ${token}` }
       });
+
       if (res.data.success) {
         setEmployees(res.data.employees || res.data.records || []);
       }
@@ -33,23 +34,41 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
 
   const formik = useFormik({
     initialValues: {
+      date: editData?.date ? new Date(editData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       employee: editData?.employee?._id || '',
       status: editData?.status || 'Present',
       checkIn: editData?.checkIn || '',
       checkOut: editData?.checkOut || '',
-      workMode: editData?.workMode || 'Office',
+      workMode: editData?.workMode || '',
       notes: editData?.notes || ''
     },
     validationSchema: Yup.object({
-      employee: Yup.string().required('Employee required'),
-      status: Yup.string().required('Status required')
+      date: Yup.string().required('Date required'),
+      employee: isEdit ? Yup.string() : Yup.string().required('Employee required'),
+      status: Yup.string().required('Status required'),
+      checkIn: Yup.string().when('status', {
+        is: 'Present',
+        then: (schema) => schema.required('Check In required for Present status'),
+        otherwise: (schema) => schema.notRequired()
+      }),
+      checkOut: Yup.string().when('status', {
+        is: 'Present',
+        then: (schema) => schema.required('Check Out required for Present status'),
+        otherwise: (schema) => schema.notRequired()
+      }),
+      workMode: Yup.string().when('status', {
+        is: 'Present',
+        then: (schema) => schema.required('Work Mode required for Present status'),
+        otherwise: (schema) => schema.notRequired()
+      })
     }),
-    enableReinitialize: true, // Reset form when editData changes
+    enableReinitialize: true,
     onSubmit: async (values) => {
       try {
         setLoading(true);
         const attendanceData = {
-          employeeId: values.employee, // ✅ Backend expects 'employeeId'
+          date: values.date,
+          employeeId: values.employee,
           status: values.status,
           workMode: values.workMode,
           checkIn: values.checkIn,
@@ -59,19 +78,17 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
 
         let res;
         if (isEdit) {
-          // Edit existing
           res = await axios.put(`http://localhost:5000/api/admin/attendance/${editData._id}`, attendanceData, {
             headers: { Authorization: `Bearer ${token}` }
           });
         } else {
-          // New attendance
           res = await axios.post('http://localhost:5000/api/admin/attendance/mark', attendanceData, {
             headers: { Authorization: `Bearer ${token}` }
           });
         }
 
         if (res.data.success) {
-          onRefresh(); // Refresh parent table
+          onRefresh();
           onClose();
         }
       } catch (err) {
@@ -82,6 +99,14 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
       }
     }
   });
+
+  useEffect(() => {
+    if (formik.values.status === 'Absent') {
+      formik.setFieldValue('checkIn', '');
+      formik.setFieldValue('checkOut', '');
+      formik.setFieldValue('workMode', '');
+    }
+  }, [formik.values.status]);
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center z-[100] p-4">
@@ -98,27 +123,56 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
         <form onSubmit={formik.handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
-              <RiUserLine size={16} />
-              Employee
+              <RiCalendarLine size={16} />
+              Date
             </label>
-            <select 
-              name="employee"
-              value={formik.values.employee}
+            <input
+              type="date"
+              name="date"
+              value={formik.values.date}
               onChange={formik.handleChange}
-              disabled={employeesLoading || isEdit}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-50"
-            >
-              <option value="">Select Employee</option>
-              {employees.map(emp => (
-                <option key={emp._id} value={emp._id}>
-                  {emp.name} ({emp.department} - {emp.designation})
-                </option>
-              ))}
-            </select>
-            {formik.touched.employee && formik.errors.employee && (
-              <p className="mt-1 text-xs text-rose-600">{formik.errors.employee}</p>
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/20"
+            />
+            {formik.touched.date && formik.errors.date && (
+              <p className="mt-1 text-xs text-rose-600">{formik.errors.date}</p>
             )}
           </div>
+
+          {isEdit && editData?.employee && (
+            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl shadow-sm">
+              <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                <RiUserLine size={16} />
+                Employee Name (Cannot Change)
+              </label>
+              <div className="text-lg font-bold text-slate-900">{editData.employee.name}</div>
+              <div className="text-sm text-slate-500">{editData.employee.department || 'N/A'} - {editData.employee.designation || 'N/A'}</div>
+            </div>
+          )}
+          {!isEdit && (
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
+                <RiUserLine size={16} />
+                Employee
+              </label>
+              <select 
+                name="employee"
+                value={formik.values.employee}
+                onChange={formik.handleChange}
+                disabled={employeesLoading}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-50"
+              >
+                <option value="">Select Employee</option>
+                {employees.map(emp => (
+                  <option key={emp._id} value={emp._id}>
+                    {emp.name} ({emp.department} - {emp.designation})
+                  </option>
+                ))}
+              </select>
+              {formik.touched.employee && formik.errors.employee && (
+                <p className="mt-1 text-xs text-rose-600">{formik.errors.employee}</p>
+              )}
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">Status</label>
@@ -146,8 +200,13 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
                 name="checkIn"
                 value={formik.values.checkIn}
                 onChange={formik.handleChange}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500"
+                disabled={formik.values.status !== 'Present'}
+                className={`w-full border rounded-lg px-3 py-2 text-sm focus:border-blue-500 ${formik.values.status !== 'Present' ? 'bg-slate-100 cursor-not-allowed' : 'border-slate-200'}`}
               />
+              {formik.touched.checkIn && formik.errors.checkIn && (
+                <p className="mt-1 text-xs text-rose-600">{formik.errors.checkIn}</p>
+              )}
+
             </div>
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
@@ -158,8 +217,13 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
                 name="checkOut"
                 value={formik.values.checkOut}
                 onChange={formik.handleChange}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500"
+                disabled={formik.values.status !== 'Present'}
+                className={`w-full border rounded-lg px-3 py-2 text-sm focus:border-blue-500 ${formik.values.status !== 'Present' ? 'bg-slate-100 cursor-not-allowed' : 'border-slate-200'}`}
               />
+              {formik.touched.checkOut && formik.errors.checkOut && (
+                <p className="mt-1 text-xs text-rose-600">{formik.errors.checkOut}</p>
+              )}
+
             </div>
           </div>
 
@@ -172,8 +236,13 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
               name="workMode"
               value={formik.values.workMode}
               onChange={formik.handleChange}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 bg-white"
+              disabled={formik.values.status !== 'Present'}
+              className={`w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 ${formik.values.status !== 'Present' ? 'bg-slate-100 cursor-not-allowed border-slate-200' : 'border-slate-200 bg-white'}`}
             >
+{formik.touched.workMode && formik.errors.workMode && (
+                <p className="mt-1 text-xs text-rose-600">{formik.errors.workMode}</p>
+              )}
+              <option value="">-- Select Work Mode --</option>
               <option value="Office">Office</option>
               <option value="WFH">WFH</option>
               <option value="Remote">Remote</option>

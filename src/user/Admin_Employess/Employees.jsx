@@ -498,7 +498,7 @@ const Employees = () => {
       });
 
       const res = await axios.get(
-        `http://localhost:5000/api/admin/employees?${params}`,
+        `http://localhost:5000/api/employees?${params}`,
         authHeaders()
       );
       setEmployees(res.data.employees || []);
@@ -518,7 +518,7 @@ const Employees = () => {
   const handleStatusToggle = async (id, newStatus) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/admin/employees/${id}`,
+        `http://localhost:5000/api/employees/${id}`,
         { status: newStatus },     // "active" | "inactive" — matches DB enum
         authHeaders()
       );
@@ -534,7 +534,7 @@ const Employees = () => {
     try {
       console.log('Deleting employee ID:', id);
       await axios.delete(
-        `http://localhost:5000/api/admin/employees/${id}`,
+        `http://localhost:5000/api/employees/${id}`,
         authHeaders()
       );
       console.log('Delete success, refetching...');

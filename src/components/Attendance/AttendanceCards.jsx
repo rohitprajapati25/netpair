@@ -11,18 +11,35 @@ const AttendanceCards = ({ data }) => {
     loading: true 
   });
   
-  // Compute attendance stats from data
-  const attendanceStats = useMemo(() => {
-    const totalRecords = data.length;
-    const present = data.filter(d => d.status === "Present").length;
-    const absent = data.filter(d => d.status === "Absent").length;
-    const todayRecords = data.filter(d => {
-      const today = new Date().toISOString().split('T')[0];
-      return d.date === today;
-    }).length;
+// Real today stats from backend API
+  const [todayStats, setTodayStats] = useState({ present: 0, absent: 0, loading: false });
+
+  useEffect(() => {
+    if (!token) return;
     
-    return { totalRecords, present, absent, todayRecords };
-  }, [data]);
+    const fetchTodayStats = async () => {
+      try {
+        setTodayStats(prev => ({...prev, loading: true}));
+        const res = await axios.get('http://localhost:5000/api/admin/attendance/today-stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.data.success) {
+          setTodayStats({
+            present: res.data.stats.present || 0,
+            absent: res.data.stats.absent || 0,
+            loading: false
+          });
+        } else {
+          setTodayStats({ present: 0, absent: 0, loading: false });
+        }
+      } catch (err) {
+        console.error('Today stats error:', err);
+        setTodayStats({ present: 0, absent: 0, loading: false });
+      }
+    };
+    
+    fetchTodayStats();
+  }, [token]);
 
 useEffect(() => {
     if (!token) return;
@@ -92,24 +109,25 @@ useEffect(() => {
         value={stats.activeEmployees.toLocaleString()} 
         icon="ri-team-line" 
         bg="from-emerald-500 to-teal-600"
-        subtitle="Currently active"
+        subtitle="Active Employees"
       />
 
       <Card 
         title="Present Today" 
-        value={attendanceStats.present} 
+        value={todayStats.present} 
         icon="ri-user-follow-line" 
         bg="from-green-500 to-emerald-600"
-        subtitle="Today attendance"
+        subtitle="Today Attendance Count"
       />
 
       <Card 
         title="Absent Today" 
-        value={attendanceStats.absent} 
+        value={todayStats.absent} 
         icon="ri-user-unfollow-line" 
         bg="from-red-500 to-rose-600"
-        subtitle="Today attendance"
+        subtitle="Today Absence Count"
       />
+
     </div>
   );
 };
