@@ -7,6 +7,7 @@ import {
   RiTimeLine,
   RiEditLine,
   RiDeleteBinLine,
+  RiLoader4Line,
 } from "react-icons/ri";
 
 const formatDateDDMMYYYY = (dateStr) => {
@@ -181,7 +182,7 @@ const AttendanceTable = ({
                           className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
                         >
                           {isDeleting ? (
-                            <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                            <RiLoader4Line size={16} className="animate-spin" />
                           ) : (
                             <RiDeleteBinLine size={16} />
                           )}

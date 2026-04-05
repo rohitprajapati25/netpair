@@ -4,6 +4,7 @@ import axios from "axios";
 import TasksTable from "../../components/Task_Timesheet/TimesheetTable";
 import TimesheetSubmitModal from "../../components/Task_Timesheet/TimesheetSubmitModal";
 import TimesheetFilters from "../../components/Task_Timesheet/TimesheetFilters";
+import { SkeletonStats, SkeletonTable } from "../../components/Skeletons";
 import { RiAddLine } from "react-icons/ri";
 
 const MyTasks = () => {
@@ -43,7 +44,13 @@ const MyTasks = () => {
   const data = activeTab === "my-tasks" ? myTasks : timesheets;
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen"><RiLoader4Line className="animate-spin text-4xl" /></div>;
+    return (
+      <div className="p-6 lg:p-10 space-y-8">
+        <div className="h-12 bg-slate-200 rounded-xl animate-pulse w-64" />
+        <SkeletonStats count={2} />
+        <div className="mt-8"><SkeletonTable rows={5} /></div>
+      </div>
+    );
   }
 
   return (

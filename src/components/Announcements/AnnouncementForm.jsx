@@ -45,7 +45,7 @@
 
 import React from "react";
 import { useFormik } from "formik";
-import * as Yup from "yup";
+import { announcementValidationSchema } from "../../schemas/announcementValidation";
 import { RiSendPlane2Line, RiUserSharedLine, RiErrorWarningLine } from "react-icons/ri";
 
 const AnnouncementForm = ({ onAdd }) => {
@@ -55,11 +55,7 @@ const AnnouncementForm = ({ onAdd }) => {
       msg: "",
       targetRole: "All",
     },
-    validationSchema: Yup.object({
-      title: Yup.string().min(5, "Title too short").required("Title is required"),
-      msg: Yup.string().min(10, "Message too short").required("Message is required"),
-      targetRole: Yup.string().required("Target role is required"),
-    }),
+    validationSchema: announcementValidationSchema,
     onSubmit: (values, { resetForm }) => {
       onAdd(values);
       resetForm();

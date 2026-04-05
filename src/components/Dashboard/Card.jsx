@@ -1,6 +1,17 @@
 import React from "react";
 
-const Card = ({ icon, num, tot, color }) => {
+const Card = ({ icon, num, tot, color, loading = false }) => {
+  if (loading) {
+    return (
+      <div className="group rounded-2xl p-6 flex items-center gap-5 shadow-lg bg-gradient-to-r from-slate-200 to-slate-300 animate-pulse">
+        <div className="flex items-center justify-center h-14 w-14 rounded-xl bg-white/30" />
+        <div className="flex flex-col space-y-2 flex-1">
+          <div className="h-8 bg-white/30 rounded-lg w-3/4" />
+          <div className="h-4 bg-white/30 rounded w-1/2" />
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       className={`group rounded-2xl p-6 flex items-center gap-5

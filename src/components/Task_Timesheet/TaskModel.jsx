@@ -1,68 +1,10 @@
-// import React, { useState } from "react";
-
-// const TaskModal = ({ task, close, onSave }) => {
-//   const [form, setForm] = useState({
-//     ...task,
-//     emp: task.employee || task.emp,
-//     title: task.task || task.title
-//   });
-
-//   const handleUpdate = () => {
-//     onSave({
-//       ...form,
-//       employee: form.emp,
-//       task: form.title
-//     });
-//   };
-
-//   return (
-//     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm">
-//       <div className="bg-white rounded-2xl w-[420px] p-6 shadow-xl">
-//         <h2 className="text-xl font-semibold mb-5">Edit Details</h2>
-//         <div className="flex flex-col gap-4">
-//           <input
-//             className="border p-2 rounded-lg"
-//             placeholder="Employee"
-//             value={form.emp}
-//             onChange={(e) => setForm({ ...form, emp: e.target.value })}
-//           />
-//           <input
-//             className="border p-2 rounded-lg"
-//             placeholder="Task"
-//             value={form.title}
-//             onChange={(e) => setForm({ ...form, title: e.target.value })}
-//           />
-//           <select
-//             className="border p-2 rounded-lg"
-//             value={form.status}
-//             onChange={(e) => setForm({ ...form, status: e.target.value })}
-//           >
-//             <option>Pending</option>
-//             <option>In Progress</option>
-//             <option>Completed</option>
-//           </select>
-//           <button
-//             className="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-//             onClick={handleUpdate}
-//           >
-//             Update Changes
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default TaskModal;
-
-
 import React from "react";
 import { useFormik } from "formik";
-
 import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
 import { RiEditLine, RiCloseLine, RiCheckLine, RiLoader4Line, RiMessage3Line } from "react-icons/ri";
 import { taskStatusSchema } from "../../schemas/taskValidation";
+import { TASK_STATUS_ENUM } from "../../utils/enums";
 
 const TaskDetailsModal = ({ task, onClose, onRefresh }) => {
   const { token } = useAuth();
@@ -82,13 +24,11 @@ const TaskDetailsModal = ({ task, onClose, onRefresh }) => {
           progress: values.progress,
         };
 
-        // If your backend schema has 'comments' as an ARRAY of objects:
         if (values.comments) {
-          payload.comments = [{ text: values.comments }]; 
-          // OR if your backend has a dedicated 'newComment' field, use that instead
+payload.comment = values.comments;
         }
 
-        const res = await axios.put(`http://localhost:5000/api/admin/tasks/${task._id}`, payload, {
+  await axios.put(`http://localhost:5000/api/admin/tasks/${task._id}`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
         onRefresh();
@@ -169,17 +109,15 @@ const TaskDetailsModal = ({ task, onClose, onRefresh }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block mb-1">Status</label>
-                  <select
+                    <select
                     {...formik.getFieldProps("status")}
                     className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm font-bold text-slate-700 focus:bg-white focus:border-blue-500 outline-none transition-all cursor-pointer ${
                       formik.touched.status && formik.errors.status ? "border-red-300" : "border-slate-100"
                     }`}
                   >
-                    <option value="Todo">Todo</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Review">Review</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Blocked">Blocked</option>
+                    {TASK_STATUS_ENUM.map((status) => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -213,7 +151,7 @@ const TaskDetailsModal = ({ task, onClose, onRefresh }) => {
                 className="w-full mt-6 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:from-emerald-600 hover:to-emerald-700 shadow-xl shadow-emerald-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {formik.isSubmitting ? <RiLoader4Line className="animate-spin" size={20} /> : <RiCheckLine size={20} />}
-                Update Task
+                Update Task Status
               </button>
             </form>
           </div>
@@ -224,3 +162,4 @@ const TaskDetailsModal = ({ task, onClose, onRefresh }) => {
 };
 
 export default TaskDetailsModal;
+

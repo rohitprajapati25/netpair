@@ -322,6 +322,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { SkeletonHeader, SkeletonFilter, SkeletonStats, SkeletonTable } from "../../components/Skeletons";
 import axios from 'axios';
 import LeaveCards from "../../components/Leave/LeaveCards";
 import LeaveTable from "../../components/Leave/LeaveTable";
@@ -413,11 +414,17 @@ const Leave = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-lg text-slate-500">Loading leaves...</div>
+      <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <SkeletonHeader />
+          <SkeletonStats count={4} />
+          <SkeletonFilter />
+          <SkeletonTable rows={6} />
+        </div>
       </div>
     );
   }
+
 
   if (error) {
     return (

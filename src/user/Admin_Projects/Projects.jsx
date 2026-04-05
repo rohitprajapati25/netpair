@@ -97,13 +97,20 @@ import ProjectFilters from "../../components/Projects/ProjectFilters";
 import ProjectsTable from "../../components/Projects/ProjectsTable";
 import ProjectCards from "../../components/Projects/ProjectCards";
 import ProjectModal from "../../components/Projects/ProjectModal";
+import { SkeletonStats, SkeletonGrid, SkeletonHeader, SkeletonFilter } from "../../components/Skeletons";
+
 import { RiAddLine } from "react-icons/ri";
 
 
 
 const Projects = () => {
   const { token, user } = useAuth();
-  const isAdminRole = ['superadmin', 'SuperAdmin', 'admin', 'Admin'].includes(user?.role) || ['superadmin', 'admin'].includes(user?.role?.toLowerCase());
+  const isAdminRole = ['superadmin', 'admin', 'SuperAdmin', 'Admin'].includes(user?.role);
+  
+  console.log('🔍 Projects component - User:', user);
+  console.log('🔍 Projects component - Token exists:', !!token);
+  console.log('🔍 Projects component - isAdminRole:', isAdminRole);
+  
   const [projects, setProjects] = useState([]);
   const [logs, setLogs] = useState([]);
   const [stats, setStats] = useState({});
@@ -119,7 +126,9 @@ const Projects = () => {
       setLoading(true);
       setError(null);
       const params = new URLSearchParams({
-        ...filters,
+        ...Object.fromEntries(
+          Object.entries(filters).filter(([key, value]) => value !== 'All' && value !== '')
+        ),
         page: '1',
         limit: '1000'
       });
@@ -134,6 +143,7 @@ const Projects = () => {
           id: p._id,
           assignedEmployees: p.assignedEmployees || []
         }));
+        console.log('Fetched projects:', mappedProjects.length, 'projects');
         setProjects(mappedProjects);
       }
 
@@ -163,7 +173,12 @@ const Projects = () => {
 
   const fetchStats = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/projects/stats', {
+      const params = new URLSearchParams(
+        Object.fromEntries(
+          Object.entries(filters).filter(([key, value]) => value !== 'All' && value !== '')
+        )
+      );
+      const res = await axios.get(`http://localhost:5000/api/admin/projects/stats?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
@@ -172,13 +187,16 @@ const Projects = () => {
     } catch (err) {
       console.error('Stats error:', err);
     }
-  }, [token]);
+  }, [token, filters]);
 
   useEffect(() => {
     if (token) {
+      console.log('🔄 Fetching projects with token:', token.substring(0, 20) + '...');
       fetchProjects();
       fetchStats();
       fetchLogs();
+    } else {
+      console.log('❌ No token available, cannot fetch projects');
     }
   }, [fetchProjects, fetchStats, fetchLogs, token]);
 
@@ -191,28 +209,20 @@ const Projects = () => {
     try {
       let res;
       if (editingProject) {
-        // Convert FormData to object for PUT
-        const projectObj = Object.fromEntries(projectData.entries());
-        
-        // Clean ObjectId empty strings for backend
-        const cleanProject = { ...projectObj };
-        if (cleanProject.projectOwnerId === '') cleanProject.projectOwnerId = null;
-        if (cleanProject.manager === '') cleanProject.manager = null;
-        
-        res = await axios.put(`http://localhost:5000/api/admin/projects/${editingProject._id}`, cleanProject, {
+        // For updates, send as JSON
+        res = await axios.put(`http://localhost:5000/api/admin/projects/${editingProject._id}`, projectData, {
           headers: { 
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
       } else {
+        // For new projects, send as FormData
         res = await axios.post('http://localhost:5000/api/admin/projects', projectData, {
           headers: { 
             Authorization: `Bearer ${token}`
           }
         });
-
-
       }
       
       if (res.data.success) {
@@ -227,23 +237,54 @@ const Projects = () => {
   };
 
   const deleteProject = async (projectId) => {
+    console.log('🗑️ Delete project called with ID:', projectId);
+    console.log('👤 User role:', user?.role, 'Token exists:', !!token);
+    console.log('🔐 isAdminRole:', isAdminRole);
+    
+    if (!isAdminRole) {
+      alert('You do not have permission to delete projects');
+      return;
+    }
+    
     if (window.confirm("⚠️ This will permanently delete the project, all tasks, and members. Continue?")) {
       try {
+        console.log('📡 Making DELETE request to:', `http://localhost:5000/api/admin/projects/${projectId}`);
         const res = await axios.delete(`http://localhost:5000/api/admin/projects/${projectId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        console.log('✅ Delete response:', res.data);
         if (res.data.success) {
           refreshData();
+          alert('Project deleted successfully!');
         }
       } catch (err) {
-        alert('Delete failed',err);
+        console.error('❌ Delete error:', err.response?.data || err.message);
+        alert('Delete failed: ' + (err.response?.data?.message || err.message));
       }
     }
   };
 
+  const handleEdit = (project) => {
+    setEditingProject(project);
+  };
+
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <SkeletonStats count={2} />
+          <SkeletonFilter />
+          <SkeletonGrid count={4} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10 flex flex-col gap-8">
+
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-800 tracking-tight">Project Management</h1>
@@ -259,7 +300,7 @@ const Projects = () => {
         
       </div>
 
-      <ProjectCards data={projects} />
+      <ProjectCards data={projects} stats={stats} />
 
       <div className="flex flex-col shadow-sm">
         <ProjectFilters 
@@ -267,12 +308,33 @@ const Projects = () => {
           setFilters={setFilters} 
           totalResults={projects.length} 
         />
-        <ProjectsTable 
-          data={projects} 
-          onDelete={isAdminRole ? deleteProject : undefined} 
-          onEdit={isAdminRole ? setEditingProject : undefined}
-          isAdminRole={isAdminRole}
-        />
+        {loading ? (
+          <div className="bg-white rounded-b-2xl border-x border-b border-slate-200 p-6">
+            <SkeletonGrid count={4} />
+          </div>
+        ) : error ? (
+          <div className="bg-white rounded-b-2xl border-x border-b border-slate-200 p-8 text-center">
+            <div className="text-red-600 font-medium">{error}</div>
+            <button 
+              onClick={refreshData}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : projects.length === 0 ? (
+          <div className="bg-white rounded-b-2xl border-x border-b border-slate-200 p-8 text-center">
+            <div className="text-slate-500 font-medium">No projects found</div>
+            <p className="text-slate-400 text-sm mt-1">Try adjusting your filters or create a new project</p>
+          </div>
+        ) : (
+          <ProjectsTable 
+            data={projects} 
+            onDelete={isAdminRole ? deleteProject : undefined} 
+            onEdit={isAdminRole ? handleEdit : undefined}
+            isAdminRole={isAdminRole}
+          />
+        )}
       </div>
 
       {/* Unified Modal (Add/Edit) */}

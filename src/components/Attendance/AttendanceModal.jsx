@@ -1,6 +1,6 @@
-    import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
-import * as Yup from "yup";
+import { attendanceValidationSchema } from "../../schemas/attendanceValidation";
 import axios from 'axios';
 import { useAuth } from "../../contexts/AuthContext";
 import { RiCloseLine, RiTimeLine, RiMapPinLine, RiCheckLine, RiUserLine, RiCalendarLine } from "react-icons/ri";
@@ -8,7 +8,6 @@ import { RiCloseLine, RiTimeLine, RiMapPinLine, RiCheckLine, RiUserLine, RiCalen
 const AttendanceModal = ({ onClose, onRefresh, editData }) => {
   const { token } = useAuth();
   const [employees, setEmployees] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [employeesLoading, setEmployeesLoading] = useState(true);
   const isEdit = !!editData;
 
@@ -42,30 +41,10 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
       workMode: editData?.workMode || '',
       notes: editData?.notes || ''
     },
-    validationSchema: Yup.object({
-      date: Yup.string().required('Date required'),
-      employee: isEdit ? Yup.string() : Yup.string().required('Employee required'),
-      status: Yup.string().required('Status required'),
-      checkIn: Yup.string().when('status', {
-        is: 'Present',
-        then: (schema) => schema.required('Check In required for Present status'),
-        otherwise: (schema) => schema.notRequired()
-      }),
-      checkOut: Yup.string().when('status', {
-        is: 'Present',
-        then: (schema) => schema.required('Check Out required for Present status'),
-        otherwise: (schema) => schema.notRequired()
-      }),
-      workMode: Yup.string().when('status', {
-        is: 'Present',
-        then: (schema) => schema.required('Work Mode required for Present status'),
-        otherwise: (schema) => schema.notRequired()
-      })
-    }),
+    validationSchema: attendanceValidationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-        setLoading(true);
         const attendanceData = {
           date: values.date,
           employeeId: values.employee,
@@ -94,8 +73,6 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
       } catch (err) {
         console.error('Attendance save error:', err);
         alert(err.response?.data?.message || (isEdit ? 'Update failed' : 'Mark failed'));
-      } finally {
-        setLoading(false);
       }
     }
   });
@@ -120,12 +97,13 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
           </button>
         </div>
 
-        <form onSubmit={formik.handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
-              <RiCalendarLine size={16} />
-              Date
-            </label>
+        <form onSubmit={formik.handleSubmit} className="space-y-5 relative">
+          <fieldset disabled={formik.isSubmitting} className="space-y-5">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
+                <RiCalendarLine size={16} />
+                Date
+              </label>
             <input
               type="date"
               name="date"
@@ -266,17 +244,17 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
             <button 
               type="button"
               onClick={onClose}
-              disabled={loading}
+              disabled={formik.isSubmitting}
               className="flex-1 px-6 py-3 rounded-xl border border-slate-200 font-semibold text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50"
             >
               Cancel
             </button>
             <button 
               type="submit" 
-              disabled={loading || employeesLoading}
+              disabled={formik.isSubmitting || employeesLoading}
               className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {loading ? (
+              {formik.isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   {isEdit ? 'Updating...' : 'Saving...'}
@@ -289,6 +267,7 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
               )}
             </button>
           </div>
+        </fieldset>
         </form>
       </div>
     </div>

@@ -263,6 +263,7 @@ import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import { taskValidationSchema } from "../../schemas/taskValidation";
 import { useAuth } from "../../contexts/AuthContext";
+import LoadingOverlay from "../common/LoadingOverlay";
 import axios from "axios";
 import { RiAddCircleLine, RiCloseLine, RiLoader4Line, RiUserAddLine, RiFlag2Line } from "react-icons/ri";
 
@@ -383,9 +384,11 @@ const AddTaskModal = ({ open, onClose, onRefresh, projects: propProjects }) => {
         </div>
 
         {/* Form */}
-        <form onSubmit={formik.handleSubmit} className="p-10 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2 space-y-2">
+        <form onSubmit={formik.handleSubmit} className="p-10 space-y-6 relative">
+          <LoadingOverlay visible={formik.isSubmitting} message="Creating task..." />
+          <fieldset disabled={formik.isSubmitting} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2 space-y-2">
               <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">Task Title *</label>
               <input
                 {...formik.getFieldProps("task_title")}
@@ -503,7 +506,7 @@ const AddTaskModal = ({ open, onClose, onRefresh, projects: propProjects }) => {
           </div>
 
           <div className="flex items-center gap-4 pt-6">
-            <button type="button" onClick={onClose} className="flex-1 py-4 font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-all">
+            <button type="button" onClick={onClose} disabled={formik.isSubmitting} className="flex-1 py-4 font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-all disabled:opacity-50">
               Cancel
             </button>
             <button 
@@ -514,6 +517,7 @@ const AddTaskModal = ({ open, onClose, onRefresh, projects: propProjects }) => {
               {formik.isSubmitting ? <RiLoader4Line className="animate-spin" size={20} /> : "Create Task"}
             </button>
           </div>
+        </fieldset>
         </form>
       </div>
     </div>

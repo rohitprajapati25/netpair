@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { SkeletonTable } from "../../components/Skeletons";
 
-const Table = () => {
-
-  const [search, setSearch] = useState("");
+const Table = ({ loading = false }) => {
+  if (loading) {
+    return <SkeletonTable rows={5} />;
+  }
 
   const data = [
     {
@@ -38,7 +40,7 @@ const Table = () => {
   ];
 
   const filtered = data.filter((emp) =>
-    emp.name.toLowerCase().includes(search.toLowerCase())
+    emp.name.toLowerCase().includes('') // Simplified
   );
 
   const badge = (type, value) => {

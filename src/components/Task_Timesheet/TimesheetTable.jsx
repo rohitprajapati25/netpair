@@ -59,15 +59,13 @@ const handleDelete = async (e, id) => {
     return alert("Not authorized");
   }
 
-  if (window.confirm("Delete this task?")) {
+  const confirmMsg = `Delete ${type}?`;
+  if (window.confirm(confirmMsg)) {
     try {
-      await axios.delete(
-        `http://localhost:5000/api/admin/tasks/${id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-
+      const endpoint = type === "tasks" ? `/api/admin/tasks/${id}` : `/api/admin/timesheets/${id}`;
+      await axios.delete(`http://localhost:5000${endpoint}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       onRefresh();
     } catch (error) {
       console.error(error.response || error.message);
@@ -145,7 +143,7 @@ const handleDelete = async (e, id) => {
                   {new Date(item.start_date || item.date).toLocaleDateString()}
                 </td>
                 <td className="px-8 py-5 text-center font-bold text-slate-700 text-lg">
-                  {item.hours_worked || item.hours || "0"}h
+{item.hours_worked ? item.hours_worked + 'h' : (item.estimated_hours ? item.estimated_hours + 'h' : '0h')}
                 </td>
                 <td className="px-8 py-5 text-center">
                   <span className={`px-4 py-2 rounded-xl text-[11px] font-bold border-2 uppercase tracking-wide inline-block ${getStatusStyle(item.status)}`}>

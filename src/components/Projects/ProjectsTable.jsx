@@ -67,7 +67,6 @@ import React from "react";
 import { RiEditLine, RiDeleteBinLine, RiEyeLine } from "react-icons/ri";
 
 const ProjectsTable = ({ data, onDelete, onEdit, isAdminRole }) => {
-  // Debug: console.log('Table isSuperAdmin:', isSuperAdmin);
   const getStatusBadge = (status) => {
     const styles = {
       Pending: "bg-slate-50 text-slate-700 border-slate-100",
@@ -137,10 +136,10 @@ const ProjectsTable = ({ data, onDelete, onEdit, isAdminRole }) => {
                 </td>
                 <td className="px-4 py-5 text-center">
                   <div className="w-20 mx-auto bg-slate-100 rounded-full p-1">
-                    <div className={`h-2 rounded-full transition-all ${getProgressBarClass(p.computedProgress || p.progress || 0)}`} 
-                         style={{width: `${p.computedProgress || p.progress || 0}%`}}></div>
+                    <div className={`h-2 rounded-full transition-all ${getProgressBarClass(p.progress || 0)}`} 
+                         style={{width: `${p.progress || 0}%`}}></div>
                   </div>
-                  <div className="text-xs font-mono mt-1 text-slate-600">{(p.computedProgress || p.progress || 0).toFixed(0)}%</div>
+                  <div className="text-xs font-mono mt-1 text-slate-600">{(p.progress || 0).toFixed(0)}%</div>
                 </td>
                 <td className="px-3 py-5 text-xs font-mono text-slate-600 text-center">{p.startDate ? new Date(p.startDate).toLocaleDateString('en-CA') : '—'}</td>
                 <td className="px-3 py-5 text-xs font-mono text-slate-600 text-center">{p.endDate ? new Date(p.endDate).toLocaleDateString('en-CA') : '—'}</td>

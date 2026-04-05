@@ -5,6 +5,7 @@ import AttendanceCards from "../../components/Attendance/AttendanceCards";
 import AttendanceFilter from "../../components/Attendance/AttendanceFilter";
 import AttendanceModal from "../../components/Attendance/AttendanceModal";
 import AttendanceTable from "../../components/Attendance/AttendanceTable";
+import { SkeletonStats, SkeletonTable } from "../../components/Skeletons";
 import { RiCalendarCheckLine } from "react-icons/ri";
 
 const Attendance = () => {
@@ -106,7 +107,12 @@ const [open, setOpen] = useState(false);
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
+    return (
+      <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10">
+        <SkeletonStats count={2} />
+        <div className="mt-8"><SkeletonTable rows={5} /></div>
+      </div>
+    );
   }
 
   return (

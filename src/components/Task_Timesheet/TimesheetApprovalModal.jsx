@@ -48,9 +48,11 @@ const TimesheetApprovalModal = ({ open, timesheet, onClose, onRefresh }) => {
             <p className="text-sm text-slate-600"><strong>Work:</strong> {timesheet.work_description}</p>
           </div>
 
-          <form onSubmit={formik.handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Action</label>
+          <form onSubmit={formik.handleSubmit} className="space-y-4 relative">
+
+            <fieldset disabled={formik.isSubmitting} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Action</label>
               <div className="flex gap-2">
                 <label className="flex items-center gap-2 p-3 border rounded-xl flex-1 cursor-pointer hover:bg-emerald-50 border-emerald-200">
                   <input
@@ -103,6 +105,7 @@ const TimesheetApprovalModal = ({ open, timesheet, onClose, onRefresh }) => {
             >
               {formik.isSubmitting ? <RiLoader4Line className="animate-spin" size={18} /> : "Confirm Action"}
             </button>
+          </fieldset>
           </form>
         </div>
       </div>

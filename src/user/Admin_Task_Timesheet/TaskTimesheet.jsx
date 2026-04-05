@@ -52,12 +52,13 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
-import { RiAddLine, RiLoader2Line } from "react-icons/ri";
+import { RiAddLine } from "react-icons/ri";
 import AddTaskModal from "../../components/Task_Timesheet/AddTaskModal";
 import TasksTable from "../../components/Task_Timesheet/TimesheetTable";
 import TimesheetSubmitModal from "../../components/Task_Timesheet/TimesheetSubmitModal";
 import TimesheetCards from "../../components/Task_Timesheet/TimesheetCards";
 import TimesheetFilters from "../../components/Task_Timesheet/TimesheetFilters";
+import { SkeletonStats, SkeletonTable } from "../../components/Skeletons";
 
 const TaskTimesheet = () => {
   const { role, token } = useAuth();
@@ -81,8 +82,8 @@ const TaskTimesheet = () => {
       const timesheetsRes = await axios.get('http://localhost:5000/api/admin/timesheets', { headers: { Authorization: `Bearer ${token}` } });
       const projectsRes = await axios.get('http://localhost:5000/api/admin/projects', { headers: { Authorization: `Bearer ${token}` } });
       console.log('Projects full response:', projectsRes.data);
-      setTasks(tasksRes.data.tasks || []);
-      setTimesheets(timesheetsRes.data || []);
+      setTasks(tasksRes.data.tasks || tasksRes.data || []);
+      setTimesheets(timesheetsRes.data.timesheets || timesheetsRes.data || []);
       setProjects(projectsRes.data.projects || projectsRes.data || []);
 
     } catch (error) {
@@ -96,16 +97,17 @@ const TaskTimesheet = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <RiLoader2Line className="animate-spin text-4xl text-slate-400" />
+      <div className="p-6 lg:p-10 min-h-screen bg-slate-50/50">
+        <SkeletonStats count={4} />
+        <div className="mt-8"><SkeletonTable rows={6} /></div>
       </div>
     );
   }
 
   const data = activeTab === "tasks" ? tasks : timesheets;
   const totalTasks = tasks.length;
-  const totalHours = timesheets.reduce((sum, ts) => sum + (ts.hours_worked || 0), 0);
-  const approvedTimesheets = timesheets.filter(ts => ts.status === "Approved").length;
+  const totalHours = Array.isArray(timesheets) ? timesheets.reduce((sum, ts) => sum + (ts.hours_worked || 0), 0) : 0;
+  const approvedTimesheets = Array.isArray(timesheets) ? timesheets.filter(ts => ts.status === "Approved").length : 0;
 
   return (
     <div className="p-6 lg:p-10 space-y-8">

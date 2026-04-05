@@ -19,7 +19,7 @@ const TimesheetSubmitModal = ({ open, onClose, onRefresh, projects = [], tasks =
     validationSchema: timesheetValidationSchema,
     onSubmit: async (values) => {
       try {
-        await axios.post('http://localhost:5000/api/employee/timesheets', values, {
+        await axios.post('http://localhost:5000/api/employees/timesheets', values, {
           headers: { Authorization: `Bearer ${token}` }
         });
         onRefresh();
@@ -49,9 +49,11 @@ const TimesheetSubmitModal = ({ open, onClose, onRefresh, projects = [], tasks =
           </button>
         </div>
 
-        <form onSubmit={formik.handleSubmit} className="p-6 space-y-4">
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Date</label>
+        <form onSubmit={formik.handleSubmit} className="p-6 space-y-4 relative">
+
+          <fieldset disabled={formik.isSubmitting} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Date</label>
             <input
               type="date"
               {...formik.getFieldProps("date")}
@@ -125,6 +127,7 @@ const TimesheetSubmitModal = ({ open, onClose, onRefresh, projects = [], tasks =
           >
             {formik.isSubmitting ? <RiLoader4Line className="animate-spin" /> : "Submit Timesheet"}
           </button>
+        </fieldset>
         </form>
       </div>
     </div>

@@ -2,9 +2,10 @@ import React from "react";
 
 const TimesheetCards = ({ data }) => {
 const totalHours = data.reduce((a, b) => {
-    const hours = Number(b.hours) || 0; 
+    const hours = Number(b.hours_worked || b.hours || 0); 
     return a + hours;
-  }, 0);  const completed = data.filter(d => d.status === "Completed").length;
+  }, 0);
+  const completed = data.filter(d => d.status === "Completed").length;
 
   console.log(totalHours);
   

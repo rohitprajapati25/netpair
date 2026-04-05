@@ -431,8 +431,9 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
 
             /* ── EDIT MODE ── */
             ) : (
-              <form onSubmit={formik.handleSubmit} className="space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <form onSubmit={formik.handleSubmit} className="space-y-5 relative">
+                <fieldset disabled={formik.isSubmitting} className="space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <InputField label="Full Name"    name="name"     formik={formik} />
                   <InputField label="Email"        name="email"    formik={formik} type="email" />
                   <InputField label="Phone"        name="phone"    formik={formik} type="tel"
@@ -484,7 +485,8 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all"
+                    disabled={formik.isSubmitting}
+                    className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Discard
                   </button>
@@ -496,6 +498,7 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
                     {formik.isSubmitting ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
+              </fieldset>
               </form>
             )}
           </div>

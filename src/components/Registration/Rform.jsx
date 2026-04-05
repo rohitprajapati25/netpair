@@ -2,7 +2,7 @@
 // import { useFormik } from "formik";
 // import { useNavigate } from "react-router-dom";
 // import { useAuth } from "../../contexts/AuthContext";
-// import { signUpSchema } from "../../schemas";
+import { signUpSchema } from "../../schemas/signUpValidation";
 // import { ROLES } from "../../../../backend/constants/roles";
 
 // const initialValues = {
@@ -295,13 +295,14 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import { useNavigate, Link } from "react-router-dom";
+
 import { useAuth } from "../../contexts/AuthContext";
-import { signUpSchema } from "../../schemas";
 import { genderRole } from "./genderRole";
 import axios from "axios";
 import { RiArrowLeftLine } from "react-icons/ri";
 import { ROLES } from "../../../../backend/constants/roles";
 import {empTypes} from "./empTypes";
+
 
 const Rform = () => {
   const navigate = useNavigate();
