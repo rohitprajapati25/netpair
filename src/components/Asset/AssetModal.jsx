@@ -34,16 +34,18 @@ const AssetModal = ({
         </div>
         
         <Formik
-          initialValues={{
-            name: initialData.name || '',
-            category: initialData.category || '',
-            status: initialData.status || 'Available',
-            serialNumber: initialData.serialNumber || '',
-            purchaseDate: initialData.purchaseDate ? initialData.purchaseDate.split('T')[0] : '',
-assignedTo: initialData.assignedTo?._id || initialData.assignedTo || '',
-            location: initialData.location || '',
-            notes: initialData.notes || ''
+initialValues={{
+            name: initialData?.name || '',
+            category: initialData?.category || '',
+            status: initialData?.status || 'Available',
+            serialNumber: initialData?.serialNumber || '',
+            purchaseDate: initialData?.purchaseDate ? initialData.purchaseDate.split('T')[0] : '',
+            assignedTo: initialData?.assignedTo?._id || initialData?.assignedTo || '',
+            location: initialData?.location || '',
+            notes: initialData?.notes || ''
           }}
+          validateOnChange={true}
+          validateOnBlur={true}
           validationSchema={assetSchema}
           enableReinitialize={true}
           onSubmit={onSave}

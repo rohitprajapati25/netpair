@@ -29,7 +29,7 @@ const AttendanceTable = ({
   const { token } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteLoading, setDeleteLoading] = useState({});
-  const recordsPerPage = 10;
+const recordsPerPage = 5; // Strictly 5 rows first page
 
 // Show ALL records
   const activeRecords = data;
@@ -87,7 +87,7 @@ const AttendanceTable = ({
   }
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm border">
+    <div className="bg-white rounded-2xl overflow-hidden shadow-sm ">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gradient-to-r from-slate-50 to-slate-100">

@@ -1,4 +1,4 @@
-// import React, { useState } from "react";
+
 
 // const Settings = () => {
 
@@ -89,7 +89,7 @@ import {
 
 const Settings = () => {
   const [profile, setProfile] = useState({
-    name: "G97 Master Admin",
+    name: "",
     email: "superadmin@g97autohub.com",
     phone: "+91 9999999999",
     avatar: "https://ui-avatars.com/api/?name=G97+Admin&background=0D8ABC&color=fff&size=256"

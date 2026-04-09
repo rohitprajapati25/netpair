@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import Card from "../../components/Asset/Card";
 import { SkeletonHeader, SkeletonFilter, SkeletonStats, SkeletonGrid } from "../../components/Skeletons";
+import AssetsTable from "../../components/Asset/AssetsTable.jsx";
 import { RiAddLine, RiEdit2Line, RiDeleteBinLine, RiCloseLine, RiMacbookLine, RiStackLine } from "react-icons/ri";
 
 
@@ -78,8 +79,8 @@ const Asset = () => {
     }
   };
 
-  const handleAdd = () => {
-    setEditingAsset(null);
+const handleAdd = () => {
+    setEditingAsset({});
     setFormData({ name: "", category: "", serialNumber: "", purchaseDate: "", assignedTo: "", status: "Available", location: "", notes: "" });
     setOpen(true);
   };
@@ -113,16 +114,26 @@ const Asset = () => {
     }
   };
 
+
   const handleSave = async (values) => {
     try {
       setSaving(true);
+      const cleanValues = { ...values };
+      
+      // Remove undefined/null empty strings for backend
+      Object.keys(cleanValues).forEach(key => {
+        if (cleanValues[key] === '' || cleanValues[key] === null || cleanValues[key] === undefined) {
+          delete cleanValues[key];
+        }
+      });
+
       let res;
-      if (editingAsset) {
-        res = await axios.put(`http://localhost:5000/api/admin/assets/${editingAsset._id}`, values, {
+      if (editingAsset?._id && editingAsset._id !== "undefined") {
+        res = await axios.put(`http://localhost:5000/api/admin/assets/${editingAsset._id}`, cleanValues, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        res = await axios.post('http://localhost:5000/api/admin/assets', values, {
+        res = await axios.post('http://localhost:5000/api/admin/assets', cleanValues, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
@@ -131,23 +142,16 @@ const Asset = () => {
         fetchAssets();
         fetchStats();
         setOpen(false);
+        alert('Asset saved successfully!');
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Save failed');
+      console.error('Save error:', error);
+      alert(error.response?.data?.message || 'Save failed - please check form data');
     } finally {
       setSaving(false);
     }
   };
 
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case "Assigned": return "bg-emerald-100 text-emerald-800 border-emerald-200";
-      case "Available": return "bg-blue-100 text-blue-800 border-blue-200";
-      case "Damaged": return "bg-rose-100 text-rose-800 border-rose-200";
-      case "Disposed": return "bg-gray-100 text-gray-800 border-gray-200";
-      default: return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
 
   const cardData = [
     { title: "Total Assets", tot: stats.total, bg: "from-indigo-600 to-blue-700" },
@@ -185,69 +189,28 @@ const Asset = () => {
         </button>
       </div>
 
+
+
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {cardData.map((d, i) => (
           <Card key={i} title={d.title} tot={d.tot} bg={d.bg} />
         ))}
       </div>
 
-      <AssetFilter filters={filters} setFilters={setFilters} totalResults={filteredAssets.length} />
+      <AssetFilter 
+        filters={filters} 
+        setFilters={setFilters} 
+        totalResults={filteredAssets.length} 
+      />
+      <AssetsTable 
+        data={filteredAssets} 
+        onEdit={handleEdit} 
+        onDelete={handleDelete} 
+        loading={loading} 
+      />
 
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-slate-50/50 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">
-                <th className="px-8 py-5">Asset Details</th>
-                <th className="px-8 py-5 text-center">Category</th>
-                <th className="px-8 py-5 text-center">Assignee</th>
-                <th className="px-8 py-5 text-center">Status</th>
-                <th className="px-8 py-5 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {filteredAssets.map((asset) => (
-                <tr key={asset._id} className="hover:bg-blue-50/30 transition-colors">
-                  <td className="px-8 py-5">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 border border-slate-200">
-                        <RiMacbookLine size={20} />
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-700 text-sm leading-tight">{asset.name}</p>
-                        <p className="text-[11px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5">{asset.assetId}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-8 py-5 text-center">
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-lg">
-                      <RiStackLine size={14} className="text-blue-500" /> {asset.category}
-                    </span>
-                  </td>
-                  <td className="px-8 py-5 text-center font-semibold text-slate-600 text-sm">
-                    {asset.assignedTo?.name || <span className="text-slate-300 italic">—</span>}
-                  </td>
-                  <td className="px-8 py-5 text-center">
-                    <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black border uppercase tracking-wider ${getStatusStyle(asset.status)}`}>
-                      {asset.status}
-                    </span>
-                  </td>
-                  <td className="px-8 py-5 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button onClick={() => handleEdit(asset)} className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-xl shadow-sm border border-blue-100">
-                        <RiEdit2Line size={18} />
-                      </button>
-                      <button onClick={() => handleDelete(asset._id)} className="p-2.5 text-rose-500 hover:bg-rose-50 rounded-xl shadow-sm border border-rose-100">
-                        <RiDeleteBinLine size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+     
 
       <AssetModal
         isOpen={open}
@@ -258,6 +221,7 @@ const Asset = () => {
         saving={saving}
       />
     </div>
+  
   );
 };
 
