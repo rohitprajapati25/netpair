@@ -1,99 +1,441 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import BarCharts from '../../components/Charts/BarCharts';
-import AreaChartSimple from '../../components/Charts/AreaChartSimple';
-import PieChartSimple from '../../components/Charts/PieChartSimple';
+import {
+  RiTeamLine, RiUserFollowLine, RiTaskLine, RiFileList3Line,
+  RiCalendarCheckLine, RiProjectorLine, RiRefreshLine,
+  RiArrowRightLine, RiEyeLine, RiUserUnfollowLine, RiTimeLine,
+  RiSurveyLine, RiComputerLine, RiAlertLine
+} from 'react-icons/ri';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell,
+  AreaChart, Area
+} from 'recharts';
 import { SkeletonHeader, SkeletonStats, SkeletonTable } from '../../components/Skeletons';
-import Card from '../../components/Dashboard/Card';
-import Table from '../../components/Dashboard/Table';
+import SystemHealth from '../../components/Dashboard/SystemHealth';
 
+const API = 'http://localhost:5000/api/admin';
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
 const Dashboard = () => {
-  const { token } = useAuth();
-  const [stats, setStats] = useState({});
-  const [activity, setActivity] = useState([]);
-  const [attendanceData, setAttendanceData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  // error removed to avoid ESLint warning
+  const { token, user } = useAuth();
+  const navigate = useNavigate();
 
-  const fetchDashboardData = useCallback(async () => {
+  const [stats,           setStats]           = useState({});
+  const [activity,        setActivity]        = useState([]);
+  const [attendanceTrend, setAttendanceTrend] = useState([]);
+  const [loading,         setLoading]         = useState(true);
+  const [refreshing,      setRefreshing]      = useState(false);
+
+  const role = user?.role?.toLowerCase() || 'employee';
+
+  // ── Fetch ──────────────────────────────────────────────────────────────────
+  const fetchAll = useCallback(async () => {
+    if (!token) return;
     try {
       setLoading(true);
-      
-      const [statsRes, activityRes, attendanceRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/admin/dashboard/stats', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/admin/dashboard/activity', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/admin/attendance?today=true', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-      ]);
+      const isEmployee = role === 'employee';
 
-      setStats(statsRes.data.stats || {});
-      setActivity(activityRes.data.activity || []);
-      setAttendanceData(attendanceRes.data.records || []);
+      // Always fetch stats
+      const statsRes = await axios.get(`${API}/dashboard/stats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).catch(() => null);
+
+      if (statsRes?.data?.success) setStats(statsRes.data.stats || {});
+
+      if (!isEmployee) {
+        // Fetch activity from audit logs
+        const activityRes = await axios.get(`${API}/dashboard/activity`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => null);
+        if (activityRes?.data?.success) setActivity(activityRes.data.activity || []);
+
+        // Try dedicated trend endpoint first, fallback to computing from attendance
+        const trendRes = await axios.get(`${API}/dashboard/attendance-trend`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => null);
+
+        if (trendRes?.data?.success && trendRes.data.trend?.length) {
+          setAttendanceTrend(trendRes.data.trend);
+        } else {
+          // Fallback: compute trend from raw attendance records (last 7 days)
+          const today = new Date();
+          const weekAgo = new Date(today);
+          weekAgo.setDate(today.getDate() - 6);
+          const dateFrom = weekAgo.toISOString().split('T')[0];
+          const dateTo   = today.toISOString().split('T')[0];
+
+          const attRes = await axios.get(
+            `${API}/attendance?dateFrom=${dateFrom}&dateTo=${dateTo}&limit=500`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          ).catch(() => null);
+
+          const records = attRes?.data?.records || [];
+
+          // Build 7-day map from raw records
+          const map = {};
+          for (let i = 6; i >= 0; i--) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            const key = d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+            map[key] = { day: key, Present: 0, Absent: 0, Late: 0 };
+          }
+          records.forEach(r => {
+            const key = new Date(r.date).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+            if (map[key]) {
+              const s = r.status || 'Absent';
+              if (map[key][s] !== undefined) map[key][s]++;
+            }
+          });
+          setAttendanceTrend(Object.values(map));
+        }
+      }
     } catch (err) {
-      console.error('Dashboard fetch error:', err);
+      console.error('Dashboard error:', err);
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, role]);
 
-  useEffect(() => {
-    if (token) {
-      fetchDashboardData();
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchAll();
+    setRefreshing(false);
+  };
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  // ── Stat cards per role ────────────────────────────────────────────────────
+  const statCards = useMemo(() => {
+    switch (role) {
+      case 'superadmin':
+        return [
+          { icon: RiTeamLine,       value: stats.totalEmployees || 0, label: 'Total Employees', color: 'from-blue-500 to-indigo-600',   link: '/employees',  trend: null },
+          { icon: RiUserFollowLine, value: stats.presentToday   || 0, label: 'Present Today',   color: 'from-emerald-500 to-green-600', link: '/attendance', trend: stats.attendanceRate },
+          { icon: RiProjectorLine,  value: stats.activeProjects || 0, label: 'Active Projects', color: 'from-purple-500 to-pink-600',   link: '/projects',   trend: null },
+          { icon: RiAlertLine,      value: stats.systemAlerts   || 0, label: 'System Alerts',   color: 'from-orange-500 to-red-500',    link: '/audit-logs', trend: null },
+        ];
+      case 'admin':
+        return [
+          { icon: RiTeamLine,       value: stats.totalEmployees || 0, label: 'Total Employees', color: 'from-blue-500 to-indigo-600',   link: '/employees',     trend: null },
+          { icon: RiUserFollowLine, value: stats.presentToday   || 0, label: 'Present Today',   color: 'from-emerald-500 to-green-600', link: '/attendance',    trend: stats.attendanceRate },
+          { icon: RiTaskLine,       value: stats.activeTasks    || 0, label: 'Active Tasks',    color: 'from-purple-500 to-pink-600',   link: '/tasktimesheet', trend: null },
+          { icon: RiSurveyLine,     value: stats.pendingLeaves  || 0, label: 'Pending Leaves',  color: 'from-orange-500 to-red-500',    link: '/leave',         trend: null },
+        ];
+      case 'hr':
+        return [
+          { icon: RiUserFollowLine,    value: stats.presentToday  || 0, label: 'Present Today',   color: 'from-emerald-500 to-green-600', link: '/attendance',    trend: null },
+          { icon: RiSurveyLine,        value: stats.pendingLeaves || 0, label: 'Pending Leaves',  color: 'from-blue-500 to-indigo-600',   link: '/leave',         trend: null },
+          { icon: RiTaskLine,          value: stats.activeTasks   || 0, label: 'Active Tasks',    color: 'from-purple-500 to-pink-600',   link: '/tasktimesheet', trend: null },
+          { icon: RiProjectorLine,     value: stats.activeProjects|| 0, label: 'Active Projects', color: 'from-orange-500 to-red-500',    link: '/projects',      trend: null },
+        ];
+      default:
+        return [
+          { icon: RiTaskLine,          value: stats.myTasks      || 0, label: 'My Tasks',        color: 'from-blue-500 to-indigo-600',   link: '/my-tasks',      trend: null },
+          { icon: RiSurveyLine,        value: stats.myLeaves     || 0, label: 'My Leaves',       color: 'from-emerald-500 to-green-600', link: '/my-leave',      trend: null },
+          { icon: RiCalendarCheckLine, value: stats.myAttendance || 0, label: 'Days Present',    color: 'from-purple-500 to-pink-600',   link: '/my-attendance', trend: null },
+          { icon: RiFileList3Line,     value: stats.myTimesheets || 0, label: 'Timesheets',      color: 'from-orange-500 to-red-500',    link: '/my-tasks',      trend: null },
+        ];
     }
-  }, [fetchDashboardData]);
+  }, [stats, role]);
 
+  // ── Pie data — colors always matched by name ──────────────────────────────
+  const pieData = useMemo(() => {
+    const present = attendanceTrend.reduce((s, d) => s + (d.Present || 0), 0);
+    const absent  = attendanceTrend.reduce((s, d) => s + (d.Absent  || 0), 0);
+    const late    = attendanceTrend.reduce((s, d) => s + (d.Late    || 0), 0);
+
+    const all = [
+      { name: 'Present', value: present, color: '#10b981' }, // always green
+      { name: 'Absent',  value: absent,  color: '#ef4444' }, // always red
+      { name: 'Late',    value: late,    color: '#f59e0b' }, // always amber
+    ].filter(d => d.value > 0);
+
+    return all.length ? all : [{ name: 'No Data', value: 1, color: '#e2e8f0' }];
+  }, [attendanceTrend]);
+
+  // ── Area data ──────────────────────────────────────────────────────────────
+  const areaData = useMemo(() => {
+    if (attendanceTrend.length) {
+      return attendanceTrend.map(d => ({
+        day:   d.day,
+        value: (d.Present || 0) + (d.Late || 0),
+      }));
+    }
+    return ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(day => ({ day, value: 0 }));
+  }, [attendanceTrend]);
+
+  const titleMap = {
+    superadmin: 'System Dashboard',
+    admin:      'Management Dashboard',
+    hr:         'HR Dashboard',
+    employee:   'My Workspace',
+  };
+
+  // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <SkeletonHeader />
-          <SkeletonStats count={4} />
-          <SkeletonTable rows={5} />
+      <div className="space-y-6">
+        <SkeletonHeader />
+        <SkeletonStats count={4} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="lg:col-span-2 bg-slate-200 rounded-2xl h-72 animate-pulse" />
+          <div className="bg-slate-200 rounded-2xl h-72 animate-pulse" />
         </div>
+        <SkeletonTable rows={5} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10 text-slate-900">
-      <div className="mb-8">
-        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Workforce Overview</h1>
-        <p className="text-slate-500 font-medium text-sm">Real-time metrics and employee activity logs.</p>
-      </div>
+    <div className="space-y-6">
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card icon="ri-team-line" num={stats.totalEmployees || 0} tot="Total Employees" color="from-blue-500 to-indigo-600"/>
-        <Card icon="ri-user-follow-line" num={stats.presentToday || 0} tot="Present Today" color="from-green-500 to-emerald-600"/>
-        <Card icon="ri-task-line" num={stats.activeTasks || 0} tot="Active Tasks" color="from-purple-500 to-pink-600"/>
-        <Card icon="ri-file-list-3-line" num={stats.pendingTimesheets || 0} tot="Pending Timesheets" color="from-orange-500 to-red-500"/>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2">
-          <BarCharts data={attendanceData} />
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
+            {titleMap[role] || 'Dashboard'}
+          </h1>
+          <p className="text-slate-500 text-sm mt-0.5">
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
         </div>
-        <div className="lg:col-span-1">
-          <PieChartSimple completed={18} progress={10} assigned={6} overdue={3} />
-        </div>
+        <button onClick={handleRefresh} disabled={refreshing}
+          className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold rounded-xl shadow-sm hover:shadow transition-all disabled:opacity-50 text-sm">
+          <RiRefreshLine className={refreshing ? 'animate-spin' : ''} />
+          {refreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-         <div className="lg:col-span-1">
-            <AreaChartSimple />
-         </div>
-         <div className="lg:col-span-2">
-            <Table data={activity} />
-         </div>
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
+        {statCards.map((stat, i) => (
+          <div key={i} onClick={() => stat.link && navigate(stat.link)}
+            className={`group rounded-2xl p-4 lg:p-5 flex items-center gap-3 shadow-md hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 cursor-pointer bg-gradient-to-br ${stat.color} text-white`}>
+            <div className="flex items-center justify-center h-10 w-10 lg:h-12 lg:w-12 rounded-xl bg-white/20 shrink-0">
+              <stat.icon className="text-lg lg:text-xl" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xl lg:text-2xl font-black leading-none">{stat.value}</p>
+              <p className="text-[10px] lg:text-xs opacity-90 font-semibold mt-1 leading-tight">{stat.label}</p>
+              {stat.trend != null && (
+                <p className="text-[10px] opacity-80 mt-0.5">{stat.trend}% this week</p>
+              )}
+            </div>
+            <RiArrowRightLine className="text-sm opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+          </div>
+        ))}
       </div>
+
+      {/* Extra info row — admin/superadmin only */}
+      {(role === 'admin' || role === 'superadmin') && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { label: 'Absent Today',       value: stats.absentToday       || 0, bg: 'from-red-500 to-rose-600',      icon: RiUserUnfollowLine },
+            { label: 'Late Today',         value: stats.lateToday         || 0, bg: 'from-amber-500 to-orange-500',  icon: RiTimeLine },
+            { label: 'Pending Timesheets', value: stats.pendingTimesheets || 0, bg: 'from-blue-500 to-indigo-600',   icon: RiFileList3Line },
+            { label: 'Total Assets',       value: stats.totalAssets       || 0, bg: 'from-slate-500 to-slate-700',   icon: RiComputerLine },
+          ].map((item, i) => (
+            <div key={i} className={`relative overflow-hidden rounded-2xl text-white p-4 bg-gradient-to-r ${item.bg} shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-between`}>
+              <div>
+                <p className="text-xs opacity-90 font-semibold">{item.label}</p>
+                <p className="text-2xl font-black mt-1">{item.value}</p>
+              </div>
+              <div className="bg-white/20 p-2.5 rounded-xl">
+                <item.icon size={18} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Charts — non-employee only */}
+      {role !== 'employee' && (
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+            {/* Bar Chart */}
+            <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Attendance — Last 7 Days</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Present · Absent · Late per day</p>
+                </div>
+                <button onClick={() => navigate('/attendance')}
+                  className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 font-semibold text-xs transition-colors">
+                  <RiEyeLine /> View All
+                </button>
+              </div>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={attendanceTrend} margin={{ top: 5, right: 5, left: -20, bottom: 5 }} barGap={2} barCategoryGap="30%">
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#cbd5e1', fontSize: 11 }} allowDecimals={false} />
+                  <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }} cursor={{ fill: '#f8fafc' }} />
+                  <Bar dataKey="Present" fill="#10b981" radius={[4, 4, 0, 0]} barSize={14} />
+                  <Bar dataKey="Absent"  fill="#ef4444" radius={[4, 4, 0, 0]} barSize={14} />
+                  <Bar dataKey="Late"    fill="#f59e0b" radius={[4, 4, 0, 0]} barSize={14} />
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-100">
+                {[['#10b981','Present'],['#ef4444','Absent'],['#f59e0b','Late']].map(([color, label]) => (
+                  <div key={label} className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-sm" style={{ background: color }} />
+                    <span className="text-xs font-semibold text-slate-500">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Pie Chart */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+              <div className="mb-3">
+                <h3 className="text-base font-bold text-slate-900">Week Summary</h3>
+                <p className="text-xs text-slate-400 mt-0.5">7-day attendance breakdown</p>
+              </div>
+              <ResponsiveContainer width="100%" height={180}>
+                <PieChart>
+                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value">
+                    {pieData.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} stroke="white" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0' }} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="space-y-2 mt-2">
+                {pieData.map(d => (
+                  <div key={d.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: d.color }} />
+                      <span className="text-xs font-semibold text-slate-600">{d.name}</span>
+                    </div>
+                    <span className="text-xs font-black text-slate-800">{d.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+            {/* Area Chart */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+              <div className="mb-4">
+                <h3 className="text-base font-bold text-slate-900">Presence Trend</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Present + Late per day</p>
+              </div>
+              <ResponsiveContainer width="100%" height={180}>
+                <AreaChart data={areaData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor="#10b981" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#cbd5e1', fontSize: 10 }} allowDecimals={false} />
+                  <Tooltip contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0' }} />
+                  <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2.5} fill="url(#areaGrad)" dot={false} name="Present" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Activity Feed */}
+            <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Recent Activity</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Latest system events</p>
+                </div>
+                <button onClick={() => navigate(role === 'superadmin' ? '/audit-logs' : '/reports')}
+                  className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 font-semibold text-xs transition-colors">
+                  <RiEyeLine /> View All
+                </button>
+              </div>
+              <ActivityFeed data={activity} />
+            </div>
+          </div>
+
+          {/* System Health — admin/superadmin only */}
+          <SystemHealth />
+        </>
+      )}
+
+      {/* Employee quick links */}
+      {role === 'employee' && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { label: 'Apply for Leave',  desc: 'Submit a new leave request',    icon: RiSurveyLine,        link: '/my-leave',      color: 'bg-blue-50    border-blue-200    text-blue-700'    },
+            { label: 'Log Timesheet',    desc: 'Record your work hours',        icon: RiTimeLine,          link: '/my-tasks',      color: 'bg-purple-50  border-purple-200  text-purple-700'  },
+            { label: 'View Attendance',  desc: 'Check your attendance history', icon: RiCalendarCheckLine, link: '/my-attendance', color: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
+          ].map((item, i) => (
+            <button key={i} onClick={() => navigate(item.link)}
+              className={`flex items-center gap-4 p-4 rounded-2xl border ${item.color} hover:shadow-md transition-all text-left`}>
+              <div className="p-3 bg-white rounded-xl shadow-sm">
+                <item.icon size={20} />
+              </div>
+              <div>
+                <p className="font-bold text-sm">{item.label}</p>
+                <p className="text-xs opacity-70 mt-0.5">{item.desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+    </div>
+  );
+};
+
+// ── Activity Feed ─────────────────────────────────────────────────────────────
+const ActivityFeed = ({ data = [] }) => {
+  if (!data.length) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-slate-400">
+        <span className="text-4xl mb-2">📋</span>
+        <p className="text-sm font-medium">No recent activity</p>
+        <p className="text-xs mt-1">Activity will appear here as actions are performed</p>
+      </div>
+    );
+  }
+
+  const STATUS_STYLE = {
+    success: 'bg-emerald-100 text-emerald-700',
+    error:   'bg-red-100    text-red-700',
+    info:    'bg-blue-100   text-blue-700',
+  };
+
+  return (
+    <div className="space-y-1 overflow-y-auto max-h-[280px] custom-scrollbar">
+      {data.slice(0, 10).map((item, i) => (
+        <div key={i} className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">
+            {(item.user?.name || 'S').charAt(0).toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-slate-800 truncate">{item.action || '—'}</p>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase shrink-0 ${STATUS_STYLE[item.status] || STATUS_STYLE.info}`}>
+                {item.status || 'info'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-xs text-slate-400 truncate">{item.description || item.resource || ''}</span>
+              {item.timestamp && (
+                <span className="text-[10px] text-slate-300 shrink-0">
+                  {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
 
 export default Dashboard;
-

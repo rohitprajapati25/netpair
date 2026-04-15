@@ -1,44 +1,63 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 
-const SocketContext = createContext();
+const SocketContext = createContext(null);
 
-export const useSocket = () => {
-  const context = useContext(SocketContext);
-  if (!context) throw new Error('useSocket must be used within SocketProvider');
-  return context;
-};
+export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
+  const socketRef = useRef(null);
 
   useEffect(() => {
-    const socketInstance = io('http://localhost:5000', {
+    // Prevent double-connect in React StrictMode
+    if (socketRef.current) return;
+
+    const instance = io('http://localhost:5000', {
       autoConnect: true,
-      transports: ['websocket']
+      transports: ['websocket', 'polling'], // fallback to polling if WS fails
+      reconnectionAttempts: 5,
+      reconnectionDelay: 2000,
+      timeout: 10000,
     });
 
-    socketInstance.on('connect', () => {
-      console.log('✅ Socket connected:', socketInstance.id);
+    socketRef.current = instance;
+
+    instance.on('connect', () => {
+      console.log('✅ Socket connected:', instance.id);
+      setSocket(instance);
     });
 
-    socketInstance.on('employeeUpdate', (data) => {
-      console.log('🔄 Employee updated:', data);
-      // Trigger refetch in parent components
+    instance.on('connect_error', (err) => {
+      // Silent — backend socket may not be running or employee role doesn't need it
+      if (import.meta.env.DEV) {
+        console.warn('⚠️ Socket connection failed (non-critical):', err.message);
+      }
+      // Stop retrying after first failure to avoid console spam
+      instance.io.opts.reconnectionAttempts = 0;
+    });
+
+    instance.on('disconnect', (reason) => {
+      if (import.meta.env.DEV) {
+        console.log('🔌 Socket disconnected:', reason);
+      }
+    });
+
+    instance.on('employeeUpdate', (data) => {
       window.dispatchEvent(new CustomEvent('employeeUpdate', { detail: data }));
     });
 
-    socketInstance.on('employeeDelete', (data) => {
-      console.log('🗑️ Employee deleted:', data);
+    instance.on('employeeDelete', (data) => {
       window.dispatchEvent(new CustomEvent('employeeDelete', { detail: data }));
     });
 
-    setSocket(socketInstance);
-
     return () => {
-      socketInstance.disconnect();
+      // Only disconnect on true unmount, not StrictMode remount
+      instance.disconnect();
+      socketRef.current = null;
+      setSocket(null);
     };
-  }, []);
+  }, []); // empty deps — connect once on mount
 
   return (
     <SocketContext.Provider value={socket}>
@@ -46,4 +65,3 @@ export const SocketProvider = ({ children }) => {
     </SocketContext.Provider>
   );
 };
-

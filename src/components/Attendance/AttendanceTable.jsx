@@ -87,8 +87,8 @@ const recordsPerPage = 5; // Strictly 5 rows first page
   }
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm ">
-      <div className="overflow-x-auto">
+    <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
+      <div className="overflow-x-auto -webkit-overflow-scrolling-touch">
         <table className="w-full">
           <thead className="bg-gradient-to-r from-slate-50 to-slate-100">
             <tr>

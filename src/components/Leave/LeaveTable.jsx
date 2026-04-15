@@ -165,7 +165,7 @@ const LeaveTable = ({ data, onStatusChange }) => {
 
   return (
     <div className="w-full flex flex-col">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" style={{WebkitOverflowScrolling:'touch'}}>
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50/50">

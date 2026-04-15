@@ -87,7 +87,7 @@ const handleDelete = async (e, id) => {
   });
 
   return (
-    <div className="bg-white rounded-b-3xl border-x border-b border-slate-100 overflow-hidden">
+    <div className="bg-white rounded-b-2xl border-x border-b border-slate-100 overflow-hidden">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="bg-slate-50/50 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">

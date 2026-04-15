@@ -300,7 +300,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { genderRole } from "./genderRole";
 import axios from "axios";
 import { RiArrowLeftLine } from "react-icons/ri";
-import { ROLES } from "../../../../backend/constants/roles";
+import { ROLES } from "../../constants/roles";
 import {empTypes} from "./empTypes";
 
 

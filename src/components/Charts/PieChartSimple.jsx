@@ -29,7 +29,7 @@ const PieChartSimple = ({ data = [] }) => {
       </div>
 
       {chartData.length > 0 ? (
-        <ResponsiveContainer width="100%" height="80%">
+<ResponsiveContainer width="100%" height={400} minHeight={300}>
           <PieChart>
             <Pie
               data={chartData}

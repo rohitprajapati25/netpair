@@ -85,7 +85,7 @@ useEffect(() => {
 
   if (stats.loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full p-3 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
         {Array(4).fill().map((_, i) => (
           <div key={i} className="animate-pulse bg-slate-200 rounded-2xl h-24"></div>
         ))}
@@ -94,7 +94,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full p-4 mb-8">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
       <Card 
         title="Total Employees" 
         value={stats.totalEmployees.toLocaleString()} 
@@ -113,19 +113,23 @@ useEffect(() => {
       />
 
       <Card 
-        title="Present Today" 
+title="Present" 
+
         value={todayStats.present} 
         icon="ri-user-follow-line" 
         bg="from-green-500 to-emerald-600"
-        subtitle="Today Attendance Count"
+subtitle="Attendance Count"
+
       />
 
       <Card 
-        title="Absent Today" 
+title="Absent" 
+
         value={todayStats.absent} 
         icon="ri-user-unfollow-line" 
         bg="from-red-500 to-rose-600"
-        subtitle="Today Absence Count"
+subtitle="Absence Count"
+
       />
 
     </div>

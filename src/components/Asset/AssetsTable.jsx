@@ -63,7 +63,7 @@ const AssetsTable = ({ data = [], onEdit, onDelete, loading = false }) => {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" style={{WebkitOverflowScrolling:'touch'}}>
       <table className="w-full">
         <thead>
           <tr className="bg-slate-50/50 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -7,131 +7,183 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
+  Cell,
 } from "recharts";
 
-const BarCharts = ({ data = [] }) => {
-  // Fallback data - ALWAYS VISIBLE
-  const fallbackData = [
-    { day: "Mon", present: 32, absent: 4, leave: 2, late: 3 },
-    { day: "Tue", present: 30, absent: 5, leave: 3, late: 2 },
-    { day: "Wed", present: 34, absent: 2, leave: 1, late: 4 },
-    { day: "Thu", present: 31, absent: 6, leave: 2, late: 1 },
-    { day: "Fri", present: 35, absent: 3, leave: 1, late: 2 }
-  ];
+const BarCharts = ({
+  data = [],
+  title = "Weekly Attendance Overview",
+  subtitle = "Real-time employee tracking",
+  dateField = 'date',
+  statusField = 'status',
+  categories = [
+    { name: 'Present', match: /present|p/i, color: '#10b981', label: 'Present' },
+    { name: 'Absent', match: /absent|a/i, color: '#ef4444', label: 'Absent' },
+    { name: 'Leave', match: /leave|onleave/i, color: '#f59e0b', label: 'On Leave' },
+    { name: 'Late', match: /late|l/i, color: '#3b82f6', label: 'Late Arrival' }
+  ],
+  height = 400,
+  loading = false,
+  className = ""
+}) => {
 
-  // Transform live data OR use fallback
-  const weeklyStats = {};
-  
-  // Process live data (last 5 days)
-  (data || []).slice(-5).forEach(record => {
-    const dayName = new Date(record.date || Date.now()).toLocaleDateString('en-US', { weekday: 'short' });
-    weeklyStats[dayName] = weeklyStats[dayName] || { present: 0, absent: 0, leave: 0, late: 0 };
-    
-    const status = (record.status || 'present').toString().toLowerCase().trim();
-    switch(status) {
-      case 'present':
-      case 'p': weeklyStats[dayName].present++; break;
-      case 'absent':
-      case 'a': weeklyStats[dayName].absent++; break;
-      case 'late':
-      case 'l': weeklyStats[dayName].late++; break;
-      default: weeklyStats[dayName].leave++; break;
+  const chartData = useMemo(() => {
+    const stats = {};
+    const now = new Date();
+    const days = [];
+
+    // Initialize last 7 days
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      const dayStr = d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+      stats[dayStr] = { day: dayStr, total: 0 };
+      categories.forEach(cat => stats[dayStr][cat.name] = 0);
     }
-  });
 
-  // Ensure minimum 5 days data
-  const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-  dayOrder.forEach(day => {
-    if (!weeklyStats[day]) weeklyStats[day] = { present: 0, absent: 0, leave: 0, late: 0 };
-  });
+    // Process actual data
+    if (Array.isArray(data)) {
+      data.forEach(record => {
+        const date = new Date(record[dateField]);
+        if (isNaN(date.getTime())) return;
+        const dayStr = date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+        
+        if (stats[dayStr]) {
+          const status = (record[statusField] || '').toString().toLowerCase().trim();
+          const cat = categories.find(c => c.match.test(status));
+          if (cat) {
+            stats[dayStr][cat.name]++;
+            stats[dayStr].total++;
+          }
+        }
+      });
+    }
 
-  const chartData = dayOrder.map(day => ({
-    day,
-    present: weeklyStats[day].present,
-    absent: weeklyStats[day].absent,
-    leave: weeklyStats[day].leave,
-    late: weeklyStats[day].late
-  }));
+    return Object.values(stats);
+  }, [data, dateField, statusField, categories]);
+
+  const totalRecords = data.length;
+
+  // Custom Tooltip Component
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white/95 backdrop-blur-md p-4 border border-slate-200 shadow-2xl rounded-2xl min-w-[160px]">
+          <p className="text-slate-900 font-bold mb-2 border-b border-slate-100 pb-1">{label}</p>
+          {payload.map((entry, index) => (
+            <div key={index} className="flex items-center justify-between gap-4 py-1">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                <span className="text-slate-600 text-sm font-medium">{entry.name}:</span>
+              </div>
+              <span className="text-slate-900 font-bold text-sm">{entry.value}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-3xl border border-slate-100 p-8 animate-pulse shadow-sm">
+        <div className="h-6 w-1/3 bg-slate-100 rounded-full mb-4"></div>
+        <div className="h-[300px] w-full bg-slate-50 rounded-2xl"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 h-[400px] w-full">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-xl font-bold text-slate-800">Weekly Attendance</h3>
-          <p className="text-sm text-slate-500 mt-1">
-            {data.length ? `${data.length} records` : 'Demo data'}
-          </p>
+    <div className={`bg-white rounded-[2rem] border border-slate-200/60 shadow-sm overflow-hidden ${className}`}>
+      {/* Header Section */}
+      <div className="p-6 md:p-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Live Analytics</span>
+          </div>
+          <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-none">
+            {title}
+          </h3>
+          <p className="text-slate-500 font-medium">{subtitle}</p>
         </div>
-        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-          data.length 
-            ? 'bg-emerald-100 text-emerald-800' 
-            : 'bg-slate-100 text-slate-600'
-        }`}>
-          {data.length ? 'LIVE' : 'DEMO'}
-        </span>
+
+        {/* Dynamic Legend */}
+        <div className="flex flex-wrap gap-4 bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
+          {categories.map((cat) => (
+            <div key={cat.name} className="flex items-center gap-2 px-1">
+              <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: cat.color }} />
+              <span className="text-xs font-bold text-slate-600 tracking-wide">{cat.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <ResponsiveContainer width="100%" height="85%">
-        <BarChart data={chartData} barCategoryGap={15}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f8fafc" />
-          <XAxis 
-            dataKey="day" 
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 12, fontWeight: 600, fill: '#475569' }}
-          />
-          <YAxis 
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 11, fill: '#64748b' }}
-            width={40}
-          />
-          <Tooltip 
-            cursor={{ fill: '#f8fafc' }}
-            contentStyle={{
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0',
-              backgroundColor: 'white',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.08)'
-            }}
-          />
-          <Legend 
-            verticalAlign="top" 
-            height={40}
-            wrapperStyle={{ paddingBottom: '10px' }}
-          />
+      {/* Chart Container */}
+      <div className="px-4 pb-4 overflow-x-auto scrollbar-hide">
+        <div className="min-w-[600px] h-full" style={{ height: height }}>
+<ResponsiveContainer width="100%" height={height || 400} minHeight={300}>
+            <BarChart
+              data={chartData}
+              margin={{ top: 10, right: 10, left: -20, bottom: 20 }}
+              barGap={8}
+            >
+              <CartesianGrid 
+                strokeDasharray="0" 
+                vertical={false} 
+                stroke="#f1f5f9" 
+              />
+              <XAxis
+                dataKey="day"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }}
+                dy={15}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#cbd5e1', fontSize: 12 }}
+              />
+              <Tooltip 
+                content={<CustomTooltip />} 
+                cursor={{ fill: '#f8fafc', radius: 10 }}
+              />
+              
+              {categories.map((cat) => (
+                <Bar
+                  key={cat.name}
+                  dataKey={cat.name}
+                  fill={cat.color}
+                  radius={[6, 6, 0, 0]}
+                  barSize={32}
+                  animationDuration={1500}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
-          <Bar 
-            dataKey="present" 
-            fill="#10b981" 
-            radius={[8,8,0,0]} 
-            name="Present"
-            maxBarSize={20}
-          />
-          <Bar 
-            dataKey="absent" 
-            fill="#ef4444" 
-            radius={[8,8,0,0]} 
-            name="Absent"
-            maxBarSize={20}
-          />
-          <Bar 
-            dataKey="leave" 
-            fill="#f59e0b" 
-            radius={[8,8,0,0]} 
-            name="Leave"
-            maxBarSize={20}
-          />
-          <Bar 
-            dataKey="late" 
-            fill="#3b82f6" 
-            radius={[8,8,0,0]} 
-            name="Late"
-            maxBarSize={20}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+      {/* Footer Stats */}
+      <div className="border-t border-slate-100 bg-slate-50/50 p-6 flex items-center justify-between">
+        <div className="flex gap-8">
+          <div>
+            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Total Scans</p>
+            <p className="text-xl font-black text-slate-800">{totalRecords}</p>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Active Employees</p>
+            <p className="text-xl font-black text-slate-800">
+               {chartData[chartData.length - 1]?.total || 0}
+            </p>
+          </div>
+        </div>
+        <button className="bg-white border border-slate-200 px-5 py-2.5 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-300 shadow-sm">
+          Export Report
+        </button>
+      </div>
     </div>
   );
 };

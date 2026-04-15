@@ -5,12 +5,11 @@ import Sidebar from '../../components/Sidebar/Sidebar'
 // import Dashboard from '../Dash/Dashboard'
 
 const Home = () => {
-  
   return (
-    <div>
-      <Sidebar/>    
+    <div className="h-screen w-screen overflow-hidden">
+      <Sidebar />
     </div>
-  )
-}
+  );
+};
 
 export default Home

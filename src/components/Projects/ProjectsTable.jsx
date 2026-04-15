@@ -96,8 +96,8 @@ const ProjectsTable = ({ data, onDelete, onEdit, isAdminRole }) => {
 
   return (
     <div className="bg-white rounded-b-2xl border-x border-b border-slate-200 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[1400px] text-left">
+      <div className="overflow-x-auto" style={{WebkitOverflowScrolling:'touch'}}>
+        <table className="w-full min-w-[900px]">
           <thead>
             <tr className="bg-slate-50/50 border-b border-slate-100">
 <th className="px-6 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400">Name</th>

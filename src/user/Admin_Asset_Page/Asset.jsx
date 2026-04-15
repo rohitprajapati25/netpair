@@ -161,29 +161,26 @@ const handleAdd = () => {
   ];
 
   if (loading) {
-
     return (
-      <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <SkeletonHeader />
-          <SkeletonFilter />
-          <SkeletonStats count={4} />
-          <SkeletonGrid count={8} />
-        </div>
+      <div className="space-y-6">
+        <SkeletonHeader />
+        <SkeletonFilter />
+        <SkeletonStats count={4} />
+        <SkeletonGrid count={8} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10 flex flex-col gap-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-black text-slate-800 tracking-tight">Asset Inventory</h1>
           <p className="text-slate-500 font-medium text-sm">Track and manage hardware & company resources</p>
         </div>
         <button 
           onClick={handleAdd} 
-          className="bg-blue-600 text-white px-6 py-3 rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all font-bold flex items-center gap-2 active:scale-95"
+          className="self-start sm:self-auto bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 shadow-md transition-all font-bold flex items-center gap-2 text-sm"
         >
           <RiAddLine size={24} /> Add Asset
         </button>
@@ -192,7 +189,7 @@ const handleAdd = () => {
 
 
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
         {cardData.map((d, i) => (
           <Card key={i} title={d.title} tot={d.tot} bg={d.bg} />
         ))}

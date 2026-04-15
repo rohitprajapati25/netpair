@@ -47,24 +47,31 @@ const Admin = () => {
           <h2 className="text-xl font-bold mb-6">Admin Team ({admins.length})</h2>
           {viewMode === 'card' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {admins.map(admin => (
-                <div key={admin._id} className="p-6 bg-slate-50 rounded-xl border border-slate-200 hover:shadow-md transition-all">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                      {admin.name?.charAt(0)?.toUpperCase()}
+              {admins.map((admin, i) => {
+                const gradients = [
+                  "from-indigo-500 to-blue-600",
+                  "from-emerald-500 to-teal-600",
+                  "from-purple-500 to-pink-600",
+                  "from-orange-500 to-red-500",
+                ];
+                const bg = gradients[i % gradients.length];
+                return (
+                  <div key={admin._id} className={`relative overflow-hidden rounded-2xl text-white p-5 bg-gradient-to-r ${bg} shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200`}>
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                        {admin.name?.charAt(0)?.toUpperCase()}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-white">{admin.name}</h3>
+                        <p className="text-sm text-white/80">{admin.email}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-bold text-slate-800">{admin.name}</h3>
-                      <p className="text-sm text-slate-500">{admin.email}</p>
-                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold bg-white/20 text-white`}>
+                      {admin.status}
+                    </span>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    admin.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
-                  }`}>
-                    {admin.status}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <table className="w-full">

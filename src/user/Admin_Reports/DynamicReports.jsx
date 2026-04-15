@@ -34,7 +34,7 @@ const DynamicReports = () => {
     tasks: []
   });
   const [filters, setFilters] = useState({
-    dateRange: 'today',
+    dateRange: 'week',
     department: "All",
   });
 
@@ -181,7 +181,8 @@ const DynamicReports = () => {
             trend="up"
           />
           <ReportCard 
-            title="Present Today" 
+title="Present"
+
             value={stats.presentToday}
             change="-1%" 
             color="from-blue-500 to-cyan-600" 
@@ -243,6 +244,7 @@ const DynamicReports = () => {
                 <option value="today">Today</option>
                 <option value="week">This Week</option>
                 <option value="month">This Month</option>
+                <option value="all">All Time</option>
               </select>
             </div>
             <div className="flex-1 min-w-[200px]">
