@@ -4,8 +4,8 @@ import { useAccessControl } from "../../contexts/AccessControlContext";
 import Header from "../Header";
 import "remixicon/fonts/remixicon.css";
 import Sidedata from "./Sidedata";
-import logo  from "../../assets/imgs/logo.png";
-import logo2 from "../../assets/imgs/logo2.png";
+const logo = "https://res.cloudinary.com/dzaoze4gr/image/upload/v1776312639/logo_wnnnq6.png";
+const logo2 = "https://res.cloudinary.com/dzaoze4gr/image/upload/q_auto/f_auto/v1776312639/logo2_zfuz9f.png";
 
 // ── Role-based nav config ─────────────────────────────────────────────────────
 const NAV_GROUPS = {
