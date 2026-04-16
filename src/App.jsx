@@ -6,6 +6,7 @@ import Lform from "./components/Login/Lform";
 import AuthLayout from "./user/AuthLayout";
 import Rform from "./components/Registration/Rform";
 import Fform from "./components/Forgot/Fform";
+import ResetPassword from "./components/Forgot/ResetPassword";
 
 import Dashboard from "./user/Dash/Dashboard";
 import Employees from "./user/Admin_Employess/Employees";
@@ -44,6 +45,7 @@ const App = () => {
       <Route path="/" element={<AuthLayout><Lform /></AuthLayout>} />
       <Route path="/employee/registration" element={<AuthLayout><Rform /></AuthLayout>} />
       <Route path="/forgot" element={<AuthLayout><Fform /></AuthLayout>} />
+      <Route path="/reset-password/:token" element={<AuthLayout><ResetPassword /></AuthLayout>} />
 
       {/* Protected layout shell */}
       <Route element={<ProtectedRoute><Home /></ProtectedRoute>}>

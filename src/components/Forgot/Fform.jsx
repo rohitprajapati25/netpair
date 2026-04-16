@@ -78,10 +78,13 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import { Link } from "react-router-dom";
 import * as Yup from "yup";
+import axios from "axios";
 import { RiMailLine, RiArrowLeftLine } from "react-icons/ri";
 
 const Fform = () => {
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const formik = useFormik({
     initialValues: { email: "" },
@@ -90,12 +93,18 @@ const Fform = () => {
     }),
     onSubmit: async (values, actions) => {
       setLoading(true);
-      // Backend API call here
-      setTimeout(() => {
-        alert("Reset link sent to your email");
-        setLoading(false);
+      setMessage("");
+      setError("");
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+        const response = await axios.post(`${apiUrl}/auth/forgot-password`, values);
+        setMessage("Password reset link sent! Please check your email.");
         actions.resetForm();
-      }, 1500);
+      } catch (err) {
+        setError(err.response?.data?.message || "Something went wrong. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     },
   });
 
@@ -105,6 +114,18 @@ const Fform = () => {
         <h2 className="text-3xl font-black text-slate-800">Forgot Password?</h2>
         <p className="text-slate-500 mt-2 font-medium">Enter your email and we'll send you a reset link.</p>
       </div>
+
+      {message && (
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-2xl text-sm font-bold animate-bounce-short">
+          {message}
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl text-sm font-bold animate-shake">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         <div className="relative group">
