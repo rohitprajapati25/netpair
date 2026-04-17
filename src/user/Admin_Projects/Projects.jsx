@@ -7,6 +7,7 @@ import ProjectCards from "../../components/Projects/ProjectCards";
 import ProjectModal from "../../components/Projects/ProjectModal";
 import { SkeletonHeader, SkeletonFilter, SkeletonStats, SkeletonGrid } from "../../components/Skeletons";
 import { RiAddLine } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 const Projects = () => {
   const { token, user } = useAuth();
@@ -32,7 +33,7 @@ const Projects = () => {
         page: '1',
         limit: '1000'
       });
-      const res = await axios.get(`http://localhost:5000/api/admin/projects?${params.toString()}`, {
+      const res = await axios.get(`${API_URL}/admin/projects?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -55,7 +56,7 @@ const Projects = () => {
   const fetchLogs = useCallback(async () => {
     if (user?.role !== "superadmin") return;
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/projects/logs', {
+      const res = await axios.get(`${API_URL}/admin/projects/logs`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
@@ -73,7 +74,7 @@ const Projects = () => {
           Object.entries(filters).filter(([key, value]) => value !== 'All' && value !== '')
         )
       );
-      const res = await axios.get(`http://localhost:5000/api/admin/projects/stats?${params.toString()}`, {
+      const res = await axios.get(`${API_URL}/admin/projects/stats?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
@@ -101,14 +102,14 @@ const Projects = () => {
     try {
       let res;
       if (editingProject) {
-        res = await axios.put(`http://localhost:5000/api/admin/projects/${editingProject._id}`, projectData, {
+        res = await axios.put(`${API_URL}/admin/projects/${editingProject._id}`, projectData, {
           headers: { 
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
       } else {
-        res = await axios.post('http://localhost:5000/api/admin/projects', projectData, {
+        res = await axios.post(`${API_URL}/admin/projects`, projectData, {
           headers: { 
             Authorization: `Bearer ${token}`
           }
@@ -134,7 +135,7 @@ const Projects = () => {
     
     if (window.confirm("⚠️ This will permanently delete the project. Continue?")) {
       try {
-        const res = await axios.delete(`http://localhost:5000/api/admin/projects/${projectId}`, {
+        const res = await axios.delete(`${API_URL}/admin/projects/${projectId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.data.success) {

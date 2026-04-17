@@ -17,6 +17,7 @@ import {
   RiLoader4Line,
   RiRefreshLine,
 } from "react-icons/ri";
+import { BASE_URL } from "../../config/api";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -65,8 +66,6 @@ const MONTH_NAMES = [
 ];
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-const BASE_URL = "http://localhost:5000";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -724,7 +723,12 @@ const Calendar = () => {
   const fetchHolidays = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${BASE_URL}/api/admin/holidays?year=${year}`, {
+      // All roles can read holidays — employees use their own endpoint,
+      // admins/superadmins use the admin endpoint (both hit same controller)
+      const endpoint = (canManage)
+        ? `${BASE_URL}/api/admin/holidays?year=${year}`
+        : `${BASE_URL}/api/employees/holidays?year=${year}`;
+      const res = await axios.get(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setHolidays(res.data.holidays || []);
@@ -733,7 +737,7 @@ const Calendar = () => {
     } finally {
       setLoading(false);
     }
-  }, [year, token, addToast]);
+  }, [year, token, addToast, canManage]);
 
   useEffect(() => { fetchHolidays(); }, [fetchHolidays]);
 

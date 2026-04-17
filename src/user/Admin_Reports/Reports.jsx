@@ -19,6 +19,7 @@ import ReportsFilterBar from "../../components/Layout/ReportsFilterBar.jsx";
 import DataStateHandler from "../../components/Layout/DataStateHandler";
 import { exportToCSV, formatDataForExport, exportToPDF, exportToExcel } from "../../utils/exportUtils.js";
 import { SkeletonHeader, SkeletonStats } from "../../components/Skeletons";
+import API_URL from "../../config/api";
 
 // ── Status badge ──────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
@@ -109,7 +110,7 @@ const Reports = () => {
     try {
       setLoading(true);
       const pageNum = resetPage ? 1 : currentPage;
-      const res = await axios.get("http://localhost:5000/api/admin/reports", {
+      const res = await axios.get(`${API_URL}/admin/reports`, {
         headers: { Authorization: `Bearer ${token}` },
         params: {
           tab:        activeTab,

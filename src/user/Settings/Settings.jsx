@@ -7,12 +7,14 @@ import {
   RiCheckLine, RiCloseLine, RiAlertLine, RiLogoutBoxLine,
   RiTimeLine, RiDeviceLine, RiLoader4Line, RiInformationLine
 } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 // ── API base ──────────────────────────────────────────────────────────────────
+// API_URL already ends with /api — so getEndpoint returns only the role suffix
 const getEndpoint = (role) => {
-  if (role === "superadmin" || role === "admin") return "/api/admin";
-  if (role === "hr") return "/api/hr";
-  return "/api/employees";
+  if (role === "superadmin" || role === "admin") return "/admin";
+  if (role === "hr") return "/hr";
+  return "/employees";
 };
 
 // ── Password strength ─────────────────────────────────────────────────────────
@@ -113,7 +115,7 @@ const Settings = () => {
       try {
         setLoading(true);
         const base = getEndpoint(role);
-        const res = await axios.get(`http://localhost:5000${base}/profile`, {
+        const res = await axios.get(`${API_URL}${base}/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data.success) {
@@ -151,7 +153,7 @@ const Settings = () => {
       setSaving(true);
       const base = getEndpoint(role);
       const res = await axios.put(
-        `http://localhost:5000${base}/profile`,
+        `${API_URL}${base}/profile`,
         { name: profile.name, phone: profile.phone, designation: profile.designation, department: profile.department },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -178,7 +180,7 @@ const Settings = () => {
       setPwdLoading(true);
       const base = getEndpoint(role);
       const res = await axios.post(
-        `http://localhost:5000${base}/password`,
+        `${API_URL}${base}/password`,
         { currentPassword: passwords.currentPassword, newPassword: passwords.newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );

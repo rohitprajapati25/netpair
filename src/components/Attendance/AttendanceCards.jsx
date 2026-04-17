@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from 'axios';
 import { useAuth } from "../../contexts/AuthContext";
 import { RiGroupLine, RiUserFollowLine, RiUserUnfollowLine, RiTeamLine } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 const AttendanceCards = ({ data }) => {
   const { token } = useAuth();
@@ -20,7 +21,7 @@ const AttendanceCards = ({ data }) => {
     const fetchTodayStats = async () => {
       try {
         setTodayStats(prev => ({...prev, loading: true}));
-        const res = await axios.get('http://localhost:5000/api/admin/attendance/today-stats', {
+        const res = await axios.get(`${API_URL}/admin/attendance/today-stats`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.data.success) {
@@ -49,12 +50,12 @@ useEffect(() => {
         setStats(prev => ({...prev, loading: true}));
         
         // Get total employees count (first page total)
-        const totalRes = await axios.get('http://localhost:5000/api/admin/employees?page=1&limit=1', {
+        const totalRes = await axios.get(`${API_URL}/admin/employees?page=1&limit=1`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
         // Get active employees count
-        const activeRes = await axios.get('http://localhost:5000/api/admin/active-employees?page=1&limit=1', {
+        const activeRes = await axios.get(`${API_URL}/admin/active-employees?page=1&limit=1`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 

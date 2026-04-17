@@ -3,12 +3,14 @@ import { useFormik } from "formik";
 import { attendanceValidationSchema } from "../../schemas/attendanceValidation";
 import axios from 'axios';
 import { useAuth } from "../../contexts/AuthContext";
-import { RiCloseLine, RiTimeLine, RiMapPinLine, RiCheckLine, RiUserLine, RiCalendarLine } from "react-icons/ri";
+import { RiCloseLine, RiTimeLine, RiMapPinLine, RiCheckLine, RiUserLine, RiCalendarLine, RiAlertLine } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 const AttendanceModal = ({ onClose, onRefresh, editData }) => {
   const { token } = useAuth();
   const [employees, setEmployees] = useState([]);
   const [employeesLoading, setEmployeesLoading] = useState(true);
+  const [submitError, setSubmitError] = useState("");
   const isEdit = !!editData;
 
   useEffect(() => {
@@ -17,7 +19,7 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
 
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/active-employees?page=1&limit=1000', {
+      const res = await axios.get(`${API_URL}/admin/active-employees?page=1&limit=1000`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -57,11 +59,11 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
 
         let res;
         if (isEdit) {
-          res = await axios.put(`http://localhost:5000/api/admin/attendance/${editData._id}`, attendanceData, {
+          res = await axios.put(`${API_URL}/admin/attendance/${editData._id}`, attendanceData, {
             headers: { Authorization: `Bearer ${token}` }
           });
         } else {
-          res = await axios.post('http://localhost:5000/api/admin/attendance/mark', attendanceData, {
+          res = await axios.post(`${API_URL}/admin/attendance/mark`, attendanceData, {
             headers: { Authorization: `Bearer ${token}` }
           });
         }
@@ -72,13 +74,13 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
         }
       } catch (err) {
         console.error('Attendance save error:', err);
-        alert(err.response?.data?.message || (isEdit ? 'Update failed' : 'Mark failed'));
+        setSubmitError(err.response?.data?.message || (isEdit ? 'Update failed' : 'Failed to mark attendance'));
       }
     }
   });
 
   useEffect(() => {
-    if (formik.values.status === 'Absent') {
+    if (formik.values.status === 'Absent' || formik.values.status === 'Leave') {
       formik.setFieldValue('checkIn', '');
       formik.setFieldValue('checkOut', '');
       formik.setFieldValue('workMode', '');
@@ -99,6 +101,14 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
 
         <form onSubmit={formik.handleSubmit} className="space-y-5 relative">
           <fieldset disabled={formik.isSubmitting} className="space-y-5">
+
+            {/* Submit error banner */}
+            {submitError && (
+              <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+                <RiAlertLine size={16} className="shrink-0 mt-0.5" />
+                <span>{submitError}</span>
+              </div>
+            )}
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
                 <RiCalendarLine size={16} />
@@ -178,8 +188,8 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
                 name="checkIn"
                 value={formik.values.checkIn}
                 onChange={formik.handleChange}
-                disabled={formik.values.status !== 'Present'}
-                className={`w-full border rounded-lg px-3 py-2 text-sm focus:border-blue-500 ${formik.values.status !== 'Present' ? 'bg-slate-100 cursor-not-allowed' : 'border-slate-200'}`}
+                disabled={formik.values.status === 'Absent' || formik.values.status === 'Leave'}
+                className={`w-full border rounded-lg px-3 py-2 text-sm focus:border-blue-500 ${(formik.values.status === 'Absent' || formik.values.status === 'Leave') ? 'bg-slate-100 cursor-not-allowed' : 'border-slate-200'}`}
               />
               {formik.touched.checkIn && formik.errors.checkIn && (
                 <p className="mt-1 text-xs text-rose-600">{formik.errors.checkIn}</p>
@@ -195,8 +205,8 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
                 name="checkOut"
                 value={formik.values.checkOut}
                 onChange={formik.handleChange}
-                disabled={formik.values.status !== 'Present'}
-                className={`w-full border rounded-lg px-3 py-2 text-sm focus:border-blue-500 ${formik.values.status !== 'Present' ? 'bg-slate-100 cursor-not-allowed' : 'border-slate-200'}`}
+                disabled={formik.values.status === 'Absent' || formik.values.status === 'Leave'}
+                className={`w-full border rounded-lg px-3 py-2 text-sm focus:border-blue-500 ${(formik.values.status === 'Absent' || formik.values.status === 'Leave') ? 'bg-slate-100 cursor-not-allowed' : 'border-slate-200'}`}
               />
               {formik.touched.checkOut && formik.errors.checkOut && (
                 <p className="mt-1 text-xs text-rose-600">{formik.errors.checkOut}</p>
@@ -214,18 +224,18 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
               name="workMode"
               value={formik.values.workMode}
               onChange={formik.handleChange}
-              disabled={formik.values.status !== 'Present'}
-              className={`w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 ${formik.values.status !== 'Present' ? 'bg-slate-100 cursor-not-allowed border-slate-200' : 'border-slate-200 bg-white'}`}
+              disabled={formik.values.status === 'Absent' || formik.values.status === 'Leave'}
+              className={`w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 ${(formik.values.status === 'Absent' || formik.values.status === 'Leave') ? 'bg-slate-100 cursor-not-allowed border-slate-200' : 'border-slate-200 bg-white'}`}
             >
-{formik.touched.workMode && formik.errors.workMode && (
-                <p className="mt-1 text-xs text-rose-600">{formik.errors.workMode}</p>
-              )}
               <option value="">-- Select Work Mode --</option>
               <option value="Office">Office</option>
               <option value="WFH">WFH</option>
               <option value="Remote">Remote</option>
               <option value="Offline">Offline</option>
             </select>
+            {formik.touched.workMode && formik.errors.workMode && (
+              <p className="mt-1 text-xs text-rose-600">{formik.errors.workMode}</p>
+            )}
           </div>
 
           <div>
@@ -245,14 +255,14 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
               type="button"
               onClick={onClose}
               disabled={formik.isSubmitting}
-              className="flex-1 px-6 py-3 rounded-xl border border-slate-200 font-semibold text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50"
+              className="flex-1 px-6 py-3 rounded-xl border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50"
             >
               Cancel
             </button>
             <button 
               type="submit" 
-              disabled={formik.isSubmitting || employeesLoading}
-              className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              disabled={formik.isSubmitting || (!isEdit && employeesLoading)}
+              className="flex-1 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {formik.isSubmitting ? (
                 <>

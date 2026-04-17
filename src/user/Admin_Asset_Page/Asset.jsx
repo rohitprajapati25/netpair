@@ -8,6 +8,7 @@ import Card from "../../components/Asset/Card";
 import { SkeletonHeader, SkeletonFilter, SkeletonStats, SkeletonGrid } from "../../components/Skeletons";
 import AssetsTable from "../../components/Asset/AssetsTable.jsx";
 import { RiAddLine, RiEdit2Line, RiDeleteBinLine, RiCloseLine, RiMacbookLine, RiStackLine } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 
 const Asset = () => {
@@ -42,7 +43,7 @@ const Asset = () => {
 
   const fetchAssets = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/assets', {
+      const res = await axios.get(`${API_URL}/admin/assets`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
@@ -57,7 +58,7 @@ const Asset = () => {
 
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/employees', {
+      const res = await axios.get(`${API_URL}/admin/employees`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setEmployees((res.data?.employees || []).filter(emp => emp && emp.name));
@@ -68,7 +69,7 @@ const Asset = () => {
 
   const fetchStats = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/assets/stats', {
+      const res = await axios.get(`${API_URL}/admin/assets/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
@@ -103,7 +104,7 @@ const handleAdd = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to remove this asset?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/admin/assets/${id}`, {
+        await axios.delete(`${API_URL}/admin/assets/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         fetchAssets();
@@ -129,11 +130,11 @@ const handleAdd = () => {
 
       let res;
       if (editingAsset?._id && editingAsset._id !== "undefined") {
-        res = await axios.put(`http://localhost:5000/api/admin/assets/${editingAsset._id}`, cleanValues, {
+        res = await axios.put(`${API_URL}/admin/assets/${editingAsset._id}`, cleanValues, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        res = await axios.post('http://localhost:5000/api/admin/assets', cleanValues, {
+        res = await axios.post(`${API_URL}/admin/assets`, cleanValues, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }

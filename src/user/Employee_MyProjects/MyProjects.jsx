@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
 import {
@@ -11,8 +11,7 @@ import {
   RiProgress3Line,
 } from "react-icons/ri";
 import { SkeletonHeader, SkeletonStats, SkeletonGrid } from "../../components/Skeletons";
-
-const BASE = "http://localhost:5000";
+import { BASE_URL as BASE } from "../../config/api";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const getStatusBadge = (status) => {
@@ -138,7 +137,7 @@ const EmptyState = ({ filtered }) => (
 
 // ── Main Component ────────────────────────────────────────────────────────────
 const MyProjects = () => {
-  const { token, user } = useAuth();
+  const { token } = useAuth();
 
   const [projects, setProjects]   = useState([]);
   const [loading, setLoading]     = useState(true);
@@ -150,7 +149,8 @@ const MyProjects = () => {
   const fetchProjects = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await axios.get(`${BASE}/api/admin/projects?limit=1000`, {
+      // Use employee-specific endpoint — backend filters to only assigned projects
+      const res = await axios.get(`${BASE}/api/employees/projects`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const all = res.data?.projects || res.data || [];
@@ -173,32 +173,15 @@ const MyProjects = () => {
     fetchProjects();
   }, [fetchProjects]);
 
-  // ── Filter to only projects where this employee is assigned ──────────────
-  const myUserId = user?._id || user?.id;
-
-  const assignedProjects = useMemo(() => {
-    if (!myUserId) return projects;
-    return projects.filter((p) => {
-      const assigned = p.assignedEmployees || [];
-      return assigned.some(
-        (e) =>
-          e === myUserId ||
-          e?._id === myUserId ||
-          e?.id === myUserId ||
-          e?.employee === myUserId ||
-          e?.employee?._id === myUserId
-      );
-    });
-  }, [projects, myUserId]);
+  // ── Backend already filters to assigned projects — use all returned projects
+  const assignedProjects = projects;
 
   // ── Client-side filter ────────────────────────────────────────────────────
   const filteredProjects = useMemo(() => {
     let result = assignedProjects;
-
     if (statusFilter !== "All") {
       result = result.filter((p) => p.status === statusFilter);
     }
-
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -207,7 +190,6 @@ const MyProjects = () => {
           p.description?.toLowerCase().includes(q)
       );
     }
-
     return result;
   }, [assignedProjects, statusFilter, search]);
 

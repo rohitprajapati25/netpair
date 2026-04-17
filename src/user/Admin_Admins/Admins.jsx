@@ -11,6 +11,7 @@ import {
 } from "react-icons/ri";
 import { PageHeader, FilterBar, DataStateHandler } from "../../components/Layout";
 import { SkeletonHeader, SkeletonFilter, SkeletonGrid, SkeletonTable } from "../../components/Skeletons";
+import API_URL from "../../config/api";
 
 const authHeaders = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
 const LIMIT = 12;
@@ -37,7 +38,7 @@ const Admins = () => {
         ...(search && { search }),
         ...(statusFilter !== "all" && { status: statusFilter }),
       });
-      const res = await axios.get(`http://localhost:5000/api/admins?${params}`, authHeaders());
+      const res = await axios.get(`${API_URL}/admins?${params}`, authHeaders());
       setAdmins(res.data.admins || res.data.employees || []);
       setTotalCount(res.data.pagination?.total || res.data.total || 0);
       setTotalPages(res.data.pagination?.pages || Math.ceil((res.data.pagination?.total || 0) / LIMIT) || 1);
@@ -57,7 +58,7 @@ const Admins = () => {
 
   const handleStatusToggle = async (id, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/admins/${id}`, { status: newStatus }, authHeaders());
+      await axios.put(`${API_URL}/admins/${id}`, { status: newStatus }, authHeaders());
       setAdmins(prev => prev.map(a => a._id === id ? { ...a, status: newStatus } : a));
     } catch (err) { alert(err.response?.data?.message || "Status update failed"); }
   };
@@ -65,7 +66,7 @@ const Admins = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this admin?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admins/${id}`, authHeaders());
+      await axios.delete(`${API_URL}/admins/${id}`, authHeaders());
       setAdmins(prev => prev.filter(a => a._id !== id));
       setTotalCount(c => Math.max(0, c - 1));
     } catch (err) { alert(err.response?.data?.message || "Delete failed"); }
@@ -73,7 +74,7 @@ const Admins = () => {
 
   const handleSave = async (values) => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/admins/${selectedAdmin._id}`, values, authHeaders());
+      const res = await axios.put(`${API_URL}/admins/${selectedAdmin._id}`, values, authHeaders());
       const updated = res.data.employee || res.data.admin || res.data;
       setAdmins(prev => prev.map(a => a._id === selectedAdmin._id ? { ...a, ...updated } : a));
       closeModal();

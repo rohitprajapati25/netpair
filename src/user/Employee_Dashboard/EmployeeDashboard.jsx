@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -16,16 +16,16 @@ import {
   RiAlertLine,
 } from "react-icons/ri";
 import { SkeletonHeader, SkeletonStats, SkeletonTable } from "../../components/Skeletons";
-
-const BASE = "http://localhost:5000";
+import { BASE_URL as BASE } from "../../config/api";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const getStatusColor = (status) => {
   const map = {
-    COMPLETED:   "bg-emerald-100 text-emerald-700",
-    IN_PROGRESS: "bg-blue-100 text-blue-700",
-    TODO:        "bg-yellow-100 text-yellow-700",
-    BLOCKED:     "bg-red-100 text-red-700",
+    "Completed":   "bg-emerald-100 text-emerald-700",
+    "In Progress": "bg-blue-100 text-blue-700",
+    "Todo":        "bg-yellow-100 text-yellow-700",
+    "Blocked":     "bg-red-100 text-red-700",
+    "Review":      "bg-purple-100 text-purple-700",
   };
   return map[status] || "bg-slate-100 text-slate-700";
 };
@@ -108,13 +108,14 @@ const EmployeeDashboard = () => {
           axios.get(`${BASE}/api/employees/timesheets`,                               { headers }).catch(() => null),
           axios.get(`${BASE}/api/employees/leaves`,                                   { headers }).catch(() => null),
           axios.get(`${BASE}/api/employees/attendance?dateFrom=${firstDay}&dateTo=${today}&limit=100`, { headers }).catch(() => null),
-          axios.get(`${BASE}/api/admin/announcements?limit=20`,                       { headers }).catch(() => null),
+          // Use employee-specific announcements endpoint
+          axios.get(`${BASE}/api/employees/announcements?limit=20`,                  { headers }).catch(() => null),
         ]);
 
       setTasks(tasksRes?.data?.tasks || []);
       setTimesheets(timesheetsRes?.data?.timesheets || []);
       setLeaves(leavesRes?.data?.leaves || []);
-      setAttendance(attendanceRes?.data?.records || attendanceRes?.data?.attendance || []);
+      setAttendance(attendanceRes?.data?.records || []);
       setAnnouncements(announcementsRes?.data?.announcements || []);
     } catch (err) {
       console.error("EmployeeDashboard fetch error:", err);
@@ -133,9 +134,9 @@ const EmployeeDashboard = () => {
     fetchAll();
   }, [fetchAll]);
 
-  // ── Derived stats ─────────────────────────────────────────────────────────
-  const totalTasks    = tasks.length;
-  const hoursLogged   = timesheets.reduce((sum, t) => sum + (t.hours_worked || 0), 0);
+  const totalTasks     = tasks.length;
+  const hoursLogged    = timesheets.reduce((sum, t) => sum + (t.hours_worked || 0), 0);
+  const pendingLeaves  = leaves.filter((l) => l.status === "Pending").length;
   const approvedLeaves = leaves.filter((l) => l.status === "Approved").length;
 
   const presentCount  = attendance.filter((r) => r.status === "Present").length;
@@ -161,7 +162,6 @@ const EmployeeDashboard = () => {
   const displayName = user?.name || user?.fullName || user?.email || "Employee";
   const displayRole = user?.role || "Employee";
 
-  // ── Stat cards config ─────────────────────────────────────────────────────
   const statCards = [
     {
       label: "My Tasks",
@@ -171,12 +171,12 @@ const EmployeeDashboard = () => {
     },
     {
       label: "Hours Logged",
-      value: `${hoursLogged}h`,
+      value: `${hoursLogged % 1 === 0 ? hoursLogged : hoursLogged.toFixed(1)}h`,
       bg: "from-purple-500 to-pink-600",
       icon: "ri-time-line",
     },
     {
-      label: "Leave Balance",
+      label: "Leaves Taken",
       value: approvedLeaves,
       bg: "from-emerald-500 to-green-600",
       icon: "ri-survey-line",
@@ -247,6 +247,11 @@ const EmployeeDashboard = () => {
                 day: "numeric",
               })}
             </span>
+            {pendingLeaves > 0 && (
+              <span className="px-2.5 py-0.5 bg-amber-400/30 border border-amber-300/40 rounded-full text-xs font-bold">
+                {pendingLeaves} leave{pendingLeaves !== 1 ? "s" : ""} pending
+              </span>
+            )}
           </div>
         </div>
         <button

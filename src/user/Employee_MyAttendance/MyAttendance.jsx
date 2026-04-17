@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
 import {
@@ -7,8 +7,7 @@ import {
   RiLoginBoxLine, RiLogoutBoxLine, RiLoader4Line,
 } from "react-icons/ri";
 import { SkeletonHeader, SkeletonStats, SkeletonTable } from "../../components/Skeletons";
-
-// ── Company shift config (must match backend) ─────────────────────────────────
+import { BASE_URL as BASE } from "../../config/api";
 const SHIFT_START = { h: 9,  m: 0  }; // 09:00
 const SHIFT_END   = { h: 18, m: 0  }; // 18:00
 const SHIFT_START_MINS = SHIFT_START.h * 60 + SHIFT_START.m;
@@ -17,7 +16,6 @@ const SHIFT_END_MINS   = SHIFT_END.h   * 60 + SHIFT_END.m;
 const fmtShift = ({ h, m }) =>
   `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
 
-const BASE = "http://localhost:5000";
 const useClock = () => {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -302,7 +300,7 @@ const MyAttendance = () => {
       const res = await axios.get(`${BASE}/api/employees/attendance?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const records = res.data.records || res.data.attendance || [];
+      const records = res.data.records || [];
       setAttendance(records);
       setStats({
         present: records.filter(r => r.status === "Present").length,

@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import {
   RiTeamLine, RiUserFollowLine, RiTaskLine, RiFileList3Line,
@@ -15,96 +16,47 @@ import {
 } from 'recharts';
 import { SkeletonHeader, SkeletonStats, SkeletonTable } from '../../components/Skeletons';
 import SystemHealth from '../../components/Dashboard/SystemHealth';
+import API_URL from '../../config/api';
 
-const API = 'http://localhost:5000/api/admin';
+const API = API_URL.replace(/\/api$/, '') + '/api/admin';
+
+// ── Fetch all dashboard data in one Promise.all ───────────────────────────────
+const fetchDashboard = async (token, role) => {
+  const headers = { Authorization: `Bearer ${token}` };
+  const isEmployee = role === 'employee';
+
+  const requests = [
+    axios.get(`${API}/dashboard/stats`, { headers }).catch(() => null),
+    isEmployee ? null : axios.get(`${API}/dashboard/activity`, { headers }).catch(() => null),
+    isEmployee ? null : axios.get(`${API}/dashboard/attendance-trend`, { headers }).catch(() => null),
+  ];
+
+  const [statsRes, activityRes, trendRes] = await Promise.all(requests);
+
+  return {
+    stats:           statsRes?.data?.stats           || {},
+    activity:        activityRes?.data?.activity     || [],
+    attendanceTrend: trendRes?.data?.trend           || [],
+  };
+};
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 const Dashboard = () => {
   const { token, user } = useAuth();
   const navigate = useNavigate();
-
-  const [stats,           setStats]           = useState({});
-  const [activity,        setActivity]        = useState([]);
-  const [attendanceTrend, setAttendanceTrend] = useState([]);
-  const [loading,         setLoading]         = useState(true);
-  const [refreshing,      setRefreshing]      = useState(false);
-
   const role = user?.role?.toLowerCase() || 'employee';
 
-  // ── Fetch ──────────────────────────────────────────────────────────────────
-  const fetchAll = useCallback(async () => {
-    if (!token) return;
-    try {
-      setLoading(true);
-      const isEmployee = role === 'employee';
+  // ── Single React Query — caches result for 5 min, no re-fetch on nav ───────
+  const { data, isLoading, refetch, isRefetching } = useQuery({
+    queryKey: ['dashboard', role],
+    queryFn:  () => fetchDashboard(token, role),
+    enabled:  !!token,
+    staleTime: 2 * 60 * 1000,   // dashboard data fresh for 2 min
+  });
 
-      // Always fetch stats
-      const statsRes = await axios.get(`${API}/dashboard/stats`, {
-        headers: { Authorization: `Bearer ${token}` }
-      }).catch(() => null);
-
-      if (statsRes?.data?.success) setStats(statsRes.data.stats || {});
-
-      if (!isEmployee) {
-        // Fetch activity from audit logs
-        const activityRes = await axios.get(`${API}/dashboard/activity`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }).catch(() => null);
-        if (activityRes?.data?.success) setActivity(activityRes.data.activity || []);
-
-        // Try dedicated trend endpoint first, fallback to computing from attendance
-        const trendRes = await axios.get(`${API}/dashboard/attendance-trend`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }).catch(() => null);
-
-        if (trendRes?.data?.success && trendRes.data.trend?.length) {
-          setAttendanceTrend(trendRes.data.trend);
-        } else {
-          // Fallback: compute trend from raw attendance records (last 7 days)
-          const today = new Date();
-          const weekAgo = new Date(today);
-          weekAgo.setDate(today.getDate() - 6);
-          const dateFrom = weekAgo.toISOString().split('T')[0];
-          const dateTo   = today.toISOString().split('T')[0];
-
-          const attRes = await axios.get(
-            `${API}/attendance?dateFrom=${dateFrom}&dateTo=${dateTo}&limit=500`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          ).catch(() => null);
-
-          const records = attRes?.data?.records || [];
-
-          // Build 7-day map from raw records
-          const map = {};
-          for (let i = 6; i >= 0; i--) {
-            const d = new Date(); d.setDate(d.getDate() - i);
-            const key = d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
-            map[key] = { day: key, Present: 0, Absent: 0, Late: 0 };
-          }
-          records.forEach(r => {
-            const key = new Date(r.date).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
-            if (map[key]) {
-              const s = r.status || 'Absent';
-              if (map[key][s] !== undefined) map[key][s]++;
-            }
-          });
-          setAttendanceTrend(Object.values(map));
-        }
-      }
-    } catch (err) {
-      console.error('Dashboard error:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [token, role]);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchAll();
-    setRefreshing(false);
-  };
-
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  const stats           = data?.stats           || {};
+  const activity        = data?.activity        || [];
+  const attendanceTrend = data?.attendanceTrend || [];
 
   // ── Stat cards per role ────────────────────────────────────────────────────
   const statCards = useMemo(() => {
@@ -173,6 +125,9 @@ const Dashboard = () => {
     employee:   'My Workspace',
   };
 
+  const loading    = isLoading;
+  const refreshing = isRefetching;
+
   // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
@@ -201,7 +156,7 @@ const Dashboard = () => {
             {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
-        <button onClick={handleRefresh} disabled={refreshing}
+        <button onClick={() => refetch()} disabled={refreshing}
           className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold rounded-xl shadow-sm hover:shadow transition-all disabled:opacity-50 text-sm">
           <RiRefreshLine className={refreshing ? 'animate-spin' : ''} />
           {refreshing ? 'Refreshing...' : 'Refresh'}

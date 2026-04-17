@@ -73,7 +73,7 @@ const AnnouncementModal = ({ data, onClose }) => {
                   <span className="text-xs font-bold text-slate-600">{data.time}</span>
                </div>
             </div>
-            <button onClick={onClose} className="px-6 py-2 bg-slate-900 text-white font-bold rounded-xl text-sm">Close</button>
+            <button onClick={onClose} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition-all">Close</button>
         </div>
       </div>
     </div>

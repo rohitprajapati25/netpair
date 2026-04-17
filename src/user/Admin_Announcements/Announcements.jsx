@@ -3,12 +3,17 @@ import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
 import {
   RiMegaphoneLine, RiSendPlane2Line, RiDeleteBin6Line,
-  RiTimeLine, RiCalendarLine, RiGroupLine, RiAlertLine,
+  RiCalendarLine, RiGroupLine, RiAlertLine,
   RiInformationLine, RiCheckboxCircleLine, RiRefreshLine,
   RiCloseLine, RiSearchLine, RiFilterLine
 } from "react-icons/ri";
+import API_URL from "../../config/api";
 
-const API = "http://localhost:5000/api/admin";
+// Use role-aware endpoint: admins use /admin, employees/hr use /employees or /admin (both work)
+const getAnnouncementsEndpoint = (role) => {
+  if (role === "superadmin" || role === "admin") return `${API_URL}/admin`;
+  return `${API_URL}/admin`; // backend filters by role automatically
+};
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const TARGET_OPTIONS = [
@@ -43,6 +48,7 @@ const targetLabel = (t) => TARGET_OPTIONS.find(o => o.value === t)?.label || t;
 const Announcements = () => {
   const { token, user } = useAuth();
   const role = user?.role?.toLowerCase();
+  const API  = getAnnouncementsEndpoint(role);
 
   const [announcements, setAnnouncements] = useState([]);
   const [loading,       setLoading]       = useState(true);

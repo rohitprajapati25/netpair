@@ -1,9 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import { useFormik } from "formik";
-// import { useNavigate } from "react-router-dom";
-// import { useAuth } from "../../contexts/AuthContext";
-import { signUpSchema } from "../../schemas/signUpValidation";
-// import { ROLES } from "../../../../backend/constants/roles";
 
 // const initialValues = {
 //   name: "",
@@ -294,20 +288,25 @@ import { signUpSchema } from "../../schemas/signUpValidation";
 
 import React, { useState } from "react";
 import { useFormik } from "formik";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../contexts/AuthContext";
-import { genderRole } from "./genderRole";
 import axios from "axios";
 import { RiArrowLeftLine } from "react-icons/ri";
 import { ROLES } from "../../constants/roles";
-import {empTypes} from "./empTypes";
+import { signUpSchema } from "../../schemas/signUpValidation";
+import API_URL from "../../config/api";
+
+// empTypes and genderRole as plain objects (const enum is TypeScript-only, breaks in JSX)
+const genderRole = { Male: "Male", Female: "Female", Other: "Other" };
+const empTypes = { FULL_TIME: "Full Time", PART_TIME: "Part Time", INTERN: "Intern", CONTRACT: "Contract" };
 
 
 const Rform = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [success, setSuccess] = useState(false);
   
   const { token } = useAuth();
 
@@ -322,10 +321,10 @@ const Rform = () => {
       designation: "", // ✅ FIXED: Schema uses 'designation' NOT 'position'
       role: ROLES.EMPLOYEE, // ✅ Default role
       joiningDate: "", // ✅ Required field
-      employmentType: empTypes.FULL_TIME || empTypes.PART_TIME || empTypes.INTERN || empTypes.CONTRACT, // ✅ Required field with default
+      employmentType: empTypes.FULL_TIME, // ✅ Default to Full Time
       password: "",
       confirm_pass: "",
-      status: ROLES.INACTIVE, // New registrations are inactive
+      status: "inactive", // New registrations are inactive
     },
     validationSchema: signUpSchema,
     onSubmit: async (values) => {
@@ -338,7 +337,7 @@ const Rform = () => {
 
         // ✅ Password ko as-is bhej rahe hain, backend par hash hoga
         const res = await axios.post(
-          "http://localhost:5000/api/admin/employees",  // ✅ Role-specific: Employee/HR/Admin + User dual save
+          `${API_URL}/admin/employees`,  // ✅ Role-specific: Employee/HR/Admin + User dual save
           submitData,
           {
             headers: {
@@ -349,8 +348,9 @@ const Rform = () => {
         );
 
         if (res.data.success) {
-          alert("Registration Successful! Please wait for Admin approval.");
-          navigate("/employees");
+          setSubmitError(null);
+          setSuccess(true);
+          setTimeout(() => navigate(-1), 1500);
         }
       } catch (err) {
         const errorMessage =
@@ -390,13 +390,21 @@ const Rform = () => {
         <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest border-b-2 border-blue-600">
           Register Member
         </h3>
-        <Link
-          to="/"
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
           className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline"
         >
           <RiArrowLeftLine /> Back
-        </Link>
+        </button>
       </div>
+
+      {/* Success */}
+      {success && (
+        <div className="p-2 mb-4 bg-emerald-50 text-emerald-700 text-[10px] rounded-lg font-bold border border-emerald-200 flex items-center gap-2">
+          ✓ Registration successful! Redirecting...
+        </div>
+      )}
 
       {/* Error Alert */}
       {submitError && (

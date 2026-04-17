@@ -3,13 +3,15 @@ import { useFormik } from "formik";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import axios from "axios";
-import { RiLockPasswordLine, RiArrowLeftLine, RiEyeLine, RiEyeOffLine } from "react-icons/ri";
+import { RiLockPasswordLine, RiArrowLeftLine, RiEyeLine, RiEyeOffLine, RiCheckLine } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 const ResetPassword = () => {
   const { token } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const formik = useFormik({
@@ -29,12 +31,11 @@ const ResetPassword = () => {
       setLoading(true);
       setError("");
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-        await axios.post(`${apiUrl}/auth/reset-password/${token}`, {
+        await axios.post(`${API_URL}/auth/reset-password/${token}`, {
           password: values.password,
         });
-        alert("Password reset successful! Redirecting to login...");
-        navigate("/");
+        setSuccess(true);
+        setTimeout(() => navigate("/"), 2500);
       } catch (err) {
         setError(err.response?.data?.message || "Invalid or expired token.");
       } finally {
@@ -53,6 +54,12 @@ const ResetPassword = () => {
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl text-sm font-bold animate-shake">
           {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl text-sm font-bold flex items-center gap-2">
+          <RiCheckLine size={18} /> Password reset successful! Redirecting to login...
         </div>
       )}
 

@@ -117,13 +117,12 @@
 
 import React, { useState } from "react";
 import { useFormik } from "formik";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import * as Yup from "yup";
 import { RiMailLine, RiLockPasswordLine, RiEyeLine, RiEyeOffLine } from "react-icons/ri";
 
 const LForm = () => {
-  const navigate = useNavigate();
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -134,32 +133,19 @@ const LForm = () => {
       password: Yup.string().min(6, "Minimum 6 characters").required("Password is required"),
     }),
     onSubmit: async (values, { setSubmitting, setErrors }) => {
-  try {
-    const res = await login(values.email, values.password);
+      try {
+        const res = await login(values.email, values.password);
 
-    if (res.success) {
-      // 🚨 CLIENT-SIDE SECURITY CHECK
-      // Maan lijiye 'res' mein user object aa raha hai: res.user.status
-      if (res.user && res.user.status === "inactive") {
-        setErrors({ 
-          password: "Aapka account abhi active nahi hai. Admin approval ka intezaar karein." 
-        });
-        // Token remove karne ke liye logout call kar sakte hain agar context handle nahi kar raha
-        return;
+        if (!res.success) {
+          setErrors({ password: res.error || "Login failed. Check your credentials." });
+        }
+        // Navigation is handled inside login() in AuthContext
+      } catch (err) {
+        setErrors({ password: "Something went wrong. Please try again." });
+      } finally {
+        setSubmitting(false);
       }
-      
-      // Agar active hai toh dashboard bhejein
-      navigate("/dashboard");
-    } else {
-      // Backend errors (Wrong password, Email not found, etc.)
-      setErrors({ password: res.error || "Login Failed" });
-    }
-  } catch (err) {
-    setErrors({ password: "Something went wrong. Please try again." });
-  } finally {
-    setSubmitting(false);
-  }
-},
+    },
   });
 
   // Helper function to show error style on input

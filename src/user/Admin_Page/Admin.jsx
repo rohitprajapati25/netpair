@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { SkeletonHeader, SkeletonFilter, SkeletonGrid, SkeletonTable } from '../../components/Skeletons';
 import axios from 'axios';
+import API_URL from '../../config/api';
 
 const Admin = () => {
   const { token } = useAuth();
@@ -12,7 +13,7 @@ const Admin = () => {
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/admins', {
+        const res = await axios.get(`${API_URL}/admins`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setAdmins(res.data.admins || []);

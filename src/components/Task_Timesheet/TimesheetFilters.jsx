@@ -48,27 +48,30 @@
 import React from "react";
 import { RiSearchLine, RiFilter3Line, RiRestartLine } from "react-icons/ri";
 
-const TimesheetFilters = ({ filters, setFilters, total }) => {
+const TimesheetFilters = ({ filters, setFilters, total, activeTab = "tasks" }) => {
   
   const resetFilters = () => {
     setFilters({ search: "", status: "All" });
   };
 
+  const taskStatuses      = ["All", "Todo", "In Progress", "Review", "Completed", "Blocked"];
+  const timesheetStatuses = ["All", "Submitted", "Approved", "Rejected"];
+  const statusOptions     = activeTab === "tasks" ? taskStatuses : timesheetStatuses;
+
   return (
     <div className="p-6 bg-white border-b border-slate-100 rounded-t-3xl">
-      {/* Main Container - Flex for Desktop, Stack for Mobile */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
         
         {/* Left: Search Box */}
         <div className="flex-1 space-y-2">
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-            Search Records
+            Search {activeTab === "tasks" ? "Tasks" : "Timesheets"}
           </label>
           <div className="relative max-w-md">
             <RiSearchLine className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg" />
             <input
               type="text"
-              placeholder="Search by task name or employee..."
+              placeholder={`Search by ${activeTab === "tasks" ? "task name or assignee" : "employee or description"}...`}
               className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm 
                          focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all"
               value={filters.search}
@@ -83,7 +86,7 @@ const TimesheetFilters = ({ filters, setFilters, total }) => {
           {/* Status Dropdown */}
           <div className="flex flex-col gap-2 w-full sm:w-56">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-              Progress Status
+              Status Filter
             </label>
             <select 
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold 
@@ -91,15 +94,13 @@ const TimesheetFilters = ({ filters, setFilters, total }) => {
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
             >
-              <option value="All">All Progress States</option>
-              <option value="Completed">Completed</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Pending">Pending</option>
-              <option value="Assigned">Assigned</option>
+              {statusOptions.map((s) => (
+                <option key={s} value={s}>{s === "All" ? `All ${activeTab === "tasks" ? "Statuses" : "Statuses"}` : s}</option>
+              ))}
             </select>
           </div>
 
-          {/* Reset Button - Perfectly aligned with inputs */}
+          {/* Reset Button */}
           <button
             onClick={resetFilters}
             className="h-[46px] px-5 flex items-center gap-2 text-sm font-bold text-slate-400 
@@ -111,10 +112,10 @@ const TimesheetFilters = ({ filters, setFilters, total }) => {
         </div>
       </div>
 
-      {/* Counter - Simple bottom line info */}
+      {/* Counter */}
       <div className="mt-4 flex items-center gap-2 text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1">
         <RiFilter3Line size={12} />
-        <span>Found {total} Matching Tasks</span>
+        <span>Found {total} Matching {activeTab === "tasks" ? "Tasks" : "Timesheets"}</span>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { timesheetApprovalSchema } from "../../schemas/timesheetValidation";
 import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
 import { RiCloseLine, RiLoader4Line, RiCheckLine, RiCloseCircleLine } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 const TimesheetApprovalModal = ({ open, timesheet, onClose, onRefresh }) => {
   const { token } = useAuth();
@@ -16,7 +17,7 @@ const TimesheetApprovalModal = ({ open, timesheet, onClose, onRefresh }) => {
     validationSchema: timesheetApprovalSchema,
     onSubmit: async (values) => {
       try {
-        await axios.put(`http://localhost:5000/api/admin/timesheets/${timesheet._id}`, values, {
+        await axios.put(`${API_URL}/admin/timesheets/${timesheet._id}`, values, {
           headers: { Authorization: `Bearer ${token}` }
         });
         onRefresh();

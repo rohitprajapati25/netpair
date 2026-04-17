@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import API_URL from '../config/api';
 
 // ── Route label map ───────────────────────────────────────────────────────────
 const ROUTE_LABELS = {
@@ -92,16 +93,15 @@ const Header = ({ onMenuClick }) => {
       setNotifLoading(true);
       if (isAdminRole) {
         const res = await axios.get(
-          'http://localhost:5000/api/admin/audit-logs?limit=8&severity=HIGH&dateRange=today',
+          `${API_URL}/admin/audit-logs?limit=8&severity=HIGH&dateRange=today`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const logs = res.data.logs || [];
         setNotifications(logs);
         setUnreadCount(logs.length);
       } else {
-        // Employee / HR — show latest announcements
         const res = await axios.get(
-          'http://localhost:5000/api/admin/announcements?limit=8',
+          `${API_URL}/admin/announcements?limit=8`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const items = res.data.announcements || [];

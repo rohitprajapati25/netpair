@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import axios from 'axios';
 import { RiUserSettingsLine, RiLockPasswordLine, RiShieldCheckLine, RiNotification3Line, RiPaletteLine, RiCheckLine, RiCloseLine } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 const DynamicSettings = () => {
   const { user, token, updateUser } = useAuth();
@@ -21,7 +22,7 @@ const DynamicSettings = () => {
 
   const loadProfile = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/profile', {
+      const res = await axios.get(`${API_URL}/admin/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProfile({
@@ -38,7 +39,7 @@ const DynamicSettings = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.put('http://localhost:5000/api/admin/profile', profile, {
+      const res = await axios.put(`${API_URL}/admin/profile`, profile, {
         headers: { Authorization: `Bearer ${token}` }
       });
       updateUser(res.data.user);
@@ -58,7 +59,7 @@ const DynamicSettings = () => {
     }
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/admin/password', {
+      await axios.post(`${API_URL}/admin/password`, {
         currentPassword,
         newPassword
       }, {

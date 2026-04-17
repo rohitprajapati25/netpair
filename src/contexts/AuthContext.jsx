@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ExpiryWarning from '../components/common/ExpiryWarning.jsx';
+import API_URL from '../config/api';
 
 const AuthContext = createContext();
 
@@ -101,7 +102,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      const res = await axios.post(`${API_URL}/auth/login`, { email, password });
       const { token: newToken, user: newUser } = res.data;
       
       // Save to state and localStorage
@@ -123,13 +124,13 @@ export const AuthProvider = ({ children }) => {
         navigate('/employee-dashboard');
       }
       
-      return { success: true };
+      return { success: true, user: newUser };
     } catch (error) {
       return { success: false, error: error.response?.data?.message || 'Login failed' };
     }
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     setToken(null);
     setRole(null);
@@ -139,7 +140,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('email');
     delete axios.defaults.headers.common['Authorization'];
     navigate('/');
-  };
+  }, [navigate]);
 
   // Global 401 interceptor
   useEffect(() => {

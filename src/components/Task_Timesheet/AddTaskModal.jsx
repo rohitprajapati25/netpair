@@ -266,6 +266,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import LoadingOverlay from "../common/LoadingOverlay";
 import axios from "axios";
 import { RiAddCircleLine, RiCloseLine, RiLoader4Line, RiUserAddLine, RiFlag2Line } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 const AddTaskModal = ({ open, onClose, onRefresh, projects: propProjects }) => {
   const { token } = useAuth();
@@ -277,7 +278,7 @@ const AddTaskModal = ({ open, onClose, onRefresh, projects: propProjects }) => {
   // Load projects dynamically
   useEffect(() => {
     if (open && token) {
-      axios.get('http://localhost:5000/api/admin/projects', { 
+      axios.get(`${API_URL}/admin/projects`, { 
         headers: { Authorization: `Bearer ${token}` } 
       }).then(res => {
         // Safety check for project array
@@ -298,7 +299,7 @@ const AddTaskModal = ({ open, onClose, onRefresh, projects: propProjects }) => {
     }
     setEmployeesLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5000/api/admin/projects/${projectId}`, { 
+      const res = await axios.get(`${API_URL}/admin/projects/${projectId}`, { 
         headers: { Authorization: `Bearer ${token}` } 
       });
 
@@ -307,7 +308,7 @@ const AddTaskModal = ({ open, onClose, onRefresh, projects: propProjects }) => {
       const assignedIds = (Array.isArray(rawData) ? rawData : []).map(emp => emp?._id || emp).filter(id => typeof id === 'string');
       
       if (assignedIds.length > 0) {
-        const empRes = await axios.get(`http://localhost:5000/api/admin/employees?ids=${assignedIds.join(',')}`, {
+        const empRes = await axios.get(`${API_URL}/admin/employees?ids=${assignedIds.join(',')}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -338,7 +339,7 @@ const AddTaskModal = ({ open, onClose, onRefresh, projects: propProjects }) => {
     validationSchema: taskValidationSchema,
     onSubmit: async (values) => {
       try {
-        await axios.post('http://localhost:5000/api/admin/tasks', values, {
+        await axios.post(`${API_URL}/admin/tasks`, values, {
           headers: { Authorization: `Bearer ${token}` }
         });
         formik.resetForm();
@@ -347,7 +348,7 @@ const AddTaskModal = ({ open, onClose, onRefresh, projects: propProjects }) => {
         onClose();
         onRefresh();
       } catch (error) {
-        alert(error.response?.data?.message || "Failed to create task");
+        formik.setStatus(error.response?.data?.message || "Failed to create task. Please try again.");
       }
     },
   });
@@ -387,6 +388,14 @@ const AddTaskModal = ({ open, onClose, onRefresh, projects: propProjects }) => {
         <form onSubmit={formik.handleSubmit} className="p-10 space-y-6 relative">
           <LoadingOverlay visible={formik.isSubmitting} message="Creating task..." />
           <fieldset disabled={formik.isSubmitting} className="space-y-6">
+
+            {/* Server error */}
+            {formik.status && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+                {formik.status}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2 space-y-2">
               <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">Task Title *</label>
@@ -512,7 +521,7 @@ const AddTaskModal = ({ open, onClose, onRefresh, projects: propProjects }) => {
             <button 
               type="submit" 
               disabled={formik.isSubmitting}
-              className="flex-[2] py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl shadow-blue-100 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-[2] py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {formik.isSubmitting ? <RiLoader4Line className="animate-spin" size={20} /> : "Create Task"}
             </button>

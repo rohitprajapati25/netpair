@@ -117,7 +117,7 @@ initialValues={{
                     <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">Assigned Employee</label>
                     <Field as="select" name="assignedTo" className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:bg-white focus:border-blue-500 outline-none transition-all">
                       <option value="">No Assignment</option>
-{employees.map((emp) => (
+                      {Array.isArray(employees) && employees.map((emp) => (
                         <option key={emp._id} value={emp._id}>{emp.name || 'N/A'} ({emp.designation || 'N/A'})</option>
                       ))}
                     </Field>
@@ -178,9 +178,9 @@ initialValues={{
                   </button>
                   <button 
                     type="submit" 
-                    className={`flex-[2] py-4 font-bold rounded-2xl shadow-xl transition-all active:scale-95 disabled:opacity-50 ${
+                    className={`flex-[2] py-4 font-bold rounded-2xl shadow-md transition-all active:scale-95 disabled:opacity-50 ${
                       isValid && dirty && !isSaving 
-                        ? 'bg-blue-600 text-white shadow-blue-100 hover:bg-blue-700' 
+                        ? 'bg-blue-600 text-white hover:bg-blue-700' 
                         : 'bg-slate-200 text-slate-500 cursor-not-allowed'
                     }`}
                     disabled={!isValid || !dirty || isSaving}

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
+import { BASE_URL } from '../config/api';
 
 const SocketContext = createContext(null);
 
@@ -13,7 +14,7 @@ export const SocketProvider = ({ children }) => {
     // Prevent double-connect in React StrictMode
     if (socketRef.current) return;
 
-    const instance = io('http://localhost:5000', {
+    const instance = io(BASE_URL, {
       autoConnect: true,
       transports: ['websocket', 'polling'], // fallback to polling if WS fails
       reconnectionAttempts: 5,

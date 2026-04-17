@@ -7,6 +7,7 @@ import {
   RiWifiLine, RiCheckboxCircleLine, RiCloseCircleLine
 } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
+import API_URL from '../../config/api';
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 const STATUS = {
@@ -45,7 +46,7 @@ const SystemHealth = () => {
     try {
       // ── Try dedicated endpoint first ────────────────────────────────────
       const res = await axios.get(
-        'http://localhost:5000/api/admin/dashboard/health',
+        `${API_URL}/admin/dashboard/health`,
         { headers: { Authorization: `Bearer ${token}` }, timeout: 5000 }
       );
       if (res.data.success) {
@@ -63,9 +64,9 @@ const SystemHealth = () => {
       const apiStart = Date.now();
 
       const [statsRes, auditRes] = await Promise.allSettled([
-        axios.get('http://localhost:5000/api/admin/dashboard/stats',
+        axios.get(`${API_URL}/admin/dashboard/stats`,
           { headers: { Authorization: `Bearer ${token}` }, timeout: 5000 }),
-        axios.get('http://localhost:5000/api/admin/audit-logs?limit=5&severity=HIGH&dateRange=today',
+        axios.get(`${API_URL}/admin/audit-logs?limit=5&severity=HIGH&dateRange=today`,
           { headers: { Authorization: `Bearer ${token}` }, timeout: 5000 }),
       ]);
 

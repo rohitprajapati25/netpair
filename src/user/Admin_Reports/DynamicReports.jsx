@@ -12,6 +12,7 @@ import PieChartSimple from "../../components/Charts/PieChartSimple";
 import AreaChartSimple from "../../components/Charts/AreaChartSimple";
 import BarCharts from "../../components/Charts/BarCharts";
 import { exportToCSV, formatDataForExport } from "../../utils/exportUtils.js";
+import API_URL from "../../config/api";
 
 const DynamicReports = () => {
   const { token } = useAuth();
@@ -51,7 +52,7 @@ const DynamicReports = () => {
         department: filters.department
       });
 
-      const response = await axios.get(`http://localhost:5000/api/admin/reports?${params}`, {
+      const response = await axios.get(`${API_URL}/admin/reports?${params}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

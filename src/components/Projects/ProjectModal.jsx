@@ -1,31 +1,24 @@
 import React, { useEffect, useState } from "react";
-
 import { useAuth } from "../../contexts/AuthContext";
 import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { projectSchema } from '../../schemas/projectValidation';
 import { 
-  RiFolderAddLine, 
-  RiEditBoxLine, 
-  RiCloseLine, 
-  RiSaveLine, 
-  RiInformationLine,
-  RiCalendarEventLine,
-  RiBuildingLine,
-  RiTeamLine,
-  RiUserLine,
-  RiMoneyDollarCircleLine,
-  RiLoader4Line
+  RiFolderAddLine, RiEditBoxLine, RiCloseLine, RiSaveLine, RiInformationLine,
+  RiCalendarEventLine, RiBuildingLine, RiTeamLine, RiUserLine,
+  RiMoneyDollarCircleLine, RiLoader4Line
 } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 const ProjectModal = ({ onClose, onSave, initialData }) => {
   const { token } = useAuth();
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const loadEmployees = async () => {
     try {
-      const url = `http://localhost:5000/api/admin/active-employees?role=employee`;
+      const url = `${API_URL}/admin/active-employees?role=employee`;
       const res = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -94,7 +87,7 @@ const ProjectModal = ({ onClose, onSave, initialData }) => {
       onClose();
     } catch (err) {
       console.error('Submit error:', err);
-      alert('Submit failed');
+      setSubmitError(err.response?.data?.message || 'Failed to save project. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -158,6 +151,14 @@ const ProjectModal = ({ onClose, onSave, initialData }) => {
           {({ values, setFieldValue, errors, touched }) => (
             <Form className="p-8 space-y-6 relative">
               <fieldset disabled={loading} className="space-y-6">
+
+                {/* Submit error */}
+                {submitError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+                    {submitError}
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-wider ml-1">
                     <RiInformationLine /> Project Name *
@@ -193,7 +194,7 @@ const ProjectModal = ({ onClose, onSave, initialData }) => {
                   </label>
                   <Field as="select" name="manager" className="w-full px-5 py-3.5 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold text-slate-700 focus:bg-white focus:border-blue-500 outline-none transition-all">
                     <option value="">Select Manager</option>
-                    {managers.map(emp => (
+                    {Array.isArray(managers) && managers.map(emp => (
                       <option key={emp._id} value={emp._id}>
                         {emp.name} - {emp.designation}
                       </option>
@@ -346,7 +347,7 @@ const ProjectModal = ({ onClose, onSave, initialData }) => {
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className="flex-[2] py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 text-white font-black rounded-2xl shadow-xl shadow-blue-200 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50"
+                  className="flex-[2] py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50"
                 >
                   {loading ? (
                     <>

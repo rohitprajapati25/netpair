@@ -2,13 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import {
-  RiArrowLeftSLine,
-  RiArrowRightSLine,
-  RiTimeLine,
-  RiEditLine,
-  RiDeleteBinLine,
-  RiLoader4Line,
+  RiArrowLeftSLine, RiArrowRightSLine, RiTimeLine,
+  RiEditLine, RiDeleteBinLine, RiLoader4Line,
 } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 const formatDateDDMMYYYY = (dateStr) => {
   const date = new Date(dateStr);
@@ -64,7 +61,7 @@ const recordsPerPage = 5; // Strictly 5 rows first page
     if (!confirm("Delete this attendance record?")) return;
     try {
       setDeleteLoading(prev => ({ ...prev, [itemId]: true }));
-      await axios.delete(`http://localhost:5000/api/admin/attendance/${itemId}`, {
+      await axios.delete(`${API_URL}/admin/attendance/${itemId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (onRefresh) onRefresh();

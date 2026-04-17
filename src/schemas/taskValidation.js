@@ -10,8 +10,7 @@ export const taskValidationSchema = Yup.object({
   description: Yup.string().max(2000, 'Description too long'),
   priority: Yup.string().oneOf(['Low', 'Medium', 'High', 'Critical']).default('Medium'),
   start_date: Yup.date()
-    .required('Start date required')
-    .max(new Date(), 'Start date cannot be in future'),
+    .required('Start date required'),
   due_date: Yup.date()
     .required('Due date required')
     .min(Yup.ref('start_date'), 'Due date must be after start date')

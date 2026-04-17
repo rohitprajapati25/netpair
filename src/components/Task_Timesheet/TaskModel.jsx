@@ -5,6 +5,7 @@ import axios from "axios";
 import { RiEditLine, RiCloseLine, RiCheckLine, RiLoader4Line, RiMessage3Line } from "react-icons/ri";
 import { taskStatusSchema } from "../../schemas/taskValidation";
 import { TASK_STATUS_ENUM } from "../../utils/enums";
+import API_URL from "../../config/api";
 
 const TaskDetailsModal = ({ task, onClose, onRefresh }) => {
   const { token } = useAuth();
@@ -25,16 +26,16 @@ const TaskDetailsModal = ({ task, onClose, onRefresh }) => {
         };
 
         if (values.comments) {
-payload.comment = values.comments;
+          payload.comments = values.comments;
         }
 
-  await axios.put(`http://localhost:5000/api/admin/tasks/${task._id}`, payload, {
+        await axios.put(`${API_URL}/admin/tasks/${task._id}`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
         onRefresh();
         onClose();
       } catch (error) {
-        alert(error.response?.data?.message || "Update failed");
+        formik.setStatus(error.response?.data?.message || "Update failed. Please try again.");
       }
     },
   });
@@ -106,6 +107,12 @@ payload.comment = values.comments;
               Quick Update
             </h4>
             <form onSubmit={formik.handleSubmit}>
+              {/* Server error */}
+              {formik.status && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+                  {formik.status}
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block mb-1">Status</label>
@@ -148,7 +155,7 @@ payload.comment = values.comments;
               <button 
                 type="submit" 
                 disabled={formik.isSubmitting}
-                className="w-full mt-6 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:from-emerald-600 hover:to-emerald-700 shadow-xl shadow-emerald-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full mt-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {formik.isSubmitting ? <RiLoader4Line className="animate-spin" size={20} /> : <RiCheckLine size={20} />}
                 Update Task Status

@@ -196,7 +196,7 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
                       Discard
                     </button>
                     <button type="submit" disabled={formik.isSubmitting || !formik.dirty}
-                      className="flex-[2] py-2.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-blue-600 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+                      className="flex-[2] py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
                       {formik.isSubmitting ? "Saving..." : "Save Changes"}
                     </button>
                   </div>

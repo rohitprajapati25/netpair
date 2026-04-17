@@ -80,6 +80,7 @@ import { Link } from "react-router-dom";
 import * as Yup from "yup";
 import axios from "axios";
 import { RiMailLine, RiArrowLeftLine } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 const Fform = () => {
   const [loading, setLoading] = useState(false);
@@ -96,8 +97,7 @@ const Fform = () => {
       setMessage("");
       setError("");
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-        const response = await axios.post(`${apiUrl}/auth/forgot-password`, values);
+        const response = await axios.post(`${API_URL}/auth/forgot-password`, values);
         setMessage("Password reset link sent! Please check your email.");
         actions.resetForm();
       } catch (err) {

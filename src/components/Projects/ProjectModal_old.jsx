@@ -1,21 +1,13 @@
 import React, { useEffect, useState } from "react";
-
 import { useAuth } from "../../contexts/AuthContext";
 import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage, useFormikContext } from 'formik';
 import { projectSchema } from '../../schemas/projectValidation';
 import { 
-  RiFolderAddLine, 
-  RiEditBoxLine, 
-  RiCloseLine, 
-  RiSaveLine, 
-  RiInformationLine,
-  RiCalendarEventLine,
-  RiBuildingLine,
-  RiTeamLine,
-  RiUserLine,
-  RiMoneyDollarCircleLine
+  RiFolderAddLine, RiEditBoxLine, RiCloseLine, RiSaveLine, RiInformationLine,
+  RiCalendarEventLine, RiBuildingLine, RiTeamLine, RiUserLine, RiMoneyDollarCircleLine
 } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 
 
@@ -75,7 +67,7 @@ const ProjectModal = ({ onClose, onSave, initialData }) => {
 
   const loadEmployees = async (companyFilter = '') => {
     try {
-      const url = `http://localhost:5000/api/admin/active-employees?role=employee${companyFilter ? `&company=${encodeURIComponent(companyFilter)}` : ''}`;
+      const url = `${API_URL}/admin/active-employees?role=employee${companyFilter ? `&company=${encodeURIComponent(companyFilter)}` : ''}`;
       const res = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` }
       });

@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import API_URL from '../config/api';
 
-const API_BASE = 'http://localhost:5000/api/admin';
+const API_BASE = API_URL + '/admin';
 
 export const useAttendance = (filters) => {
   const { token } = useAuth();

@@ -11,6 +11,7 @@ import {
 } from "react-icons/ri";
 import { PageHeader, FilterBar, DataStateHandler } from "../../components/Layout";
 import { SkeletonHeader, SkeletonFilter, SkeletonGrid, SkeletonTable } from "../../components/Skeletons";
+import API_URL from "../../config/api";
 
 const authHeaders = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
 const LIMIT = 12;
@@ -37,7 +38,7 @@ const HRs = () => {
         ...(search && { search }),
         ...(statusFilter !== "all" && { status: statusFilter }),
       });
-      const res = await axios.get(`http://localhost:5000/api/hr?${params}`, authHeaders());
+      const res = await axios.get(`${API_URL}/hr?${params}`, authHeaders());
       setHrs(res.data.hrs || res.data.employees || []);
       setTotalCount(res.data.pagination?.total || res.data.total || 0);
       setTotalPages(res.data.pagination?.pages || Math.ceil((res.data.pagination?.total || 0) / LIMIT) || 1);
@@ -57,7 +58,7 @@ const HRs = () => {
 
   const handleStatusToggle = async (id, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/hr/${id}`, { status: newStatus }, authHeaders());
+      await axios.put(`${API_URL}/hr/${id}`, { status: newStatus }, authHeaders());
       setHrs(prev => prev.map(h => h._id === id ? { ...h, status: newStatus } : h));
     } catch (err) { alert(err.response?.data?.message || "Status update failed"); }
   };
@@ -65,7 +66,7 @@ const HRs = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this HR member?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/hr/${id}`, authHeaders());
+      await axios.delete(`${API_URL}/hr/${id}`, authHeaders());
       setHrs(prev => prev.filter(h => h._id !== id));
       setTotalCount(c => Math.max(0, c - 1));
     } catch (err) { alert(err.response?.data?.message || "Delete failed"); }
@@ -73,7 +74,7 @@ const HRs = () => {
 
   const handleSave = async (values) => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/hr/${selectedHR._id}`, values, authHeaders());
+      const res = await axios.put(`${API_URL}/hr/${selectedHR._id}`, values, authHeaders());
       const updated = res.data.employee || res.data.hr || res.data;
       setHrs(prev => prev.map(h => h._id === selectedHR._id ? { ...h, ...updated } : h));
       closeModal();

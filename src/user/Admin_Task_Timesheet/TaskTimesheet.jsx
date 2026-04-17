@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
 import { RiAddLine } from "react-icons/ri";
@@ -77,7 +77,7 @@ const TaskTimesheet = () => {
 
       <TimesheetCards data={tasks} timesheets={timesheets} />
 
-      <TimesheetFilters filters={filters} setFilters={setFilters} total={data.length} />
+      <TimesheetFilters filters={filters} setFilters={setFilters} total={data.length} activeTab={activeTab} />
 
       <div className="space-y-2">
         <div className="flex border-b border-slate-200">

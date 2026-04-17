@@ -10,11 +10,13 @@ import GlobalErrorToast from './components/common/GlobalErrorToast.jsx';
 import '../src/style.css'
 import App from './App.jsx'
 
+// ── QueryClient created ONCE outside the component tree ──────────────────────
+// If placed inside a component it gets recreated on every render, wiping cache.
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000,
-      cacheTime: 10 * 60 * 1000,
+      staleTime: 5 * 60 * 1000,       // data fresh for 5 min — no refetch on nav
+      gcTime:    10 * 60 * 1000,       // keep unused cache for 10 min
       retry: 1,
       refetchOnWindowFocus: false,
     },

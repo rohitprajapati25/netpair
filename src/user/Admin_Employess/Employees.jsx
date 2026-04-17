@@ -12,6 +12,7 @@ import {
 } from "react-icons/ri";
 import { PageHeader, FilterBar, DataStateHandler } from "../../components/Layout";
 import { SkeletonHeader, SkeletonFilter, SkeletonGrid, SkeletonTable } from "../../components/Skeletons";
+import API_URL from "../../config/api";
 
 const authHeaders = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
 const LIMIT = 12;
@@ -42,7 +43,7 @@ const Employees = () => {
         ...(statusFilter !== "all" && { status: statusFilter }),
         ...(deptFilter  !== "all" && { department: deptFilter }),
       });
-      const res = await axios.get(`http://localhost:5000/api/admin/employees?${params}`, authHeaders());
+      const res = await axios.get(`${API_URL}/admin/employees?${params}`, authHeaders());
       setEmployees(res.data.employees || []);
       setTotalCount(res.data.pagination?.total || res.data.total || res.data.count || 0);
       setTotalPages(res.data.pagination?.pages || Math.ceil((res.data.pagination?.total || 0) / LIMIT) || 1);
@@ -63,7 +64,7 @@ const Employees = () => {
 
   const handleStatusToggle = async (id, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/admin/employees/${id}`, { status: newStatus }, authHeaders());
+      await axios.put(`${API_URL}/admin/employees/${id}`, { status: newStatus }, authHeaders());
       setEmployees(prev => prev.map(e => e._id === id ? { ...e, status: newStatus } : e));
     } catch (err) { alert(err.response?.data?.message || "Status update failed"); }
   };
@@ -71,7 +72,7 @@ const Employees = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this employee?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admin/employees/${id}`, authHeaders());
+      await axios.delete(`${API_URL}/admin/employees/${id}`, authHeaders());
       setEmployees(prev => prev.filter(e => e._id !== id));
       setTotalCount(c => Math.max(0, c - 1));
     } catch (err) { alert(err.response?.data?.message || "Delete failed"); }
@@ -79,7 +80,7 @@ const Employees = () => {
 
   const handleSave = async (values) => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/admin/employees/${selectedEmployee._id}`, values, authHeaders());
+      const res = await axios.put(`${API_URL}/admin/employees/${selectedEmployee._id}`, values, authHeaders());
       const updated = res.data.employee || res.data;
       setEmployees(prev => prev.map(e => e._id === selectedEmployee._id ? { ...e, ...updated } : e));
       closeModal();

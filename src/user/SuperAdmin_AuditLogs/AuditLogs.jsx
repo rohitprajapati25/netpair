@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
 import {
@@ -9,6 +9,7 @@ import {
   RiSmartphoneLine, RiTabletLine, RiMacbookLine, RiGlobalLine,
   RiDeleteBin6Line, RiDeleteBinLine, RiAlertLine
 } from "react-icons/ri";
+import API_URL from "../../config/api";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 const SEVERITY_STYLE = {
@@ -81,7 +82,7 @@ const AuditLogs = () => {
       });
 
       const res = await axios.get(
-        `http://localhost:5000/api/admin/audit-logs?${params}`,
+        `${API_URL}/admin/audit-logs?${params}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -104,7 +105,7 @@ const AuditLogs = () => {
   const fetchFallbackLogs = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/admin/dashboard/activity",
+        `${API_URL}/admin/dashboard/activity`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const activity = res.data.activity || [];
@@ -146,7 +147,7 @@ const AuditLogs = () => {
   const handleDeleteLog = async (id) => {
     try {
       setDeleting(id);
-      await axios.delete(`http://localhost:5000/api/admin/audit-logs/${id}`, {
+      await axios.delete(`${API_URL}/admin/audit-logs/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setLogs(prev => prev.filter(l => l._id !== id));
@@ -173,7 +174,7 @@ const AuditLogs = () => {
     try {
       setLoading(true);
       const params = dateRange !== 'all' ? `?dateRange=${dateRange}` : '';
-      await axios.delete(`http://localhost:5000/api/admin/audit-logs${params}`, {
+      await axios.delete(`${API_URL}/admin/audit-logs${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setShowClearModal(false);
