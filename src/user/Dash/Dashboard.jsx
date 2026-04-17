@@ -316,7 +316,7 @@ const Dashboard = () => {
           </div>
 
           {/* System Health — admin/superadmin only */}
-          <SystemHealth />
+          {(role === 'admin' || role === 'superadmin') && <SystemHealth />}
         </>
       )}
 

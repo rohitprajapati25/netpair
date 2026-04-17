@@ -24,6 +24,14 @@ const statusStyle = {
 const fmtDate = (d) =>
   d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
+// Calculate days between two dates (inclusive) as fallback when backend doesn't return days
+const calcDays = (from, to) => {
+  if (!from || !to) return null;
+  const diff = new Date(to) - new Date(from);
+  if (diff < 0) return null;
+  return Math.ceil(diff / 86400000) + 1;
+};
+
 // ── Toast ─────────────────────────────────────────────────────────────────────
 const Toast = ({ msg, type, onClose }) => {
   useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
@@ -261,10 +269,15 @@ const Leave = () => {
   const rows = useMemo(() =>
     leaves.map((l) => ({
       ...l,
-      _id:  l._id,
-      name: l.employeeId?.name  || l.name  || "Unknown",
-      email: l.employeeId?.email || l.email || "",
-      dept: l.employeeId?.department || "",
+      _id:        l._id,
+      name:       l.employeeId?.name       || l.name  || "Unknown",
+      email:      l.employeeId?.email      || l.email || "",
+      dept:       l.employeeId?.department || "",
+      designation: l.employeeId?.designation || "",
+      approvedBy: l.approvedBy || null,
+      approvedAt: l.approvedAt || null,
+      // Ensure days is always a number — compute from dates if backend didn't return it
+      days: l.days ?? calcDays(l.fromDate, l.toDate) ?? 0,
     })),
   [leaves]);
 
@@ -296,7 +309,7 @@ const Leave = () => {
         <button
           onClick={fetchLeaves}
           disabled={loading}
-          className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold rounded-xl shadow-sm text-sm transition-all disabled:opacity-50"
+          className="w-auto self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold rounded-xl shadow-sm text-sm transition-all disabled:opacity-50"
         >
           <RiRefreshLine className={loading ? "animate-spin" : ""} size={15} />
           Refresh
@@ -361,11 +374,11 @@ const Leave = () => {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px]">
+          <table className="w-full min-w-[900px]">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                {["Employee", "Type", "Duration", "Days", "Reason", "Status", "Actions"].map((h) => (
-                  <th key={h} className="px-5 py-3.5 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                {["Employee", "Leave Type", "Duration", "Days", "Reason", "Applied On", "Status", "Reviewed By", "Actions"].map((h) => (
+                  <th key={h} className="px-4 py-3.5 text-left text-[10px] font-black text-slate-500 uppercase tracking-wider whitespace-nowrap">
                     {h}
                   </th>
                 ))}
@@ -374,7 +387,7 @@ const Leave = () => {
             <tbody className="divide-y divide-slate-100">
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-16 text-center">
+                  <td colSpan={9} className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center gap-2 text-slate-400">
                       <RiSurveyLine className="text-5xl opacity-40" />
                       <p className="font-semibold text-slate-500">No leave requests found</p>
@@ -384,102 +397,156 @@ const Leave = () => {
                 </tr>
               ) : rows.map((leave) => (
                 <tr key={leave._id} className="hover:bg-slate-50 transition-colors group">
+
                   {/* Employee */}
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3.5">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-black shrink-0">
-                        {leave.name.charAt(0).toUpperCase()}
+                        {(leave.name || "?").charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold text-slate-800 text-sm truncate">{leave.name}</p>
-                        {leave.dept && <p className="text-xs text-slate-400 truncate">{leave.dept}</p>}
+                        <p className="text-xs text-slate-400 truncate">
+                          {leave.dept || leave.employeeId?.designation || "—"}
+                        </p>
                       </div>
                     </div>
                   </td>
 
-                  {/* Type */}
-                  <td className="px-5 py-4">
-                    <span className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-wide">
+                  {/* Leave Type */}
+                  <td className="px-4 py-3.5">
+                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border ${
+                      leave.type === "Sick"      ? "bg-red-50    text-red-700    border-red-200"    :
+                      leave.type === "Casual"    ? "bg-blue-50   text-blue-700   border-blue-200"   :
+                      leave.type === "Emergency" ? "bg-orange-50 text-orange-700 border-orange-200" :
+                      leave.type === "Earned"    ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                      "bg-slate-100 text-slate-600 border-slate-200"
+                    }`}>
                       {leave.type}
                     </span>
                   </td>
 
                   {/* Duration */}
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-                      <span>{fmtDate(leave.fromDate)}</span>
-                      <span className="text-slate-300">→</span>
-                      <span>{fmtDate(leave.toDate)}</span>
+                  <td className="px-4 py-3.5">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                        <span>{fmtDate(leave.fromDate)}</span>
+                        <span className="text-slate-300">→</span>
+                        <span>{fmtDate(leave.toDate)}</span>
+                      </div>
                     </div>
                   </td>
 
                   {/* Days */}
-                  <td className="px-5 py-4">
-                    <span className="font-black text-slate-700 text-sm">{leave.days ?? "—"}d</span>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-1">
+                      <span className="font-black text-slate-800 text-sm">
+                        {leave.days != null ? leave.days : "—"}
+                      </span>
+                      {leave.days != null && (
+                        <span className="text-xs text-slate-400">day{leave.days !== 1 ? "s" : ""}</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Reason */}
-                  <td className="px-5 py-4 max-w-[180px]">
-                    <p className="text-xs text-slate-500 truncate" title={leave.reason}>{leave.reason || "—"}</p>
+                  <td className="px-4 py-3.5 max-w-[160px]">
+                    {leave.reason ? (
+                      <p className="text-xs text-slate-500 truncate" title={leave.reason}>
+                        {leave.reason}
+                      </p>
+                    ) : (
+                      <span className="text-xs text-slate-300">—</span>
+                    )}
+                  </td>
+
+                  {/* Applied On */}
+                  <td className="px-4 py-3.5 whitespace-nowrap">
+                    <p className="text-xs text-slate-600">{fmtDate(leave.createdAt)}</p>
+                    <p className="text-[10px] text-slate-400">
+                      {leave.createdAt ? new Date(leave.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}
+                    </p>
                   </td>
 
                   {/* Status */}
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-1.5">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-black border ${statusStyle[leave.status] || "bg-slate-100 text-slate-600 border-slate-200"}`}>
+                  <td className="px-4 py-3.5">
+                    <div className="flex flex-col gap-1">
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black border w-fit ${statusStyle[leave.status] || "bg-slate-100 text-slate-600 border-slate-200"}`}>
+                        {leave.status === "Pending"  && <RiTimeLine size={10} />}
+                        {leave.status === "Approved" && <RiCheckLine size={10} />}
+                        {leave.status === "Rejected" && <RiCloseLine size={10} />}
                         {leave.status}
                       </span>
+                      {/* Rejection reason tooltip */}
                       {leave.status === "Rejected" && leave.rejectionReason && (
-                        <div className="relative group/tip">
-                          <RiInformationLine size={14} className="text-red-400 cursor-help" />
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-800 text-white text-xs rounded-xl p-3 shadow-xl z-20 hidden group-hover/tip:block pointer-events-none">
-                            <p className="font-bold mb-1">Rejection Reason:</p>
-                            <p className="opacity-90">{leave.rejectionReason}</p>
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800" />
+                        <div className="relative group/tip w-fit">
+                          <p className="text-[10px] text-red-500 cursor-help flex items-center gap-0.5 truncate max-w-[120px]">
+                            <RiInformationLine size={10} className="shrink-0" />
+                            <span className="truncate">{leave.rejectionReason}</span>
+                          </p>
+                          <div className="absolute bottom-full left-0 mb-2 w-56 bg-slate-800 text-white text-xs rounded-xl p-3 shadow-xl z-20 hidden group-hover/tip:block pointer-events-none">
+                            <p className="font-bold mb-1 text-red-300">Rejection Reason:</p>
+                            <p className="opacity-90 leading-relaxed">{leave.rejectionReason}</p>
+                            <div className="absolute top-full left-4 border-4 border-transparent border-t-slate-800" />
                           </div>
                         </div>
                       )}
                     </div>
                   </td>
 
+                  {/* Reviewed By */}
+                  <td className="px-4 py-3.5">
+                    {leave.approvedBy ? (
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-slate-700 truncate">
+                          {leave.approvedBy?.name || "—"}
+                        </p>
+                        <p className="text-[10px] text-slate-400">
+                          {leave.approvedAt ? fmtDate(leave.approvedAt) : ""}
+                        </p>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-slate-300">Pending</span>
+                    )}
+                  </td>
+
                   {/* Actions */}
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3.5">
                     <div className="flex items-center gap-1">
-                      {leave.status === "Pending" && (
+                      {leave.status === "Pending" ? (
                         <>
                           <button
                             onClick={() => handleQuickAction(leave._id, "Approved")}
                             disabled={saving}
-                            title="Approve"
+                            title="Quick Approve"
                             className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all disabled:opacity-40"
                           >
-                            <RiCheckLine size={17} />
+                            <RiCheckLine size={16} />
                           </button>
                           <button
                             onClick={() => handleQuickAction(leave._id, "Rejected")}
                             disabled={saving}
-                            title="Reject"
+                            title="Quick Reject"
                             className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-all disabled:opacity-40"
                           >
-                            <RiCloseLine size={17} />
+                            <RiCloseLine size={16} />
+                          </button>
+                          <button
+                            onClick={() => setEditLeave(leave)}
+                            title="Review with reason"
+                            className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                          >
+                            <RiEditLine size={15} />
                           </button>
                         </>
-                      )}
-                      {/* Edit button — opens modal for full control */}
-                      {leave.status === "Pending" && (
-                        <button
-                          onClick={() => setEditLeave(leave)}
-                          title="Edit with reason"
-                          className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                        >
-                          <RiEditLine size={16} />
-                        </button>
-                      )}
-                      {leave.status !== "Pending" && (
-                        <span className="text-xs text-slate-400 px-2">—</span>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 capitalize px-1">
+                          {leave.status}
+                        </span>
                       )}
                     </div>
                   </td>
+
                 </tr>
               ))}
             </tbody>

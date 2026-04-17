@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
+﻿import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import PremiumCard from "../../components/Employee/PremiumCard";
 import EmployeeModal from "../../components/Employee/EmployeeModal";
 import EmployeeTable from "../../components/Employee/EmployeeTable";
 import {
   RiUserAddLine, RiLayoutGridFill, RiListUnordered,
   RiRefreshLine, RiLoader4Line, RiArrowLeftSLine, RiArrowRightSLine,
-  RiTeamLine, RiUserFollowLine, RiUserUnfollowLine
+  RiTeamLine, RiUserFollowLine, RiUserUnfollowLine, RiBriefcaseLine,
 } from "react-icons/ri";
 import { PageHeader, FilterBar, DataStateHandler } from "../../components/Layout";
 import { SkeletonHeader, SkeletonFilter, SkeletonGrid, SkeletonTable } from "../../components/Skeletons";
@@ -18,24 +19,29 @@ const LIMIT = 12;
 
 const HRs = () => {
   const navigate = useNavigate();
-  const [hrs, setHrs]                   = useState([]);
-  const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState(null);
-  const [search, setSearch]             = useState("");
+  const { role: userRole } = useAuth();
+  const isSuperAdmin = userRole?.toLowerCase() === "superadmin";
+
+  const [hrs,          setHrs]          = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [error,        setError]        = useState(null);
+  const [search,       setSearch]       = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [page, setPage]                 = useState(1);
-  const [totalPages, setTotalPages]     = useState(1);
-  const [totalCount, setTotalCount]     = useState(0);
-  const [selectedHR, setSelectedHR]     = useState(null);
-  const [modalMode, setModalMode]       = useState("view");
-  const [viewMode, setViewMode]         = useState("card");
+  const [deptFilter,   setDeptFilter]   = useState("all");
+  const [empTypeFilter,setEmpTypeFilter]= useState("all");
+  const [page,         setPage]         = useState(1);
+  const [totalPages,   setTotalPages]   = useState(1);
+  const [totalCount,   setTotalCount]   = useState(0);
+  const [selectedHR,   setSelectedHR]   = useState(null);
+  const [modalMode,    setModalMode]    = useState("view");
+  const [viewMode,     setViewMode]     = useState("card");
 
   const fetchHRs = useCallback(async () => {
     try {
       setLoading(true); setError(null);
       const params = new URLSearchParams({
         page: page.toString(), limit: LIMIT.toString(),
-        ...(search && { search }),
+        ...(search       && { search }),
         ...(statusFilter !== "all" && { status: statusFilter }),
       });
       const res = await axios.get(`${API_URL}/hr?${params}`, authHeaders());
@@ -54,13 +60,31 @@ const HRs = () => {
     return () => clearTimeout(t);
   }, [fetchHRs]);
 
-  useEffect(() => { setPage(1); }, [search, statusFilter]);
+  useEffect(() => { setPage(1); }, [search, statusFilter, deptFilter, empTypeFilter]);
+
+  // Client-side filter for dept + empType (backend doesn't support these)
+  const filteredHRs = useMemo(() => hrs.filter(h => {
+    if (deptFilter    !== "all" && h.department    !== deptFilter)    return false;
+    if (empTypeFilter !== "all" && h.employmentType !== empTypeFilter) return false;
+    return true;
+  }), [hrs, deptFilter, empTypeFilter]);
+
+  // Unique departments from loaded data
+  const departments = useMemo(() => {
+    const set = new Set(hrs.map(h => h.department).filter(Boolean));
+    return Array.from(set).sort();
+  }, [hrs]);
 
   const handleStatusToggle = async (id, newStatus) => {
+    // Optimistic update
+    setHrs(prev => prev.map(h => h._id === id ? { ...h, status: newStatus } : h));
     try {
       await axios.put(`${API_URL}/hr/${id}`, { status: newStatus }, authHeaders());
-      setHrs(prev => prev.map(h => h._id === id ? { ...h, status: newStatus } : h));
-    } catch (err) { alert(err.response?.data?.message || "Status update failed"); }
+    } catch (err) {
+      // Revert on failure
+      setHrs(prev => prev.map(h => h._id === id ? { ...h, status: newStatus === "active" ? "inactive" : "active" } : h));
+      alert(err.response?.data?.message || "Status update failed");
+    }
   };
 
   const handleDelete = async (id) => {
@@ -75,7 +99,7 @@ const HRs = () => {
   const handleSave = async (values) => {
     try {
       const res = await axios.put(`${API_URL}/hr/${selectedHR._id}`, values, authHeaders());
-      const updated = res.data.employee || res.data.hr || res.data;
+      const updated = res.data.hr || res.data.employee || res.data;
       setHrs(prev => prev.map(h => h._id === selectedHR._id ? { ...h, ...updated } : h));
       closeModal();
     } catch (err) { alert(err.response?.data?.message || "Update failed"); }
@@ -86,6 +110,7 @@ const HRs = () => {
 
   const activeCount   = hrs.filter(h => h.status === "active"   || h.status === "Active").length;
   const inactiveCount = hrs.filter(h => h.status === "inactive" || h.status === "Inactive").length;
+  const fullTimeCount = hrs.filter(h => h.employmentType === "Full Time").length;
 
   if (loading && hrs.length === 0) {
     return (
@@ -101,17 +126,18 @@ const HRs = () => {
     <div className="space-y-5">
 
       <PageHeader
-        title="HR Directory"
+        title="HR Team Management"
         description={`${totalCount} HR team members`}
         action={{ label: "Add HR Member", icon: <RiUserAddLine size={18} />, onClick: () => navigate("/employee/registration") }}
       />
 
-      {/* Stats bar */}
-      <div className="grid grid-cols-3 gap-3">
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { icon: RiTeamLine,         label: "Total",    value: totalCount,   bg: "from-emerald-500 to-teal-600"   },
-          { icon: RiUserFollowLine,   label: "Active",   value: activeCount,  bg: "from-blue-500 to-indigo-600"    },
-          { icon: RiUserUnfollowLine, label: "Inactive", value: inactiveCount,bg: "from-amber-500 to-orange-500"   },
+          { icon: RiTeamLine,         label: "Total HR",   value: totalCount,   bg: "from-emerald-500 to-teal-600"   },
+          { icon: RiUserFollowLine,   label: "Active",     value: activeCount,  bg: "from-blue-500 to-indigo-600"    },
+          { icon: RiUserUnfollowLine, label: "Inactive",   value: inactiveCount,bg: "from-amber-500 to-orange-500"   },
+          { icon: RiBriefcaseLine,    label: "Full Time",  value: fullTimeCount, bg: "from-purple-500 to-pink-600"   },
         ].map((s, i) => (
           <div key={i} className={`flex items-center justify-between p-4 lg:p-5 rounded-2xl bg-gradient-to-r ${s.bg} text-white shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200`}>
             <div>
@@ -129,15 +155,36 @@ const HRs = () => {
         searchValue={search}
         setSearchValue={val => setSearch(val)}
         searchPlaceholder="Search by name or email..."
-        filters={[{
-          value: statusFilter,
-          onChange: val => setStatusFilter(val),
-          options: [
-            { value: "all",      label: "All Status" },
-            { value: "active",   label: "Active"     },
-            { value: "inactive", label: "Inactive"   },
-          ],
-        }]}
+        filters={[
+          {
+            value: statusFilter,
+            onChange: val => setStatusFilter(val),
+            options: [
+              { value: "all",      label: "All Status" },
+              { value: "active",   label: "Active"     },
+              { value: "inactive", label: "Inactive"   },
+            ],
+          },
+          {
+            value: deptFilter,
+            onChange: val => setDeptFilter(val),
+            options: [
+              { value: "all", label: "All Depts" },
+              ...departments.map(d => ({ value: d, label: d })),
+            ],
+          },
+          {
+            value: empTypeFilter,
+            onChange: val => setEmpTypeFilter(val),
+            options: [
+              { value: "all",        label: "All Types"  },
+              { value: "Full Time",  label: "Full Time"  },
+              { value: "Part Time",  label: "Part Time"  },
+              { value: "Intern",     label: "Intern"     },
+              { value: "Contract",   label: "Contract"   },
+            ],
+          },
+        ]}
         actions={{
           toggle:  { value: viewMode, onChange: setViewMode, cardIcon: <RiLayoutGridFill size={18} />, tableIcon: <RiListUnordered size={18} /> },
           refresh: { onClick: fetchHRs, icon: loading ? <RiLoader4Line size={18} className="animate-spin" /> : <RiRefreshLine size={18} /> },
@@ -147,28 +194,28 @@ const HRs = () => {
       <DataStateHandler
         loading={loading && hrs.length === 0}
         error={error}
-        isEmpty={!hrs.length}
+        isEmpty={!filteredHRs.length}
         emptyLabel="No HR members found"
         emptyDescription="Add your first HR team member."
         onRetry={fetchHRs}
       >
         {viewMode === "card" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {hrs.map((hr, i) => (
+            {filteredHRs.map((hr, i) => (
               <PremiumCard key={hr._id || i} {...hr}
                 onView={() => openModal(hr, "view")}
                 onEdit={() => openModal(hr, "edit")}
-                onDelete={handleDelete}
+                onDelete={isSuperAdmin ? handleDelete : null}
                 onStatusToggle={handleStatusToggle}
               />
             ))}
           </div>
         ) : (
           <EmployeeTable
-            employees={hrs}
-            onView={id => { const h = hrs.find(h => h._id === id); if (h) openModal(h, "view"); }}
-            onEdit={id => { const h = hrs.find(h => h._id === id); if (h) openModal(h, "edit"); }}
-            onDelete={handleDelete}
+            employees={filteredHRs}
+            onView={id => { const h = filteredHRs.find(h => h._id === id); if (h) openModal(h, "view"); }}
+            onEdit={id => { const h = filteredHRs.find(h => h._id === id); if (h) openModal(h, "edit"); }}
+            onDelete={isSuperAdmin ? handleDelete : null}
             onStatusToggle={handleStatusToggle}
           />
         )}
@@ -191,7 +238,7 @@ const HRs = () => {
               if (p < 1 || p > totalPages) return null;
               return (
                 <button key={p} onClick={() => setPage(p)}
-                  className={`w-8 h-8 text-xs font-bold rounded-lg transition-colors ${p === page ? "bg-blue-600 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}>
+                  className={`w-8 h-8 text-xs font-bold rounded-lg transition-colors ${p === page ? "bg-emerald-500 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}>
                   {p}
                 </button>
               );

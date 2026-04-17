@@ -45,27 +45,37 @@ import React from "react";
 
 const AuthLayout = ({ children }) => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 md:p-8 font-sans">
-      <div className="flex w-full max-w-6xl bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200 overflow-hidden min-h-[700px]">
-        
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-3 sm:p-6 md:p-8 font-sans">
+      <div className="flex w-full max-w-6xl bg-white rounded-2xl sm:rounded-[2.5rem] shadow-2xl shadow-slate-200 overflow-hidden">
+
         {/* Form Side */}
-        <div className="w-full md:w-1/2 flex flex-col px-8 md:px-16 py-12 justify-center">
-          <div className="mb-10">
-            <img src="https://res.cloudinary.com/dzaoze4gr/image/upload/v1776312639/logo_wnnnq6.png" alt="Logo" className="h-12 w-auto object-contain" />
+        <div className="w-full md:w-1/2 flex flex-col px-4 sm:px-8 md:px-12 py-6 sm:py-10 justify-center min-h-0">
+          {/* Logo */}
+          <div className="mb-6 sm:mb-10">
+            <img
+              src="https://res.cloudinary.com/dzaoze4gr/image/upload/v1776312639/logo_wnnnq6.png"
+              alt="Logo"
+              className="h-9 sm:h-12 w-auto object-contain"
+            />
           </div>
 
-          <div className="w-full overflow-y-auto pr-1 custom-scrollbar">
+          {/* Scrollable form area */}
+          <div className="w-full overflow-y-auto max-h-[75vh] pr-1 custom-scrollbar">
             {children}
           </div>
         </div>
 
-        {/* Image Side */}
-        <div className="hidden md:block md:w-1/2 relative p-6">
-          <div className="h-full w-full rounded-[2rem] overflow-hidden relative group">
-            <img src="https://res.cloudinary.com/dzaoze4gr/image/upload/q_auto/f_auto/v1776312064/img1_plksxc.jpg" alt="Auth" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent flex flex-col justify-end p-12">
-              <h3 className="text-3xl font-bold text-white mb-2 text-shadow">Internal Management System</h3>
-              <p className="text-blue-50/90 font-medium">Efficiently manage your workspace and employees with precision.</p>
+        {/* Image Side — hidden on mobile */}
+        <div className="hidden md:block md:w-1/2 relative p-4 lg:p-6">
+          <div className="h-full min-h-[560px] w-full rounded-2xl lg:rounded-[2rem] overflow-hidden relative group">
+            <img
+              src="https://res.cloudinary.com/dzaoze4gr/image/upload/q_auto/f_auto/v1776312064/img1_plksxc.jpg"
+              alt="Auth"
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent flex flex-col justify-end p-8 lg:p-12">
+              <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2">Internal Management System</h3>
+              <p className="text-blue-50/90 font-medium text-sm lg:text-base">Efficiently manage your workspace and employees with precision.</p>
             </div>
           </div>
         </div>

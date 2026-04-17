@@ -386,7 +386,7 @@ const Rform = () => {
   return (
     <div className="w-full overflow-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4 sticky top-0 bg-white z-10 pb-2 border-b border-slate-50">
+      <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
         <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest border-b-2 border-blue-600">
           Register Member
         </h3>
@@ -415,7 +415,7 @@ const Rform = () => {
 
       <form
         onSubmit={formik.handleSubmit}
-        className="space-y-4 max-h-[480px] overflow-y-auto pr-2 custom-scrollbar"
+        className="space-y-4"
       >
         {/* Full Name */}
         <div>
@@ -433,7 +433,7 @@ const Rform = () => {
         </div>
 
         {/* Gender & DOB */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">
               Gender
@@ -465,7 +465,7 @@ const Rform = () => {
         </div>
 
         {/* Email & Phone */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">
               Email
@@ -496,7 +496,7 @@ const Rform = () => {
 
         {/* Work Details Section */}
         <div className="space-y-4 pt-2 border-t border-slate-50">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">
                 Department
@@ -540,7 +540,7 @@ const Rform = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">
                 System Role
@@ -591,7 +591,7 @@ const Rform = () => {
 
         {/* Security Section */}
         <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">
                 Password
@@ -625,7 +625,7 @@ const Rform = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full h-14 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-2xl font-black shadow-xl mt-4 active:scale-95 transition-all"
+          className="w-full h-11 sm:h-14 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-xl font-black shadow-xl mt-4 active:scale-95 transition-all"
         >
           {loading ? "Registering..." : "Complete Registration"}
         </button>

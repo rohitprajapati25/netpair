@@ -146,7 +146,12 @@ const Announcements = () => {
     return matchTarget && matchSearch;
   });
 
-  const canCreate = role === "superadmin" || role === "admin";
+  const canCreate = role === "superadmin" || role === "admin" || role === "hr";
+
+  // HR can only target employees or all — not admin-only
+  const availableTargets = role === "hr"
+    ? TARGET_OPTIONS.filter(o => o.value !== "admin")
+    : TARGET_OPTIONS;
 
   return (
     <div className="space-y-6">
@@ -171,7 +176,7 @@ const Announcements = () => {
           </div>
         </div>
         <button onClick={fetchAnnouncements} disabled={loading}
-          className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold rounded-xl shadow-sm text-sm transition-all disabled:opacity-50">
+          className="w-auto self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold rounded-xl shadow-sm text-sm transition-all disabled:opacity-50">
           <RiRefreshLine className={loading ? "animate-spin" : ""} /> Refresh
         </button>
       </div>
@@ -186,6 +191,11 @@ const Announcements = () => {
                 <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
                   <RiSendPlane2Line className="text-blue-600" /> New Announcement
                 </h3>
+                {role === "hr" && (
+                  <p className="text-[10px] text-amber-600 font-semibold mt-1">
+                    HR can broadcast to employees and all staff only
+                  </p>
+                )}
               </div>
 
               <div className="p-5 space-y-4">
@@ -194,7 +204,7 @@ const Announcements = () => {
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Target Audience</label>
                   <div className="grid grid-cols-2 gap-2">
-                    {TARGET_OPTIONS.map(opt => (
+                    {availableTargets.map(opt => (
                       <button key={opt.value} type="button"
                         onClick={() => setForm(f => ({ ...f, targetRole: opt.value }))}
                         className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-all ${
@@ -343,7 +353,7 @@ const Announcements = () => {
                   key={a._id}
                   announcement={a}
                   onView={() => setSelected(a)}
-                  onDelete={canCreate ? handleDelete : null}
+                  onDelete={(canCreate || role === "hr") ? handleDelete : null}
                   currentUserId={user?.id}
                   currentRole={role}
                 />
@@ -361,7 +371,12 @@ const Announcements = () => {
 
 // ── Announcement Card ─────────────────────────────────────────────────────────
 const AnnouncementCard = ({ announcement: a, onView, onDelete, currentUserId, currentRole }) => {
-  const canDelete = onDelete && (currentRole === "superadmin" || a.createdBy?.id === currentUserId);
+  // superadmin/admin can delete any; HR can delete only their own
+  const canDelete = onDelete && (
+    currentRole === "superadmin" ||
+    currentRole === "admin" ||
+    (currentRole === "hr" && a.createdBy?.id === currentUserId)
+  );
 
   return (
     <div

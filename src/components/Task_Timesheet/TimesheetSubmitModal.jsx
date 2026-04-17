@@ -171,11 +171,11 @@ const TimesheetSubmitModal = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
       {/* Backdrop click */}
       <div className="absolute inset-0" onClick={handleClose} />
 
-      <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl max-h-[95vh] flex flex-col overflow-hidden">
+      <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl max-h-[90vh] sm:max-h-[95vh] flex flex-col overflow-hidden">
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">

@@ -65,9 +65,9 @@ const AnnouncementForm = ({ onAdd }) => {
   return (
     <form 
       onSubmit={formik.handleSubmit}
-      className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-5"
+      className="bg-white p-4 sm:p-6 lg:p-8 rounded-2xl shadow-sm border border-slate-100 space-y-4 sm:space-y-5"
     >
-      <h3 className="text-lg font-black text-slate-800 mb-2 flex items-center gap-2">
+      <h3 className="text-base sm:text-lg font-black text-slate-800 mb-2 flex items-center gap-2">
         <RiUserSharedLine className="text-blue-500" /> Create Broadcast
       </h3>
 
@@ -77,7 +77,7 @@ const AnnouncementForm = ({ onAdd }) => {
         <select
           name="targetRole"
           {...formik.getFieldProps("targetRole")}
-          className="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold text-sm"
+          className="w-full bg-slate-50 border-2 border-slate-100 px-4 py-3 rounded-xl outline-none focus:border-blue-500 font-bold text-sm"
         >
           <option value="All">All Employees</option>
           <option value="Intern">Interns Only</option>
@@ -94,7 +94,7 @@ const AnnouncementForm = ({ onAdd }) => {
           name="title"
           {...formik.getFieldProps("title")}
           placeholder="Enter title..."
-          className={`w-full bg-slate-50 border-2 p-4 rounded-2xl outline-none transition-all font-bold text-sm ${
+          className={`w-full bg-slate-50 border-2 px-4 py-3 rounded-xl outline-none transition-all font-bold text-sm ${
             formik.touched.title && formik.errors.title ? "border-rose-400" : "border-slate-100 focus:border-blue-500"
           }`}
         />
@@ -113,7 +113,7 @@ const AnnouncementForm = ({ onAdd }) => {
           {...formik.getFieldProps("msg")}
           placeholder="Write your message..."
           rows={4}
-          className={`w-full bg-slate-50 border-2 p-4 rounded-2xl outline-none transition-all text-sm font-medium resize-none ${
+          className={`w-full bg-slate-50 border-2 px-4 py-3 rounded-xl outline-none transition-all text-sm font-medium resize-none ${
             formik.touched.msg && formik.errors.msg ? "border-rose-400" : "border-slate-100 focus:border-blue-500"
           }`}
         />
@@ -126,7 +126,7 @@ const AnnouncementForm = ({ onAdd }) => {
 
       <button
         type="submit"
-        className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-blue-600 transition-all shadow-lg active:scale-95"
+        className="w-full bg-slate-900 text-white py-3 sm:py-4 rounded-xl font-black flex items-center justify-center gap-2 hover:bg-blue-600 transition-all shadow-lg active:scale-95"
       >
         <RiSendPlane2Line size={20} /> Publish Now
       </button>

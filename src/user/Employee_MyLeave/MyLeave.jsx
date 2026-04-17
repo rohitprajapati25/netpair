@@ -4,7 +4,7 @@ import axios from "axios";
 import {
   RiAddLine, RiCalendarLine, RiSearchLine, RiFilterLine,
   RiCloseLine, RiInformationLine, RiDeleteBinLine, RiLoader4Line,
-  RiCheckLine,
+  RiCheckLine, RiAlertLine,
 } from "react-icons/ri";
 import { SkeletonHeader, SkeletonStats, SkeletonTable } from "../../components/Skeletons";
 import { BASE_URL as BASE } from "../../config/api";
@@ -29,12 +29,32 @@ const statusStyle = {
   Rejected: "bg-red-50    text-red-700    border-red-200",
 };
 
+// ── Field wrapper (same as TimesheetSubmitModal) ───────────────────────────────
+const Field = ({ label, required, error, hint, children }) => (
+  <div className="space-y-1.5">
+    <label className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
+      {label}
+      {required && <span className="text-red-500 normal-case font-bold">*</span>}
+    </label>
+    {children}
+    {error && (
+      <p className="flex items-center gap-1 text-red-500 text-xs font-medium">
+        <RiAlertLine size={11} className="shrink-0" />{error}
+      </p>
+    )}
+    {!error && hint && <p className="text-slate-400 text-xs">{hint}</p>}
+  </div>
+);
+
+const inputBase = "w-full px-4 py-3 border-2 rounded-xl text-sm font-medium outline-none transition-all bg-slate-50 focus:bg-white";
+const inputCls  = (err) => `${inputBase} ${err ? "border-red-300 focus:border-red-400 focus:ring-2 focus:ring-red-100" : "border-slate-100 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"}`;
+
 // ── Toast ─────────────────────────────────────────────────────────────────────
 const Toast = ({ msg, type, onClose }) => {
   useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
   const bg = type === "error" ? "bg-red-600" : type === "warning" ? "bg-amber-600" : "bg-emerald-600";
   return (
-    <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl font-semibold text-sm text-white ${bg}`}>
+    <div className={`fixed bottom-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl font-semibold text-sm text-white ${bg}`}>
       {type === "error" ? <RiCloseLine size={18} /> : <RiCheckLine size={18} />}
       {msg}
     </div>
@@ -69,96 +89,136 @@ const ApplyModal = ({ onClose, onSubmit, submitting }) => {
     if (validate()) onSubmit(form);
   };
 
+  const handleClose = () => {
+    if (submitting) return;
+    onClose();
+  };
+
   const liveDays = calcDays(form.fromDate, form.toDate);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h3 className="text-lg font-black text-slate-800">Apply for Leave</h3>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-red-500 hover:bg-slate-100 rounded-xl transition-all">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
+      {/* Backdrop click */}
+      <div className="absolute inset-0" onClick={handleClose} />
+
+      <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl max-h-[90vh] sm:max-h-[95vh] flex flex-col overflow-hidden">
+
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-blue-100 text-blue-600 rounded-xl">
+              <RiCalendarLine size={20} />
+            </div>
+            <div>
+              <h3 className="font-black text-slate-800 text-base leading-tight">Apply for Leave</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Submit a new request</p>
+            </div>
+          </div>
+          <button
+            onClick={handleClose}
+            disabled={submitting}
+            className="p-2 text-slate-400 hover:text-rose-500 rounded-xl hover:bg-slate-100 transition-all disabled:opacity-40"
+          >
             <RiCloseLine size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Leave Type */}
-          <div>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Leave Type</label>
-            <select
-              value={form.type}
-              onChange={(e) => set("type", e.target.value)}
-              className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none text-sm transition-all ${errors.type ? "border-red-300" : "border-slate-200"}`}
+        {/* ── Body ── */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+          <div className="p-6 space-y-5">
+
+            {/* Leave Type */}
+            <Field label="Leave Type" required error={errors.type}>
+              <select
+                value={form.type}
+                onChange={(e) => set("type", e.target.value)}
+                className={inputCls(errors.type)}
+              >
+                {LEAVE_TYPES.map((t) => <option key={t} value={t}>{t} Leave</option>)}
+              </select>
+            </Field>
+
+            {/* Date range */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="From Date" required error={errors.fromDate}>
+                <input
+                  type="date"
+                  value={form.fromDate}
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => set("fromDate", e.target.value)}
+                  className={inputCls(errors.fromDate)}
+                />
+              </Field>
+              <Field label="To Date" required error={errors.toDate}>
+                <input
+                  type="date"
+                  value={form.toDate}
+                  min={form.fromDate || new Date().toISOString().split("T")[0]}
+                  onChange={(e) => set("toDate", e.target.value)}
+                  className={inputCls(errors.toDate)}
+                />
+              </Field>
+            </div>
+
+            {/* Live days badge */}
+            {liveDays > 0 && (
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-xl">
+                <RiCalendarLine className="text-blue-500 shrink-0" size={16} />
+                <span className="text-sm font-bold text-blue-700">
+                  {liveDays} day{liveDays !== 1 ? "s" : ""} of leave
+                </span>
+              </div>
+            )}
+
+            {/* Reason */}
+            <Field
+              label="Reason"
+              required
+              error={errors.reason}
+              hint="Minimum 10 characters"
             >
-              {LEAVE_TYPES.map((t) => <option key={t} value={t}>{t} Leave</option>)}
-            </select>
-            {errors.type && <p className="text-red-500 text-xs mt-1">{errors.type}</p>}
-          </div>
-
-          {/* Date range */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">From Date</label>
-              <input
-                type="date"
-                value={form.fromDate}
-                min={new Date().toISOString().split("T")[0]}
-                onChange={(e) => set("fromDate", e.target.value)}
-                className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none text-sm transition-all ${errors.fromDate ? "border-red-300" : "border-slate-200"}`}
+              <textarea
+                value={form.reason}
+                onChange={(e) => set("reason", e.target.value)}
+                rows={4}
+                maxLength={500}
+                placeholder="Describe the reason for your leave..."
+                className={`${inputCls(errors.reason)} resize-none`}
               />
-              {errors.fromDate && <p className="text-red-500 text-xs mt-1">{errors.fromDate}</p>}
-            </div>
-            <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">To Date</label>
-              <input
-                type="date"
-                value={form.toDate}
-                min={form.fromDate || new Date().toISOString().split("T")[0]}
-                onChange={(e) => set("toDate", e.target.value)}
-                className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none text-sm transition-all ${errors.toDate ? "border-red-300" : "border-slate-200"}`}
-              />
-              {errors.toDate && <p className="text-red-500 text-xs mt-1">{errors.toDate}</p>}
-            </div>
+              <div className="flex items-center justify-between">
+                <span className={`text-xs font-medium ${form.reason.length < 10 && form.reason.length > 0 ? "text-red-500" : "text-slate-400"}`}>
+                  {form.reason.length < 10 && form.reason.length > 0
+                    ? `${10 - form.reason.length} more chars needed`
+                    : ""}
+                </span>
+                <span className={`text-xs font-medium ${form.reason.length > 450 ? "text-amber-500" : "text-slate-400"}`}>
+                  {form.reason.length}/500
+                </span>
+              </div>
+            </Field>
+
           </div>
 
-          {/* Live days */}
-          {liveDays > 0 && (
-            <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-xl">
-              <RiCalendarLine className="text-blue-500" size={16} />
-              <span className="text-sm font-bold text-blue-700">{liveDays} day{liveDays !== 1 ? "s" : ""} of leave</span>
-            </div>
-          )}
-
-          {/* Reason */}
-          <div>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">
-              Reason <span className="normal-case font-normal">(min 10 chars)</span>
-            </label>
-            <textarea
-              value={form.reason}
-              onChange={(e) => set("reason", e.target.value)}
-              rows={3}
-              maxLength={500}
-              placeholder="Describe the reason for your leave..."
-              className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none text-sm resize-none transition-all ${errors.reason ? "border-red-300" : "border-slate-200"}`}
-            />
-            <div className="flex items-center justify-between mt-1">
-              {errors.reason
-                ? <p className="text-red-500 text-xs">{errors.reason}</p>
-                : <span />}
-              <span className="text-xs text-slate-400">{form.reason.length}/500</span>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose}
-              className="flex-1 px-5 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all text-sm">
+          {/* ── Footer ── */}
+          <div className="px-6 pb-6 flex gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={handleClose}
+              disabled={submitting}
+              className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition-all disabled:opacity-50"
+            >
               Cancel
             </button>
-            <button type="submit" disabled={submitting}
-              className="flex-1 px-5 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-md disabled:opacity-60 text-sm flex items-center justify-center gap-2">
-              {submitting ? <><RiLoader4Line className="animate-spin" size={16} /> Submitting...</> : "Submit Request"}
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm shadow-md transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {submitting ? (
+                <><RiLoader4Line className="animate-spin" size={16} /> Submitting...</>
+              ) : (
+                <><RiCheckLine size={16} /> Submit Request</>
+              )}
             </button>
           </div>
         </form>
@@ -171,15 +231,14 @@ const ApplyModal = ({ onClose, onSubmit, submitting }) => {
 const MyLeave = () => {
   const { token } = useAuth();
 
-  const [leaves,     setLeaves]     = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [cancelling, setCancelling] = useState(null);
-  const [showModal,  setShowModal]  = useState(false);
-  const [toast,      setToast]      = useState(null);
-  const [search,     setSearch]     = useState("");
+  const [leaves,       setLeaves]       = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [submitting,   setSubmitting]   = useState(false);
+  const [cancelling,   setCancelling]   = useState(null);
+  const [showModal,    setShowModal]    = useState(false);
+  const [toast,        setToast]        = useState(null);
+  const [search,       setSearch]       = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [tooltipId,  setTooltipId]  = useState(null);
 
   const showToast = (msg, type = "success") => setToast({ msg, type });
 
@@ -262,7 +321,7 @@ const MyLeave = () => {
     }
   };
 
-  // ── Loading ───────────────────────────────────────────────────────────────
+  // ── Loading skeleton ──────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="space-y-6">
@@ -285,7 +344,7 @@ const MyLeave = () => {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="self-start sm:self-auto flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md transition-all text-sm"
+          className="w-auto self-start sm:self-auto flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md transition-all text-sm"
         >
           <RiAddLine size={18} /> Apply Leave
         </button>
@@ -294,16 +353,17 @@ const MyLeave = () => {
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
         {[
-          { label: "Total",    value: stats.total,    bg: "from-indigo-500 to-blue-600",   icon: "ri-calendar-line",         key: "All" },
-          { label: "Pending",  value: stats.pending,  bg: "from-yellow-500 to-orange-500", icon: "ri-time-line",             key: "Pending" },
-          { label: "Approved", value: stats.approved, bg: "from-emerald-500 to-green-600", icon: "ri-checkbox-circle-fill",  key: "Approved" },
-          { label: "Rejected", value: stats.rejected, bg: "from-red-500 to-rose-600",      icon: "ri-close-circle-fill",     key: "Rejected" },
+          { label: "Total",    value: stats.total,    bg: "from-indigo-500 to-blue-600",   icon: "ri-calendar-line",        key: "All"      },
+          { label: "Pending",  value: stats.pending,  bg: "from-yellow-500 to-orange-500", icon: "ri-time-line",            key: "Pending"  },
+          { label: "Approved", value: stats.approved, bg: "from-emerald-500 to-green-600", icon: "ri-checkbox-circle-fill", key: "Approved" },
+          { label: "Rejected", value: stats.rejected, bg: "from-red-500 to-rose-600",      icon: "ri-close-circle-fill",    key: "Rejected" },
         ].map((s) => (
           <div
             key={s.key}
             onClick={() => setStatusFilter(s.key)}
-            className={`cursor-pointer rounded-2xl p-4 lg:p-5 bg-gradient-to-r ${s.bg} text-white shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-between
-              ${statusFilter === s.key ? "ring-4 ring-white/40 scale-[1.02]" : ""}`}
+            className={`cursor-pointer rounded-2xl p-4 lg:p-5 bg-gradient-to-r ${s.bg} text-white shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-between ${
+              statusFilter === s.key ? "ring-4 ring-white/40 scale-[1.02]" : ""
+            }`}
           >
             <div>
               <p className="text-xs opacity-90 font-semibold">{s.label}</p>
@@ -317,7 +377,7 @@ const MyLeave = () => {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col sm:flex-row gap-3">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-3 sm:p-4 flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
           <input
@@ -328,20 +388,22 @@ const MyLeave = () => {
             className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none text-sm transition-all"
           />
         </div>
-        <div className="relative">
-          <RiFilterLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="pl-9 pr-8 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-200 outline-none text-sm bg-white appearance-none cursor-pointer min-w-[150px]"
-          >
-            {["All", "Pending", "Approved", "Rejected"].map((s) => (
-              <option key={s} value={s}>{s === "All" ? "All Statuses" : s}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex items-center px-3 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-500 shrink-0">
-          {filtered.length} request{filtered.length !== 1 ? "s" : ""}
+        <div className="flex gap-3">
+          <div className="relative flex-1 sm:flex-none">
+            <RiFilterLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full sm:w-auto pl-9 pr-8 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-200 outline-none text-sm bg-white appearance-none cursor-pointer sm:min-w-[150px]"
+            >
+              {["All", "Pending", "Approved", "Rejected"].map((s) => (
+                <option key={s} value={s}>{s === "All" ? "All Statuses" : s}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center px-3 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-500 shrink-0">
+            {filtered.length} result{filtered.length !== 1 ? "s" : ""}
+          </div>
         </div>
       </div>
 
@@ -380,28 +442,17 @@ const MyLeave = () => {
                 );
                 return (
                   <tr key={leave._id} className="hover:bg-slate-50 transition-colors">
-                    {/* Type */}
                     <td className="px-4 py-3.5">
                       <span className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-wide">
                         {leave.type}
                       </span>
                     </td>
-
-                    {/* From */}
                     <td className="px-4 py-3.5 text-sm text-slate-600 whitespace-nowrap">{fmtDate(leave.fromDate)}</td>
-
-                    {/* To */}
                     <td className="px-4 py-3.5 text-sm text-slate-600 whitespace-nowrap">{fmtDate(leave.toDate)}</td>
-
-                    {/* Days */}
                     <td className="px-4 py-3.5 text-sm font-black text-slate-700">{days}d</td>
-
-                    {/* Reason */}
                     <td className="px-4 py-3.5 text-sm text-slate-500 max-w-[180px] truncate" title={leave.reason}>
                       {leave.reason || "—"}
                     </td>
-
-                    {/* Status */}
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-1.5">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${statusStyle[leave.status] || "bg-slate-100 text-slate-600 border-slate-200"}`}>
@@ -417,7 +468,6 @@ const MyLeave = () => {
                             </div>
                           </div>
                         )}
-                        {/* Approver info */}
                         {leave.status !== "Pending" && leave.approvedBy?.name && (
                           <span className="text-[10px] text-slate-400 hidden sm:inline">
                             by {leave.approvedBy.name}
@@ -425,8 +475,6 @@ const MyLeave = () => {
                         )}
                       </div>
                     </td>
-
-                    {/* Action */}
                     <td className="px-4 py-3.5">
                       {leave.status === "Pending" ? (
                         <button

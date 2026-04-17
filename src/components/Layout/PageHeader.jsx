@@ -10,16 +10,16 @@ import React from "react";
  */
 const PageHeader = ({ title, description, action, align = "row" }) => {
   return (
-    <div className={`flex flex-col ${align === "row" ? "md:flex-row md:items-end" : ""} justify-between gap-6`}>
+    <div className={`flex flex-col ${align === "row" ? "sm:flex-row sm:items-center" : ""} justify-between gap-3`}>
       <div>
-        <h1 className="text-3xl font-black text-slate-800 tracking-tight">{title}</h1>
+        <h1 className="text-2xl lg:text-3xl font-black text-slate-800 tracking-tight">{title}</h1>
         <p className="text-slate-500 font-medium text-sm">{description}</p>
       </div>
-      
+
       {action && (
         <button
           onClick={action.onClick}
-          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-2xl font-bold shadow-xl transition-all active:scale-95 whitespace-nowrap"
+          className="w-auto self-start sm:self-auto flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md transition-all active:scale-95 text-sm whitespace-nowrap"
         >
           {action.icon && <span>{action.icon}</span>}
           <span>{action.label}</span>

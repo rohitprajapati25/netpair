@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import PremiumCard from "../../components/Employee/PremiumCard";
 import EmployeeModal from "../../components/Employee/EmployeeModal";
 import EmployeeTable from "../../components/Employee/EmployeeTable";
@@ -18,6 +19,8 @@ const LIMIT = 12;
 
 const Admins = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role?.toLowerCase() === "superadmin";
   const [admins, setAdmins]             = useState([]);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState(null);
@@ -158,7 +161,7 @@ const Admins = () => {
               <PremiumCard key={admin._id || i} {...admin}
                 onView={() => openModal(admin, "view")}
                 onEdit={() => openModal(admin, "edit")}
-                onDelete={handleDelete}
+                onDelete={isSuperAdmin ? handleDelete : null}
                 onStatusToggle={handleStatusToggle}
               />
             ))}
@@ -168,7 +171,7 @@ const Admins = () => {
             employees={admins}
             onView={id => { const a = admins.find(a => a._id === id); if (a) openModal(a, "view"); }}
             onEdit={id => { const a = admins.find(a => a._id === id); if (a) openModal(a, "edit"); }}
-            onDelete={handleDelete}
+            onDelete={isSuperAdmin ? handleDelete : null}
             onStatusToggle={handleStatusToggle}
           />
         )}

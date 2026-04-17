@@ -154,24 +154,23 @@ const LForm = () => {
 
   return (
     <div className="w-full">
-      <div className="mb-8 text-center md:text-left">
-        <h2 className="text-3xl font-black text-slate-800">Login</h2>
-        <p className="text-slate-500 font-medium">Access your management portal</p>
+      <div className="mb-6 sm:mb-8 text-center md:text-left">
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-800">Login</h2>
+        <p className="text-slate-500 font-medium text-sm sm:text-base">Access your management portal</p>
       </div>
 
-      <form onSubmit={formik.handleSubmit} className="space-y-5">
+      <form onSubmit={formik.handleSubmit} className="space-y-4">
         
         {/* Email Field */}
         <div className="relative group">
-          <RiMailLine className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors text-xl ${formik.touched.email && formik.errors.email ? 'text-red-400' : 'text-slate-400 group-focus-within:text-blue-600'}`} />
+          <RiMailLine className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors text-lg sm:text-xl ${formik.touched.email && formik.errors.email ? 'text-red-400' : 'text-slate-400 group-focus-within:text-blue-600'}`} />
           <input 
             type="email" 
             name="email" 
             placeholder="Email Address" 
             {...formik.getFieldProps("email")} 
-            className={`w-full h-12 pl-12 pr-4 border rounded-xl outline-none transition-all shadow-sm ${inputErrorStyle("email")}`} 
+            className={`w-full h-11 sm:h-12 pl-11 pr-4 border rounded-xl outline-none transition-all shadow-sm text-sm ${inputErrorStyle("email")}`} 
           />
-          {/* 🚨 Validation Message for Email */}
           {formik.touched.email && formik.errors.email && (
             <p className="text-red-500 text-[11px] font-bold mt-1 ml-2 uppercase tracking-wider italic">
               {formik.errors.email}
@@ -181,19 +180,17 @@ const LForm = () => {
 
         {/* Password Field */}
         <div className="relative group">
-          <RiLockPasswordLine className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors text-xl ${formik.touched.password && formik.errors.password ? 'text-red-400' : 'text-slate-400 group-focus-within:text-blue-600'}`} />
+          <RiLockPasswordLine className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors text-lg sm:text-xl ${formik.touched.password && formik.errors.password ? 'text-red-400' : 'text-slate-400 group-focus-within:text-blue-600'}`} />
           <input 
             type={showPassword ? "text" : "password"} 
             name="password" 
             placeholder="Password" 
             {...formik.getFieldProps("password")} 
-            className={`w-full h-12 pl-12 pr-12 border rounded-xl outline-none transition-all shadow-sm ${inputErrorStyle("password")}`} 
+            className={`w-full h-11 sm:h-12 pl-11 pr-12 border rounded-xl outline-none transition-all shadow-sm text-sm ${inputErrorStyle("password")}`} 
           />
           <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600">
-            {showPassword ? <RiEyeOffLine size={20} /> : <RiEyeLine size={20} />}
+            {showPassword ? <RiEyeOffLine size={18} /> : <RiEyeLine size={18} />}
           </button>
-          
-          {/* 🚨 Validation Message for Password */}
           {formik.touched.password && formik.errors.password && (
             <p className="text-red-500 text-[11px] font-bold mt-1 ml-2 uppercase tracking-wider italic">
               {formik.errors.password}
@@ -202,18 +199,18 @@ const LForm = () => {
         </div>
 
         <div className="flex justify-between items-center px-1 text-sm">
-          <Link to="/forgot" className="font-bold text-blue-600 hover:underline">Forgot Password?</Link>
+          <Link to="/forgot" className="font-bold text-blue-600 hover:underline text-xs sm:text-sm">Forgot Password?</Link>
         </div>
 
         <button 
           type="submit" 
           disabled={formik.isSubmitting} 
-          className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black shadow-lg shadow-blue-100 transition-all active:scale-[0.98] disabled:bg-slate-300"
+          className="w-full h-12 sm:h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl sm:rounded-2xl font-black shadow-lg shadow-blue-100 transition-all active:scale-[0.98] disabled:bg-slate-300 text-sm sm:text-base"
         >
           {formik.isSubmitting ? "Processing..." : "Sign In"}
         </button>
 
-        <p className="text-center text-slate-500 text-sm font-bold pt-2">
+        <p className="text-center text-slate-500 text-xs sm:text-sm font-bold pt-1">
           New Employee? <Link to="/employee/registration" className="text-blue-600 hover:underline">Create Account</Link>
         </p>
       </form>

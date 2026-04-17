@@ -108,7 +108,7 @@ const AddAdmin = ({ onClose, onRefresh }) => {
 
       <form
         onSubmit={formik.handleSubmit}
-        className="space-y-4 max-h-[480px] overflow-y-auto pr-1 custom-scrollbar"
+        className="space-y-4"
       >
         {/* Name */}
         <div>
@@ -126,7 +126,7 @@ const AddAdmin = ({ onClose, onRefresh }) => {
         </div>
 
         {/* Email + Phone */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email *</label>
             <div className="relative mt-1">
@@ -156,7 +156,7 @@ const AddAdmin = ({ onClose, onRefresh }) => {
         </div>
 
         {/* Department + Designation */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Department *</label>
             <select {...formik.getFieldProps("department")} className={`${inputCls("department")} mt-1`}>
@@ -181,7 +181,7 @@ const AddAdmin = ({ onClose, onRefresh }) => {
         </div>
 
         {/* Joining Date + Employment Type */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Joining Date *</label>
             <input
@@ -202,7 +202,7 @@ const AddAdmin = ({ onClose, onRefresh }) => {
         </div>
 
         {/* Password */}
-        <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
           <div>
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Password *</label>
             <div className="relative mt-1">

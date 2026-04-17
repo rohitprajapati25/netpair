@@ -88,19 +88,29 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
   }, [formik.values.status]);
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center z-[100] p-4">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 transform transition-all">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-slate-800">
-            {isEdit ? 'Edit Attendance' : 'Mark Attendance'}
-          </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 -m-1 rounded-lg hover:bg-slate-100 transition">
-            <RiCloseLine size={24} />
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-3 sm:p-4">
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[92vh] overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-blue-100 text-blue-600 rounded-xl">
+              <RiCalendarLine size={20} />
+            </div>
+            <div>
+              <h3 className="font-black text-slate-800 text-base leading-tight">
+                {isEdit ? 'Edit Attendance' : 'Mark Attendance'}
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">{isEdit ? 'Update attendance record' : 'Record employee attendance'}</p>
+            </div>
+          </div>
+          <button onClick={onClose} disabled={formik.isSubmitting} className="p-2 text-slate-400 hover:text-rose-500 rounded-xl hover:bg-slate-100 transition-all disabled:opacity-40">
+            <RiCloseLine size={20} />
           </button>
         </div>
 
-        <form onSubmit={formik.handleSubmit} className="space-y-5 relative">
-          <fieldset disabled={formik.isSubmitting} className="space-y-5">
+        <form onSubmit={formik.handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 relative">
+          <fieldset disabled={formik.isSubmitting} className="space-y-4">
 
             {/* Submit error banner */}
             {submitError && (
@@ -119,7 +129,7 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
               name="date"
               value={formik.values.date}
               onChange={formik.handleChange}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="w-full border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-slate-50 focus:bg-white"
             />
             {formik.touched.date && formik.errors.date && (
               <p className="mt-1 text-xs text-rose-600">{formik.errors.date}</p>
@@ -147,7 +157,7 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
                 value={formik.values.employee}
                 onChange={formik.handleChange}
                 disabled={employeesLoading}
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-50"
+                className="w-full border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-slate-50 focus:bg-white disabled:bg-slate-50 disabled:opacity-60"
               >
                 <option value="">Select Employee</option>
                 {employees.map(emp => (
@@ -168,7 +178,7 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
               name="status"
               value={formik.values.status}
               onChange={formik.handleChange}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 bg-white"
+              className="w-full border-2 border-slate-100 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-slate-50 focus:bg-white"
             >
               <option value="Present">Present</option>
               <option value="Absent">Absent</option>
@@ -178,7 +188,7 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
                 <RiTimeLine size={12} /> Check In
@@ -189,7 +199,7 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
                 value={formik.values.checkIn}
                 onChange={formik.handleChange}
                 disabled={formik.values.status === 'Absent' || formik.values.status === 'Leave'}
-                className={`w-full border rounded-lg px-3 py-2 text-sm focus:border-blue-500 ${(formik.values.status === 'Absent' || formik.values.status === 'Leave') ? 'bg-slate-100 cursor-not-allowed' : 'border-slate-200'}`}
+                className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all ${(formik.values.status === 'Absent' || formik.values.status === 'Leave') ? 'bg-slate-100 cursor-not-allowed border-slate-100' : 'border-slate-100 bg-slate-50 focus:bg-white'}`}
               />
               {formik.touched.checkIn && formik.errors.checkIn && (
                 <p className="mt-1 text-xs text-rose-600">{formik.errors.checkIn}</p>
@@ -206,7 +216,7 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
                 value={formik.values.checkOut}
                 onChange={formik.handleChange}
                 disabled={formik.values.status === 'Absent' || formik.values.status === 'Leave'}
-                className={`w-full border rounded-lg px-3 py-2 text-sm focus:border-blue-500 ${(formik.values.status === 'Absent' || formik.values.status === 'Leave') ? 'bg-slate-100 cursor-not-allowed' : 'border-slate-200'}`}
+                className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all ${(formik.values.status === 'Absent' || formik.values.status === 'Leave') ? 'bg-slate-100 cursor-not-allowed border-slate-100' : 'border-slate-100 bg-slate-50 focus:bg-white'}`}
               />
               {formik.touched.checkOut && formik.errors.checkOut && (
                 <p className="mt-1 text-xs text-rose-600">{formik.errors.checkOut}</p>
@@ -225,7 +235,7 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
               value={formik.values.workMode}
               onChange={formik.handleChange}
               disabled={formik.values.status === 'Absent' || formik.values.status === 'Leave'}
-              className={`w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 ${(formik.values.status === 'Absent' || formik.values.status === 'Leave') ? 'bg-slate-100 cursor-not-allowed border-slate-200' : 'border-slate-200 bg-white'}`}
+              className={`w-full border-2 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all ${(formik.values.status === 'Absent' || formik.values.status === 'Leave') ? 'bg-slate-100 cursor-not-allowed border-slate-100' : 'border-slate-100 bg-slate-50 focus:bg-white'}`}
             >
               <option value="">-- Select Work Mode --</option>
               <option value="Office">Office</option>
@@ -245,24 +255,28 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
               value={formik.values.notes}
               onChange={formik.handleChange}
               rows={2}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 resize-none outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="w-full border-2 border-slate-100 rounded-xl px-4 py-3 resize-none outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-slate-50 focus:bg-white"
               placeholder="Any special notes..."
             />
           </div>
 
-          <div className="flex gap-3 mt-8 pt-6 border-t border-slate-100">
+        </fieldset>
+          </div>
+
+          {/* Footer buttons — sticky, outside scroll */}
+          <div className="px-4 sm:px-6 pb-4 sm:pb-5 pt-3 border-t border-slate-100 shrink-0 flex gap-3">
             <button 
               type="button"
               onClick={onClose}
               disabled={formik.isSubmitting}
-              className="flex-1 px-6 py-3 rounded-xl border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50"
+              className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition-all disabled:opacity-50"
             >
               Cancel
             </button>
             <button 
               type="submit" 
               disabled={formik.isSubmitting || (!isEdit && employeesLoading)}
-              className="flex-1 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm shadow-md transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {formik.isSubmitting ? (
                 <>
@@ -277,7 +291,6 @@ const AttendanceModal = ({ onClose, onRefresh, editData }) => {
               )}
             </button>
           </div>
-        </fieldset>
         </form>
       </div>
     </div>

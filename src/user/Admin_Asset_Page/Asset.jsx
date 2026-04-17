@@ -181,9 +181,9 @@ const handleAdd = () => {
         </div>
         <button 
           onClick={handleAdd} 
-          className="self-start sm:self-auto bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 shadow-md transition-all font-bold flex items-center gap-2 text-sm"
+          className="w-auto self-start sm:self-auto bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 shadow-md transition-all font-bold flex items-center gap-2 text-sm"
         >
-          <RiAddLine size={24} /> Add Asset
+          <RiAddLine size={18} /> Add Asset
         </button>
       </div>
 

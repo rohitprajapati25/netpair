@@ -11,7 +11,9 @@ import API_URL from "../../config/api";
 
 const Projects = () => {
   const { token, user } = useAuth();
-  const isAdminRole = ['superadmin', 'admin', 'SuperAdmin', 'Admin'].includes(user?.role);
+  const role = user?.role?.toLowerCase();
+  const isAdminRole = ['superadmin', 'admin'].includes(role);
+  const isHR        = role === 'hr';
   
   const [projects, setProjects] = useState([]);
   const [logs, setLogs] = useState([]);
@@ -54,7 +56,7 @@ const Projects = () => {
   }, [filters, token]);
 
   const fetchLogs = useCallback(async () => {
-    if (user?.role !== "superadmin") return;
+    if (role !== "superadmin") return;
     try {
       const res = await axios.get(`${API_URL}/admin/projects/logs`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -174,9 +176,9 @@ const Projects = () => {
         {isAdminRole && (
           <button 
             onClick={() => setOpen(true)} 
-            className="self-start sm:self-auto bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 shadow-md transition-all font-bold flex items-center gap-2 text-sm"
+            className="w-auto self-start sm:self-auto bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 shadow-md transition-all font-bold flex items-center gap-2 text-sm"
           >
-            <RiAddLine size={22} /> Add New Project
+            <RiAddLine size={18} /> Add New Project
           </button>
         )}
       </div>

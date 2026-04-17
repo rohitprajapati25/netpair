@@ -20,7 +20,11 @@ const LIMIT = 12;
 const Employees = () => {
   const navigate = useNavigate();
   const { role: userRole } = useAuth();
-  const isHR = userRole?.toLowerCase() === "hr";
+  const role = userRole?.toLowerCase();
+  const isHR          = role === "hr";
+  const isSuperAdmin  = role === "superadmin";
+  // Only superadmin can delete employees (backend enforces this too)
+  const canDelete     = isSuperAdmin;
   const [employees, setEmployees]       = useState([]);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState(null);
@@ -183,7 +187,7 @@ const Employees = () => {
               <PremiumCard key={emp._id || i} {...emp}
                 onView={() => openModal(emp, "view")}
                 onEdit={!isHR ? () => openModal(emp, "edit") : null}
-                onDelete={!isHR ? handleDelete : null}
+                onDelete={canDelete ? handleDelete : null}
                 onStatusToggle={!isHR ? handleStatusToggle : null}
               />
             ))}
@@ -193,7 +197,7 @@ const Employees = () => {
             employees={employees}
             onView={id => { const e = employees.find(e => e._id === id); if (e) openModal(e, "view"); }}
             onEdit={id => { const e = employees.find(e => e._id === id); if (e) openModal(e, "edit"); }}
-            onDelete={handleDelete}
+            onDelete={canDelete ? handleDelete : null}
             onStatusToggle={handleStatusToggle}
           />
         )}

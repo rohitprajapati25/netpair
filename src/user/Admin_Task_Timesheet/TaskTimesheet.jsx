@@ -59,17 +59,17 @@ const TaskTimesheet = () => {
         {role === 'employee' ? (
           <button
             onClick={() => setSubmitTimesheetOpen(true)}
-            className="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all flex items-center gap-2"
+            className="w-auto self-start sm:self-auto bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-indigo-700 shadow-md transition-all flex items-center gap-2 text-sm"
           >
-            <RiAddLine />
+            <RiAddLine size={18} />
             Log Timesheet
           </button>
-        ) : (
+        ) : role === 'hr' ? null : (
           <button
             onClick={() => setAddTaskOpen(true)}
-            className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center gap-2"
+            className="w-auto self-start sm:self-auto bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 shadow-md transition-all flex items-center gap-2 text-sm"
           >
-            <RiAddLine />
+            <RiAddLine size={18} />
             New Task
           </button>
         )}

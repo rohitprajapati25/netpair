@@ -31,8 +31,10 @@ const ProgressBar = ({ value, max = 100 }) => {
 
 // ── component ─────────────────────────────────────────────────────────────────
 const SystemHealth = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const navigate  = useNavigate();
+  const role = user?.role?.toLowerCase();
+  const isSuperAdmin = role === 'superadmin';
 
   const [health,     setHealth]     = useState(null);
   const [loading,    setLoading]    = useState(true);
@@ -66,8 +68,10 @@ const SystemHealth = () => {
       const [statsRes, auditRes] = await Promise.allSettled([
         axios.get(`${API_URL}/admin/dashboard/stats`,
           { headers: { Authorization: `Bearer ${token}` }, timeout: 5000 }),
-        axios.get(`${API_URL}/admin/audit-logs?limit=5&severity=HIGH&dateRange=today`,
-          { headers: { Authorization: `Bearer ${token}` }, timeout: 5000 }),
+        isSuperAdmin
+          ? axios.get(`${API_URL}/admin/audit-logs?limit=5&severity=HIGH&dateRange=today`,
+              { headers: { Authorization: `Bearer ${token}` }, timeout: 5000 })
+          : Promise.resolve({ data: { logs: [], total: 0 } }),
       ]);
 
       const apiLatency = Date.now() - apiStart;
@@ -298,7 +302,7 @@ const SystemHealth = () => {
                   </span>
                 </div>
                 <button
-                  onClick={(e) => { e.stopPropagation(); navigate('/audit-logs'); }}
+                  onClick={(e) => { e.stopPropagation(); navigate(isSuperAdmin ? '/audit-logs' : '/reports'); }}
                   className="text-[10px] font-bold text-blue-600 hover:underline"
                 >
                   View All

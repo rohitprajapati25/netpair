@@ -723,9 +723,9 @@ const Calendar = () => {
   const fetchHolidays = useCallback(async () => {
     setLoading(true);
     try {
-      // All roles can read holidays — employees use their own endpoint,
-      // admins/superadmins use the admin endpoint (both hit same controller)
-      const endpoint = (canManage)
+      // All roles can read holidays
+      // admin/superadmin/HR use admin endpoint; employees use employee endpoint
+      const endpoint = (canManage || isHR)
         ? `${BASE_URL}/api/admin/holidays?year=${year}`
         : `${BASE_URL}/api/employees/holidays?year=${year}`;
       const res = await axios.get(endpoint, {

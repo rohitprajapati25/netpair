@@ -15,6 +15,7 @@ const ROLE_BADGE = {
 
 const EmployeeTable = ({ employees = [], onView, onEdit, onDelete, onStatusToggle }) => {
   const [confirmId, setConfirmId] = useState(null);
+  const canDelete = !!onDelete;
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -109,8 +110,8 @@ const EmployeeTable = ({ employees = [], onView, onEdit, onDelete, onStatusToggl
                   ) : (
                     <div className="flex items-center justify-end gap-1">
                       <TblBtn onClick={() => onView(emp._id)}  color="blue"    title="View"><FiEye size={15} /></TblBtn>
-                      <TblBtn onClick={() => onEdit(emp._id)}  color="amber"   title="Edit"><FiEdit3 size={15} /></TblBtn>
-                      <TblBtn
+                      {onEdit && <TblBtn onClick={() => onEdit(emp._id)}  color="amber"   title="Edit"><FiEdit3 size={15} /></TblBtn>}
+                      {onStatusToggle && <TblBtn
                         onClick={() => onStatusToggle(emp._id, (emp.status === "Active" || emp.status === "active") ? "inactive" : "active")}
                         color="emerald"
                         title={(emp.status === "Active" || emp.status === "active") ? "Deactivate" : "Activate"}
@@ -118,10 +119,10 @@ const EmployeeTable = ({ employees = [], onView, onEdit, onDelete, onStatusToggl
                         {(emp.status === "Active" || emp.status === "active")
                           ? <FiCheckCircle size={16} className="text-emerald-500" />
                           : <FiMinusCircle size={16} className="text-amber-500" />}
-                      </TblBtn>
-                      <TblBtn onClick={() => setConfirmId(emp._id)} color="rose" title="Delete">
+                      </TblBtn>}
+                      {canDelete && <TblBtn onClick={() => setConfirmId(emp._id)} color="rose" title="Delete">
                         <FiTrash2 size={15} />
-                      </TblBtn>
+                      </TblBtn>}
                     </div>
                   )}
                 </td>

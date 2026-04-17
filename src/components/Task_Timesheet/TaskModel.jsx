@@ -51,18 +51,18 @@ const TaskDetailsModal = ({ task, onClose, onRefresh }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onClick={onClose} />
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
+      <div className="absolute inset-0" onClick={onClose} />
       
-      <div className="relative bg-white w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-200 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[92vh] overflow-hidden animate-in slide-in-from-bottom-4 duration-200">
         {/* Header */}
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl ${statusColor[task.status]} flex items-center justify-center font-bold`}>
               {task.status.slice(0,1)}
             </div>
             <div>
-              <h2 className="text-lg font-black text-slate-800 tracking-tight">{task.task_title}</h2>
+              <h2 className="text-base sm:text-lg font-black text-slate-800 tracking-tight">{task.task_title}</h2>
               <p className="text-xs text-slate-500">Project: {task.project_id?.name || 'N/A'}</p>
             </div>
           </div>
@@ -71,9 +71,9 @@ const TaskDetailsModal = ({ task, onClose, onRefresh }) => {
           </button>
         </div>
 
-        {/* Details */}
-        <div className="p-8 space-y-6">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        {/* Details — scrollable */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-slate-400 uppercase text-[10px] font-bold tracking-wider">Assignee</span>
               <p className="font-bold text-slate-800">{task.assigned_to?.name || 'N/A'}</p>
@@ -102,7 +102,7 @@ const TaskDetailsModal = ({ task, onClose, onRefresh }) => {
 
           {/* Update Form */}
           <div className="space-y-4 pt-4 border-t">
-            <h4 className="font-black text-slate-800 text-lg flex items-center gap-2">
+            <h4 className="font-black text-slate-800 text-base sm:text-lg flex items-center gap-2">
               <RiEditLine />
               Quick Update
             </h4>
@@ -113,7 +113,7 @@ const TaskDetailsModal = ({ task, onClose, onRefresh }) => {
                   {formik.status}
                 </div>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block mb-1">Status</label>
                     <select

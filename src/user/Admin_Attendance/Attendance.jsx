@@ -10,7 +10,11 @@ import { useAttendance, useAttendanceStats } from '../../hooks/useAttendance';
 import useDebounce from '../../hooks/useDebounce';
 
 const Attendance = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const role = user?.role?.toLowerCase();
+  const isSuperAdmin = role === "superadmin";
+  // Only superadmin can edit/delete attendance records
+  const canEditAttendance = isSuperAdmin;
   const [open, setOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [fullAttendanceData, setFullAttendanceData] = useState([]);
@@ -30,12 +34,16 @@ const Attendance = () => {
   const { data: attendanceRes, isLoading: attendanceLoading, error: attendanceError, refetch: refetchAttendance } = useAttendance(debouncedFilters);
   const { data: statsRes, isLoading: statsLoading, refetch: refetchStats } = useAttendanceStats();
 
-  // Store raw data for edit + mapped for table
-  const rawAttendanceData = attendanceRes?.records || [];
+  // Store raw data for edit — use JSON comparison to avoid infinite loop
+  // rawAttendanceData is a new array ref every render, so we can't use it as dep directly
   useEffect(() => {
-    setFullAttendanceData(rawAttendanceData);
-  }, [rawAttendanceData]); // Prevent infinite loop
+    if (attendanceRes?.records) {
+      setFullAttendanceData(attendanceRes.records);
+    }
+  }, [attendanceRes]); // attendanceRes ref only changes when React Query refetches
   
+  const rawAttendanceData = attendanceRes?.records || [];
+
   const attendanceData = rawAttendanceData.map(record => ({
     id: record._id,
     name: record.employee?.name || 'Unknown',
@@ -99,7 +107,7 @@ const Attendance = () => {
         </div>
         <button
           onClick={() => setOpen(true)}
-          className="self-start sm:self-auto flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-md transition-all font-bold text-sm"
+          className="w-auto self-start sm:self-auto flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-md transition-all font-bold text-sm"
           disabled={loading}
         >
           <RiCalendarCheckLine size={18} />
@@ -140,7 +148,7 @@ const Attendance = () => {
             totalEmployees={stats.totalEmployees}
             activeEmployees={stats.activeEmployees}
             onRefresh={handleRefresh}
-            onEdit={handleEdit}
+            onEdit={canEditAttendance ? handleEdit : null}
           />
         </div>
     </div>

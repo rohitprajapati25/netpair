@@ -46,9 +46,9 @@ const ResetPassword = () => {
 
   return (
     <div className="w-full animate-fade-in">
-      <div className="mb-8">
-        <h2 className="text-3xl font-black text-slate-800">Set New Password</h2>
-        <p className="text-slate-500 mt-2 font-medium">Please enter your new secure password below.</p>
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-800">Set New Password</h2>
+        <p className="text-slate-500 mt-1 sm:mt-2 font-medium text-sm sm:text-base">Please enter your new secure password below.</p>
       </div>
 
       {error && (
@@ -63,15 +63,15 @@ const ResetPassword = () => {
         </div>
       )}
 
-      <form onSubmit={formik.handleSubmit} className="space-y-6">
+      <form onSubmit={formik.handleSubmit} className="space-y-4 sm:space-y-6">
         <div className="relative group">
-          <RiLockPasswordLine className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors text-xl" />
+          <RiLockPasswordLine className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors text-lg sm:text-xl" />
           <input
             type={showPassword ? "text" : "password"}
             name="password"
             placeholder="New Password"
             {...formik.getFieldProps("password")}
-            className={`w-full h-14 pl-12 pr-12 border rounded-2xl outline-none transition-all ${
+            className={`w-full h-11 sm:h-14 pl-11 sm:pl-12 pr-12 border rounded-xl sm:rounded-2xl outline-none transition-all text-sm ${
               formik.touched.password && formik.errors.password ? "border-red-500 bg-red-50" : "border-slate-200 focus:border-blue-600 focus:shadow-lg focus:shadow-blue-50"
             }`}
           />
@@ -80,7 +80,7 @@ const ResetPassword = () => {
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
           >
-            {showPassword ? <RiEyeOffLine size={20} /> : <RiEyeLine size={20} />}
+            {showPassword ? <RiEyeOffLine size={18} /> : <RiEyeLine size={18} />}
           </button>
           {formik.touched.password && formik.errors.password && (
             <p className="text-red-500 text-[11px] font-bold mt-1 ml-2 uppercase tracking-wider">{formik.errors.password}</p>
@@ -88,13 +88,13 @@ const ResetPassword = () => {
         </div>
 
         <div className="relative group">
-          <RiLockPasswordLine className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors text-xl" />
+          <RiLockPasswordLine className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors text-lg sm:text-xl" />
           <input
             type={showPassword ? "text" : "password"}
             name="confirmPassword"
             placeholder="Confirm New Password"
             {...formik.getFieldProps("confirmPassword")}
-            className={`w-full h-14 pl-12 pr-4 border rounded-2xl outline-none transition-all ${
+            className={`w-full h-11 sm:h-14 pl-11 sm:pl-12 pr-4 border rounded-xl sm:rounded-2xl outline-none transition-all text-sm ${
               formik.touched.confirmPassword && formik.errors.confirmPassword ? "border-red-500 bg-red-50" : "border-slate-200 focus:border-blue-600 focus:shadow-lg focus:shadow-blue-50"
             }`}
           />
@@ -106,7 +106,7 @@ const ResetPassword = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full h-14 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white rounded-2xl font-black shadow-xl shadow-blue-100 transition-all flex items-center justify-center gap-2"
+          className="w-full h-11 sm:h-14 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white rounded-xl sm:rounded-2xl font-black shadow-xl shadow-blue-100 transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
         >
           {loading ? "Resetting..." : "Reset Password"}
         </button>

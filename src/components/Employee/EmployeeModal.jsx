@@ -84,20 +84,22 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
       <div className="relative bg-white rounded-2xl w-full max-w-3xl max-h-[92vh] overflow-hidden shadow-2xl flex flex-col md:flex-row">
 
         {/* ── Left: profile panel ── */}
-        <div className="w-full md:w-56 bg-gradient-to-b from-slate-800 to-slate-900 p-6 flex flex-col items-center text-center shrink-0">
+        <div className="w-full md:w-56 bg-gradient-to-b from-slate-800 to-slate-900 p-4 md:p-6 flex flex-row md:flex-col items-center md:items-center text-center shrink-0 gap-4 md:gap-0">
           <img src={avatar} alt={employee?.name}
-            className="w-20 h-20 rounded-2xl object-cover ring-4 ring-white/20 shadow-xl mb-3" />
-          <h2 className="text-white font-bold text-base leading-tight">{employee?.name || "—"}</h2>
-          <p className="text-slate-400 text-xs mt-0.5">{employee?.designation || "—"}</p>
-          <span className={`mt-2 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-            (employee?.status === "active" || employee?.status === "Active")
-              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-              : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-          }`}>
-            {employee?.status || "—"}
-          </span>
+            className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover ring-4 ring-white/20 shadow-xl md:mb-3 shrink-0" />
+          <div className="flex-1 md:flex-none text-left md:text-center">
+            <h2 className="text-white font-bold text-sm md:text-base leading-tight">{employee?.name || "—"}</h2>
+            <p className="text-slate-400 text-xs mt-0.5">{employee?.designation || "—"}</p>
+            <span className={`mt-1 md:mt-2 inline-block px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              (employee?.status === "active" || employee?.status === "Active")
+                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+            }`}>
+              {employee?.status || "—"}
+            </span>
+          </div>
 
-          <div className="w-full mt-5 space-y-2">
+          <div className="hidden md:block w-full mt-5 space-y-2">
             <SCard icon={<FiBriefcase size={11} />} label="Dept"   value={employee?.department} />
             <SCard icon={<FiCalendar  size={11} />} label="Joined" value={fmtDisplay(employee?.joiningDate)} />
             <SCard icon={<FiCalendar  size={11} />} label="Tenure" value={tenure(employee?.joiningDate)} />
@@ -166,10 +168,10 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
                     <div>
                       <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Department</label>
                       <select {...formik.getFieldProps("department")}
-                        className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-sm font-medium outline-none transition-all ${
+                        className={`w-full px-4 py-3 bg-slate-50 border-2 rounded-xl text-sm font-medium outline-none transition-all ${
                           formik.touched.department && formik.errors.department
                             ? "border-rose-300 focus:ring-2 focus:ring-rose-200"
-                            : "border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
+                            : "border-slate-100 focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
                         }`}>
                         <option value="">Select department...</option>
                         {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
@@ -183,7 +185,7 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
                     <div>
                       <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Status</label>
                       <select {...formik.getFieldProps("status")}
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all">
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all">
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                       </select>
@@ -192,11 +194,11 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode = "view" }) => 
 
                   <div className="flex gap-3 pt-2">
                     <button type="button" onClick={handleClose}
-                      className="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all">
+                      className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all">
                       Discard
                     </button>
                     <button type="submit" disabled={formik.isSubmitting || !formik.dirty}
-                      className="flex-[2] py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+                      className="flex-[2] py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
                       {formik.isSubmitting ? "Saving..." : "Save Changes"}
                     </button>
                   </div>
@@ -234,10 +236,10 @@ const IField = ({ label, name, formik, type = "text", placeholder }) => (
   <div>
     <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{label}</label>
     <input type={type} placeholder={placeholder} {...formik.getFieldProps(name)}
-      className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-sm font-medium outline-none transition-all ${
+      className={`w-full px-4 py-3 bg-slate-50 border-2 rounded-xl text-sm font-medium outline-none transition-all ${
         formik.touched[name] && formik.errors[name]
           ? "border-rose-300 focus:ring-2 focus:ring-rose-200"
-          : "border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
+          : "border-slate-100 focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
       }`}
     />
     {formik.touched[name] && formik.errors[name] && (

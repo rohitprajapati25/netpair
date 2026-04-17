@@ -240,9 +240,9 @@ const LeaveTable = ({ data, onStatusChange }) => {
 
       {/* Modal / Popup */}
       {editLeave && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl scale-in-center">
-            <h2 className="text-xl font-black text-slate-800 mb-2">Update Status</h2>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white rounded-2xl p-5 sm:p-8 w-full max-w-sm shadow-2xl scale-in-center">
+            <h2 className="text-lg sm:text-xl font-black text-slate-800 mb-2">Update Status</h2>
             <p className="text-sm text-slate-500 mb-6 font-medium">Changing status for <span className="text-blue-600 font-bold">{editLeave.name}</span></p>
             <select
               value={newStatus}

@@ -278,7 +278,7 @@ const MyTasks = () => {
           <h1 className="text-2xl lg:text-3xl font-black text-slate-800">My Tasks</h1>
           <p className="text-slate-500 text-sm mt-0.5">Track your assigned tasks and log work hours</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button onClick={fetchAll} disabled={loading} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-semibold transition-all disabled:opacity-50">
             <RiRefreshLine className={loading ? "animate-spin" : ""} size={15} /> Refresh
           </button>
