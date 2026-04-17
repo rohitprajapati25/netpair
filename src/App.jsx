@@ -34,8 +34,6 @@ const EmployeeDashboard = lazy(() => import("./user/Employee_Dashboard/EmployeeD
 const MyProjects        = lazy(() => import("./user/Employee_MyProjects/MyProjects"));
 const AuditLogs         = lazy(() => import("./user/SuperAdmin_AuditLogs/AuditLogs"));
 const AccessControl     = lazy(() => import("./user/SuperAdmin_AccessControl/AccessControl"));
-const SystemConfig      = lazy(() => import("./user/SuperAdmin_SystemConfig/SystemConfig"));
-const Integrations      = lazy(() => import("./user/SuperAdmin_Integrations/Integrations"));
 const CalendarPage      = lazy(() => import("./user/Calendar/Calendar"));
 
 const SUPER_ONLY   = [ROLES.SUPER_ADMIN];
@@ -80,12 +78,6 @@ const App = () => {
           } />
           <Route path="/access-control" element={
             <ProtectedRoute allowedRoles={SUPER_ONLY}><AccessControl /></ProtectedRoute>
-          } />
-          <Route path="/system-config" element={
-            <ProtectedRoute allowedRoles={SUPER_ONLY}><SystemConfig /></ProtectedRoute>
-          } />
-          <Route path="/integrations" element={
-            <ProtectedRoute allowedRoles={SUPER_ONLY}><Integrations /></ProtectedRoute>
           } />
           <Route path="/assets" element={
             <ProtectedRoute allowedRoles={ADMIN_ROLES} pageKey="assets"><Asset /></ProtectedRoute>

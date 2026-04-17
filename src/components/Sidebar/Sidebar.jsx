@@ -47,8 +47,6 @@ const NAV_GROUPS = {
       label: "System",
       items: [
         { navpath: "access-control", icon: "ri-shield-keyhole-fill",  data: "Access Control" },
-        { navpath: "system-config",  icon: "ri-settings-4-fill",      data: "System Config" },
-        { navpath: "integrations",   icon: "ri-plug-fill",            data: "Integrations" },
         { navpath: "settings",       icon: "ri-user-settings-fill",   data: "Settings" },
       ],
     },
